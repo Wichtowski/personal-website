@@ -64,7 +64,6 @@ export interface TranslationDict {
     emailMe: string;
     downloadCv: string;
     cvConfirm: string;
-    copyEmail: string;
     viewSocials: string;
   };
   theme: {
@@ -219,7 +218,6 @@ export const dictionaries: Record<Language, TranslationDict> = {
       emailMe: "Napisz bezpośrednio",
       downloadCv: "Pobierz CV",
       cvConfirm: "Czy chcesz teraz pobrać moje CV?",
-      copyEmail: "Skopiuj adres e-mail",
       viewSocials: "Znajdź mnie w mediach społecznościowych",
     },
     theme: {
