@@ -1,0 +1,185 @@
+---
+title: "How We Indexed Over 300,000 Scientific Papers with a Serverless AI Pipeline"
+description: "How we rebuilt a serverless AI pipeline for indexing 300,000+ scientific papers — with OCR, chunking, figure enrichment, embeddings, retries, and cost-aware re-indexing."
+date: "2026-06-25"
+readTime: "10 min"
+tags: ["AI", "Cloud", "Mistral", "OCR", "Serverless", "Vector Search", "Architecture"]
+language: "en"
+---
+
+# How We Indexed Over 300,000 Scientific Papers with a Serverless AI Pipeline
+
+Indexing <span className="whitespace-nowrap">300,000</span> scientific papers sounds like a scaling problem.
+In practice, it quickly became a reliability, cost-control, and data-consistency problem.
+
+Each paper had to move from a raw PDF asset into clean markdown, meaningful chunks, enriched tables and figures, vector embeddings, and finally a searchable index. The difficult part was not just processing the documents once — it was making the system safe to retry, cheap to re-run, and observable when thousands of documents were moving through the pipeline at the same time.
+
+I led a significant part of the engineering effort behind this pipeline.
+This is how we designed it, rebuilt it, and made it reliable enough to process **over <span className="whitespace-nowrap">300,000</span> scientific papers** without turning every failure into a manual recovery task.
+
+## The Problem: Scale, Variety, and Reliability
+
+Scientific papers are not simple documents. A single paper may contain:
+
+- Dense multi-column prose that breaks naive text extraction
+- Structured data tables that require semantic context to interpret
+- Figures and charts where the key information lives in captions and surrounding paragraphs
+- Version histories — the same paper may be re-indexed after metadata updates
+
+At this scale, a failed job is not an edge case — it is part of normal operation. The system had to assume that OCR jobs would fail, queues would back up, documents would be re-indexed, and individual stages would need to be replayed without corrupting the final index.
+
+## The Architecture: An Event-Driven Chain
+
+The final architecture is a serverless, event-driven chain of isolated processing stages. Each stage owns one responsibility, writes its progress to a shared processing record, and passes the document forward only after its output has been safely persisted.
+
+> **Input** -> **OCR** -> **Chunking** -> **Figure Enrichment** -> **Embedding** -> **Vector Storage** -> **Output Notification**
+
+That processing record became the backbone of the system. It allowed any stage to answer the most important operational question before doing work: _has this already been completed successfully?_
+
+### Step 1 — The Input Gate
+
+A single API call kicks off everything. The **input function** is responsible for:
+
+- Validating the incoming request and resolving per-tenant configuration
+- Creating a processing record in the state store — this is the single source of truth for the document's journey
+- Writing an immutable configuration snapshot to object storage
+- Routing the document to the correct OCR queue based on current system configuration and any per-request overrides
+
+One of the subtler design decisions here was handling **re-indexing**. If a document already exists in the state store, the input function detects that and decides whether to restart from scratch, resume from the last valid checkpoint, or reject the request entirely. This logic alone saved us from countless data consistency headaches at scale.
+
+### Step 2 — OCR: Two Modes, One Truth
+
+The most expensive step in the pipeline is converting raw PDF bytes into clean, structured markdown
+— a task we delegated entirely to a state-of-the-art OCR model.
+But at 300k documents, the approach to invoking that model matters enormously.
+
+We implemented **two OCR modes** that coexist in the system:
+
+**Synchronous mode** processes each document individually and waits for the OCR result before continuing. This is ideal for near-real-time use cases — a freshly uploaded paper that needs to be searchable within seconds.
+
+**Batched mode** submits documents to the OCR provider as background jobs, which are then polled at regular intervals by a scheduled function.
+A dedicated polling function wakes up on a fixed schedule, queries the state store for all documents with pending batch jobs, and dispatches them to a consumer function that downloads and saves the results.
+This mode is orders of magnitude more cost-efficient at scale and was the primary mode used during the mass 300k-document ingestion.
+
+One of the more interesting design decisions came from the OCR provider's recommendation to bundle multiple documents into a single large batch payload. On paper, that made sense: fewer requests, larger jobs, better utilisation of their processing infrastructure.
+
+In practice, we chose the opposite approach: **one batch job per document**.
+
+The billing model was effectively the same either way, but the operational behaviour was completely different. With bundled jobs, one bad document could force unnecessary re-submission work for the whole group. With one document per batch job, failures became isolated, retries became simple, and the dashboard could show the exact state of every paper independently.
+
+This was one of those cases where the less “optimised” architecture was actually the better production architecture.
+
+The most important cost optimisation was simple: **never run OCR twice for the same document version**.
+
+If markdown already existed in object storage, the OCR stage skipped the model call entirely and reused the previous output. That mattered because re-indexing was common while we iterated on chunking, table handling, and figure enrichment. We could reprocess hundreds of thousands of papers without paying the OCR cost again.
+
+The OCR output — markdown plus extracted images — became a durable artefact, not a temporary intermediate result.
+
+#### Dealing with OCR Hallucinations
+
+No OCR model is perfect, and at <span className="whitespace-nowrap">300,000</span> documents even a sub-1% failure rate represents thousands of affected files.
+The OCR model we used exhibited a specific failure mode on low-quality scans and blank pages: it would produce output that was syntactically valid markdown but semantically nonsensical — random characters, repeated punctuation, or pages that appeared empty but contained garbled noise.
+We measured this hallucination rate at roughly **0.5% of processed pages**.
+
+We handled this in the chunking stage. Chunks below a minimum meaningful-content threshold were discarded, and documents made almost entirely of noisy output were flagged for review instead of silently producing useless search results.
+
+That distinction mattered: a failed extraction should be visible as a failed extraction, not hidden as an apparently successful document with no useful chunks.
+
+### Step 3 — Chunking: Turning Documents into Searchable Units
+
+Once a document is in markdown, the chunking function takes over. Raw OCR markdown is only the starting point. To make it useful for retrieval, we had to turn long documents into smaller units that still preserved enough context to answer scientific queries correctly.
+
+The chunker supports multiple strategies that evolved over the lifecycle of the project:
+
+- **Flat markdown chunking** — the original approach: split on heading boundaries, enforce a maximum token size per chunk, and carry forward heading context.
+- **Hierarchical chunking** — the rebuilt approach: parse the document into a tree of sections and sub-sections, preserve parent context across splits, and produce chunks that still know where they belong inside the paper. This improved retrieval for queries that depended on section-level context rather than isolated paragraphs.
+
+Tables needed a different path. Embedding raw markdown tables produced weak results, especially when the meaning depended on column headers, captions, or nearby text.
+
+Instead, tables went through a **table description step**. A language model read the table together with its surrounding context and generated a natural-language summary. That summary became the embedded representation, while the original table remained available as source data.
+
+Chunks are persisted to object storage in a structured format and the state store is updated before passing control downstream.
+
+### Step 4 — Figure Enrichment
+
+Figures — graphs, charts, microscopy images, diagrams — are among the most information-dense elements in a scientific paper, and the hardest to index with pure text extraction. The OCR step extracts and stores all embedded images to object storage alongside the markdown, giving the figure enrichment stage direct access to the raw image bytes.
+
+#### Image Classification: Meaningful vs. Non-Meaningful
+
+One problem we underestimated at first: **scientific papers contain a surprising amount of image noise**.
+
+The OCR model extracted author headshots, publisher logos, institutional seals, decorative borders, and other images that carried no useful scientific information. More importantly, some papers contained human subjects, clinical imagery, or sensitive visual content that should never be surfaced casually in search results.
+
+Before any figure description or fact extraction runs, each image passes through a **classification step** that determines whether it is _meaningful_ (a chart, graph, diagram, data visualisation, microscopy image, chemical structure) or _non-meaningful_ (a portrait, logo, decorative element, or flagged sensitive image). Non-meaningful images are excluded from the enrichment pipeline entirely — they do not receive descriptions, do not generate chunks, and do not appear in the vector index. This classification step was essential for both quality and safety reasons.
+
+#### Enrichment for Meaningful Figures
+
+For images that pass classification, a vision-capable language model processes each figure in context — it sees the image alongside the surrounding paragraphs and figure caption. From this it produces:
+
+- A **natural language description** of what the figure depicts
+- A set of **key facts and findings** explicitly stated in or directly supported by the figure
+
+The resulting figure chunks carry both the raw figure reference and the AI-generated textual representation, making them semantically searchable in a way that a filename or caption number never could be.
+
+### Step 5 — Embedding and Vector Storage
+
+The final active step in the pipeline generates dense vector embeddings for all chunks and upserts them into a vector database.
+
+The embedding function loads all chunks from object storage and selects which ones to embed based on the current **pipeline mode** — a feature flag-controlled configuration that allows selective re-indexing of only text chunks, only table chunks, only figure chunks, or all three.
+This granularity was essential during the iterative rebuild phase: we could improve the table description strategy and re-index only tables without touching the text or figure vectors.
+
+Before writing new vectors, the embedding stage checks whether the document already exists in the collection. If it does, only the affected chunk types are deleted and replaced. This prevented stale duplicates while still allowing partial re-indexing.
+
+For example, we could regenerate table descriptions and replace only table vectors without touching text or figure chunks.
+
+On success, a notification is published to an output topic, which downstream systems consume to mark the document as fully indexed and notify the client of success.
+
+## Reliability Patterns That Made It Work at Scale
+
+The architecture only worked because the operational rules were built into the pipeline from the beginning. These were the patterns that mattered most:
+
+**Idempotency everywhere.** Every function checks the state store for completed steps before doing any work. A lambda that crashes after uploading markdown but before updating the state store can be safely retried — it will re-upload the markdown (or skip if it already exists) and continue. This property made our re-indexing campaigns trivially safe to operate.
+
+**Selective resumption.** Rather than restarting failed documents from the beginning, the pipeline resumes from the last successfully completed checkpoint. A document that failed during embedding does not have to go back through OCR and chunking.
+
+**Config-driven re-indexing.** Each document's processing is governed by a configuration snapshot written to object storage at intake time. When we needed to change chunking parameters, table description prompts, or figure classification thresholds, we could trigger a re-indexing run that picked up the new configuration while still skipping unchanged expensive steps like OCR. This decoupling of configuration from execution was crucial for safe, incremental iteration across the full corpus.
+
+**Observable state.** Every step writes a timestamped entry into the processing record. This gave us a document-level source of truth for debugging: instead of guessing from logs alone, we could see which stage had completed, which one failed, and where processing should resume.
+
+**Batching and flow control.** The mass ingestion trigger did not simply fire all <span className="whitespace-nowrap">300,000</span> documents at once.
+A tunable batch controller managed the send rate, monitoring the depth of the OCR provider's job queue and holding back new submissions until the queue was short enough to absorb the next batch.
+This prevented queue saturation and kept latency predictable.
+
+## Building the Operational Dashboard
+
+One of the biggest challenges during large indexing runs was observability.
+
+The pipeline had many moving parts: multiple Lambda functions, separate stacks, queue-driven stages, scheduled pollers, OCR jobs, and document-level processing state. Cloud logs were useful, but they were not enough for day-to-day debugging. When something stalled, we needed a faster way to answer basic operational questions: which stage is blocked, which stack is affected, which Lambda should we inspect, and whether the poller needs to be triggered manually.
+
+To solve this, I built `indexing_dashboard.py` as a side project after hours — a lightweight text user interface that ran directly in the terminal. It gave developers a simple way to inspect the indexing pipeline without jumping between cloud consoles.
+
+The tool could look up indexing-related Lambda functions across any stack and environment, inspect the relevant pipeline resources, and manually trigger the poller used by the batched OCR mode. The poller normally ran on a schedule, but during large backfills and debugging sessions, being able to trigger it directly from the console made the system much easier to operate.
+
+What started as a small Python TUI for the indexing pipeline later evolved into a broader Rust-based Ratatui tool for working with multiple pipelines, queues, and Lambda functions. I maintained that tool as the operational surface for the team, turning repeated debugging steps into a faster and safer developer workflow.
+
+## The Rebuild
+
+The pipeline described here was not the first version.
+
+The original implementation was more monolithic: too much logic lived in one flow, retries were harder to reason about, and re-indexing usually meant repeating more work than necessary. That was acceptable early on, but it became painful once the corpus grew and the indexing strategy started changing quickly.
+
+The rebuild introduced clean stage separation, dual OCR modes, hierarchical chunking, figure enrichment, and selective re-indexing by chunk type.
+
+The motivation was not architectural purity. It came from operational pain: long runs that could not be interrupted safely, duplicate vectors after partial failures, expensive OCR calls during reprocessing, and chunking changes that required full re-runs to validate.
+
+After the rebuild, the system became much easier to operate. We could pause ingestion, change configuration, retry failed documents, re-index only selected chunk types, and continue processing without losing track of the corpus.
+
+## Closing Thoughts
+
+The biggest lesson from this project was that large-scale AI pipelines are rarely hard because of one model call. OCR, embeddings, vector search, and vision models are all important, but they are not enough on their own.
+
+The hard part is the system around them: checkpoints, retries, state tracking, cost control, partial reprocessing, queue management, and observability.
+
+If I were building a similar pipeline again, I would invest in the state layer even earlier. Once every document has a reliable source of truth, failures become recoverable events instead of production mysteries.
+
+At <span className="whitespace-nowrap">300,000</span> papers, that difference matters more than any individual model choice.

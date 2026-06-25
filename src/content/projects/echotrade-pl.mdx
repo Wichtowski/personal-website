@@ -1,0 +1,67 @@
+---
+title: "EchoTrade"
+description: "Buduję system wspierany przez AI do analizy portfela inwestycyjnego i kontrolowanego tradingu, który łączy monitorowanie pozycji, raportowanie, wyszukiwanie okazji oraz ścisłe warstwy bezpieczeństwa przed dopuszczeniem jakiejkolwiek automatyzacji transakcji."
+date: "2026-06-25"
+category: "ai"
+tags: ["AI", "FinTech", "Trading", "FastAPI", "React", "Cloudflare Pages", "Python", "Playwright"]
+githubUrl: "https://github.com/Wichtowski/EchoTrade"
+liveUrl: "https://echotrade.oskarwichtowski.com"
+language: "pl"
+---
+
+---
+
+## Opis projektu
+
+Buduję **EchoTrade** jako osobisty system do świadomego zarządzania portfelem inwestycyjnym z pomocą AI. Nie próbuję stworzyć magicznego bota tradingowego. Chcę narzędzia, które pomaga mi porządkować dane o portfelu, rozumieć kontekst rynkowy, analizować ryzyko i podejmować lepsze decyzje, zanim zacznę automatyzować jakiekolwiek działania.
+
+Projekt zaczął się od prostej potrzeby: chciałem mieć jedno miejsce, w którym mogę śledzić pozycje, sprawdzać stan portfela i stopniowo dodawać bardziej inteligentną analizę. Z czasem rozwinęło się to w większy system łączący dziennik decyzji inwestycyjnych, raportowanie, kontekst rynkowy i analizę wspieraną przez AI.
+
+## Dlaczego to zbudowałem
+
+Zbudowałem EchoTrade, bo interesuję się tradingiem i chciałem sprawdzić, jak może wyglądać taki system, jeśli stworzy się go od zera — nie jako gotowego bota, tylko jako własne środowisko do analizy, monitorowania i podejmowania decyzji.
+
+Dużą motywacją było też to, że nie mam czasu ani ochoty codziennie sprawdzać wielu portali, newsów, raportów i innych źródeł informacji. Chcę być na bieżąco z ważnymi wydarzeniami rynkowymi, ale niekoniecznie samemu ich ciągle szukać. EchoTrade ma pomagać mi wyłapywać istotny kontekst, nowe okazje, potencjalne ryzyka oraz sytuacje, które mogą wpłynąć na moje pozycje.
+
+Zależy mi szczególnie na tym, żeby system potrafił wcześniej sygnalizować, że wokół danej pozycji zaczyna dziać się coś ważnego — na przykład zbliża się większa zmienność, pojawia się negatywny sentyment, istotne wydarzenie makroekonomiczne albo ryzyko, które powinienem świadomie przeanalizować.
+
+Frontend powstawał mocno iteracyjnie i był dość mocno vibe-code’owany, ale całość dobrze spełnia swoją rolę: daje mi jedno miejsce do przeglądania portfela, kontekstu, raportów i sygnałów bez konieczności ręcznego przekopywania się przez różne źródła każdego dnia.
+
+## Co zbudowałem
+
+Zaprojektowałem EchoTrade jako zestaw wyspecjalizowanych modułów, które współpracują ze sobą, zamiast tworzyć jedną dużą, monolityczną aplikację.
+
+W centrum systemu znajduje się **backend w FastAPI**, który obsługuje logikę portfela, API, uwierzytelnianie, procesy przeglądu decyzji i koordynację działania całego systemu. Na tym zbudowałem **dashboard w Vike + React**, który służy jako główny interfejs do przeglądania pozycji, alokacji portfela, snapshotów i wyników analiz.
+
+Wokół tego dodałem usługi wspierające:
+
+- **generowanie sygnałów z pomocą AI**
+- **ocenę ryzyka i sprawdzanie reguł bezpieczeństwa**
+- **prowadzenie dziennika decyzji inwestycyjnych**
+- **analizę decyzji po wykonanej transakcji**
+- **automatyczne zbieranie kontekstu rynkowego z użyciem Playwright**
+- **powiadomienia i procesy automatyzacji**
+
+Lokalnie projekt działa na dość rozbudowanym stacku z **PostgreSQL, RabbitMQ, Redis, MongoDB, n8n i usługami mailowymi**. W produkcji podzieliłem go między **backend hostowany na VPS** i **frontend na Cloudflare Pages**, dzięki czemu architektura pozostaje prosta i praktyczna.
+
+## Dlaczego zbudowałem to w ten sposób
+
+Najważniejszą decyzją projektową w EchoTrade jest model bezpieczeństwa.
+
+Celowo nie buduję systemu, w którym LLM może bezpośrednio składać zlecenia. Zamiast tego oddzielam analizę, walidację i wykonanie transakcji na osobne warstwy. Model może wygenerować pomysł, ale ten pomysł nadal musi przejść przez uporządkowany proces przeglądu, ograniczenia ryzyka i logikę możliwą do późniejszego audytu.
+
+Ta separacja jest dla mnie ważna, ponieważ chcę, żeby system był godny zaufania, zrozumiały i możliwy do sprawdzenia. Dużo bardziej interesuje mnie budowanie zdyscyplinowanego środowiska do podejmowania decyzji niż pogoń za szybką automatyzacją.
+
+## Co czyni projekt ciekawym
+
+EchoTrade jest dla mnie ciekawy, bo traktuje AI jako część procesu inwestycyjnego, a nie jako skrót, który ma ten proces zastąpić.
+
+Zamiast prosić model, żeby „handlował za mnie”, używam AI tam, gdzie faktycznie ma sens: do podsumowywania kontekstu, wychwytywania wzorców, wspierania przeglądu decyzji, generowania potencjalnych pomysłów i pomagania mi w bardziej konsekwentnej analizie portfela. Ten projekt jest mniej o autonomicznym działaniu, a bardziej o budowaniu lepszej infrastruktury do podejmowania decyzji.
+
+To oznacza też, że techniczne wyzwanie nie kończy się na integracji modelu. Chodzi o zaprojektowanie systemu, w którym przepływy danych, procesy przeglądu, reguły bezpieczeństwa, interfejs użytkownika i narzędzia operacyjne wzajemnie się wspierają.
+
+## Podsumowanie
+
+EchoTrade to moja próba zbudowania inwestycyjnego workspace’u wspieranego przez AI, który pozostaje użyteczny jeszcze zanim pojawi się pełna automatyzacja. Chcę, żeby pomagał mi myśleć klarowniej, uczciwiej oceniać decyzje i działać ostrożnie, gdy w grę wchodzi realny kapitał.
+
+Dla mnie to jest prawdziwy cel tego projektu: nie automatyzować inwestowania tak szybko, jak to możliwe, tylko zbudować system, który krok po kroku zasługuje na zaufanie.

@@ -1,0 +1,69 @@
+---
+title: "EchoTrade"
+description: "I am building an AI-assisted portfolio intelligence and controlled trading system that combines position monitoring, reporting, opportunity scans, and strict safety layers before any trade automation is allowed."
+date: "2026-06-25"
+category: "ai"
+tags: ["AI", "FinTech", "Trading", "FastAPI", "React", "Cloudflare Pages", "Python", "Playwright"]
+githubUrl: "https://github.com/Wichtowski/EchoTrade"
+liveUrl: "https://echotrade.oskarwichtowski.com"
+language: "en"
+---
+
+## Overview
+
+I am building **EchoTrade** as a personal system for thoughtful portfolio management with AI support. I am not trying to create a magic trading bot. I want a tool that helps me organize portfolio data, understand context, review risk, and make better decisions before I automate anything.
+
+The project started from a simple idea: I wanted one place where I could track positions, review portfolio state, and gradually add more intelligent analysis around it. Over time, it evolved into a broader system that combines portfolio journaling, reporting, market context, and AI-assisted review.
+
+## What I Built
+
+I designed EchoTrade as a set of specialized modules that work together rather than one monolithic app.
+
+At the center is a **FastAPI backend** that handles portfolio logic, APIs, authentication, review workflows, and orchestration. On top of that, I built a **Vike + React dashboard** that acts as the main interface for reviewing positions, portfolio allocation, snapshots, and analysis results.
+
+Around that core, I added supporting services for:
+
+- **AI signal generation**
+- **risk evaluation and policy checks**
+- **decision journaling**
+- **post-trade reviews**
+- **browser-based market research with Playwright**
+- **notifications and automation workflows**
+
+Locally, the project runs on a fairly complete stack with **PostgreSQL, RabbitMQ, Redis, MongoDB, n8n, and mail services**. In production, I split it across a **VPS-hosted backend** and a **Cloudflare Pages frontend**, which keeps the architecture simple and practical.
+
+## Why I Built It
+
+I built EchoTrade because I am genuinely interested in trading and wanted to explore what this kind of system could look like when built from scratch — not as a ready-made trading bot, but as my own environment for analysis, monitoring, and decision-making.
+
+A big part of the motivation was also practical: I do not always have the time or energy to check multiple news sites, market portals, reports, and other sources every day. I want to stay aware of important market developments, but I do not want to manually search for all of them myself. EchoTrade is meant to help me surface relevant context, new opportunities, potential risks, and events that may affect my positions.
+
+I especially wanted the system to warn me earlier when something important starts happening around a position — for example rising volatility, negative sentiment, a major macroeconomic event, or a risk factor that I should consciously review.
+
+The frontend was built very iteratively and, at times, quite vibe-coded, but it works well for its purpose: it gives me one place to review my portfolio, context, reports, and signals without manually digging through different sources every day.
+
+## Why I Built It This Way
+
+The most important design choice in EchoTrade is the safety model.
+
+I am deliberately not building a system where an LLM can directly place trades. Instead, I separate analysis, validation, and execution into distinct layers. The model can generate an idea, but that idea still has to go through structured review, risk constraints, and audit-friendly logic before anything else happens.
+
+That separation matters to me because I want the system to be trustworthy, explainable, and reviewable. I am much more interested in building a disciplined decision environment than in chasing fast automation.
+
+## What Makes It Interesting
+
+What makes EchoTrade compelling to me is that it treats AI as part of an investing workflow, not as a shortcut around one.
+
+Instead of asking a model to “trade for me,” I use AI where it is actually useful: summarizing context, surfacing patterns, supporting reviews, generating candidate ideas, and helping me inspect portfolio state more consistently. The product is less about autonomous action and more about building better decision infrastructure.
+
+That also means the technical challenge is not just model integration. It is designing a system where data pipelines, review flows, safety rules, user interfaces, and operational tooling all reinforce each other.
+
+## Takeaway
+
+EchoTrade is my attempt to build an AI-native investing workspace that stays useful even before full automation exists. I want it to help me think more clearly, review decisions more honestly, and move carefully when real capital is involved.
+
+For me, that is the real goal of the project: not automating investing as quickly as possible, but building a system that earns trust step by step.
+
+## Future Plans
+
+I plan to continue building out the system with more AI-assisted analysis, better risk management features, and eventually controlled automation capabilities. The goal is to create a robust environment where I can make informed decisions with confidence, leveraging AI as a supportive tool rather than a replacement for human judgment.

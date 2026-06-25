@@ -1,0 +1,176 @@
+---
+title: "Jak zaindeksowaliśmy ponad 300 000 prac naukowych za pomocą serverless AI pipeline"
+description: "Jak przebudowaliśmy serverless AI pipeline do indexingu ponad 300 000 prac naukowych — z OCR, chunkingiem, figure enrichment, embeddings, retry logic i cost-aware re-indexingiem."
+date: "2026-06-25"
+readTime: "10 min"
+tags: ["AI", "Cloud", "Mistral", "OCR", "Serverless", "Vector Search", "Architecture"]
+language: "pl"
+---
+
+---
+
+# Jak zaindeksowaliśmy ponad 300 000 prac naukowych za pomocą serverless AI pipeline
+
+Indexing 300 000 prac naukowych brzmi jak problem skali. W praktyce bardzo szybko okazało się, że był to przede wszystkim problem reliability, kontroli kosztów i spójności danych.
+
+Każda praca musiała przejść drogę od surowego PDF assetu do czystego markdowna, sensownie podzielonych chunks, wzbogaconych tabel i figurek, vector embeddings, a na końcu do searchable index. Najtrudniejsze nie było samo jednorazowe przetworzenie dokumentów — trudne było zbudowanie systemu, który da się bezpiecznie retry’ować, tanio re-runować i obserwować, kiedy tysiące dokumentów jednocześnie przechodzą przez pipeline.
+
+Byłem odpowiedzialny za znaczną część prac inżynieryjnych nad tym pipeline’em. Tak zaprojektowaliśmy go, przebudowaliśmy i doprowadziliśmy do stanu, w którym mógł niezawodnie przetworzyć **ponad 300 000 prac naukowych**, bez zamieniania każdej awarii w ręczną operację ratunkową.
+
+## Problem: skala, różnorodność i reliability
+
+Prace naukowe nie są prostymi dokumentami. Pojedynczy paper może zawierać:
+
+- gęsty, wielokolumnowy tekst, który łamie naiwne text extraction,
+- strukturalne tabele, które wymagają semantic context, żeby poprawnie je zinterpretować,
+- figury i wykresy, gdzie kluczowa informacja znajduje się w captionach i otaczających paragrafach,
+- historie wersji — ten sam paper może być re-indexowany po aktualizacji metadanych.
+
+Przy takiej skali failed job nie jest edge casem — jest częścią normalnej pracy systemu. Pipeline musiał zakładać, że OCR jobs będą failować, queues będą się zapychać, dokumenty będą re-indexowane, a poszczególne stage’e będą musiały być odtwarzane bez uszkodzenia finalnego indexu.
+
+## Architektura: event-driven chain
+
+Finalna architektura to serverless, event-driven chain odizolowanych processing stages. Każdy stage ma jedną odpowiedzialność, zapisuje swój progress do wspólnego processing record i przekazuje dokument dalej dopiero wtedy, kiedy jego output został bezpiecznie zapisany.
+
+> **Input** -> **OCR** -> **Chunking** -> **Figure Enrichment** -> **Embedding** -> **Vector Storage** -> **Output Notification**
+
+Ten processing record stał się kręgosłupem całego systemu. Dzięki niemu każdy stage mógł odpowiedzieć na najważniejsze pytanie operacyjne przed rozpoczęciem pracy: _czy to zostało już poprawnie wykonane?_
+
+### Step 1 — Input Gate
+
+Pojedynczy API call uruchamia cały proces. **Input function** odpowiada za:
+
+- walidację przychodzącego requestu i rozwiązanie per-tenant configuration,
+- utworzenie processing record w state store — czyli single source of truth dla całej ścieżki dokumentu,
+- zapisanie immutable configuration snapshot do object storage,
+- przekierowanie dokumentu do właściwej OCR queue na podstawie aktualnej konfiguracji systemu i ewentualnych per-request overrides.
+
+Jedną z mniej oczywistych decyzji projektowych było obsłużenie **re-indexingu**. Jeżeli dokument już istnieje w state store, input function wykrywa to i decyduje, czy rozpocząć od zera, wznowić od ostatniego poprawnego checkpointu, czy całkowicie odrzucić request. Sama ta logika oszczędziła nam ogromnej liczby problemów ze spójnością danych przy dużej skali.
+
+### Step 2 — OCR: dwa tryby, jedna prawda
+
+Najdroższym krokiem w pipeline jest konwersja surowych PDF bytes do czystego, strukturalnego markdowna — zadanie, które w całości delegowaliśmy do state-of-the-art OCR model. Ale przy 300 000 dokumentów sposób wywoływania tego modelu ma ogromne znaczenie.
+
+Zaimplementowaliśmy **dwa OCR modes**, które współistnieją w systemie:
+
+**Synchronous mode** przetwarza każdy dokument indywidualnie i czeka na OCR result przed kontynuowaniem. To idealne rozwiązanie dla near-real-time use cases — na przykład świeżo przesłany paper, który ma stać się searchable w ciągu kilku sekund.
+
+**Batched mode** wysyła dokumenty do OCR providera jako background jobs, które są następnie pollowane w regularnych odstępach przez scheduled function. Dedykowana polling function uruchamia się według stałego schedule, odpytuje state store o wszystkie dokumenty z pending batch jobs i przekazuje je do consumer function, która pobiera oraz zapisuje wyniki. Ten tryb jest o rzędy wielkości bardziej cost-efficient przy dużej skali i był głównym trybem używanym podczas masowego ingestionu 300 000 dokumentów.
+
+Jedna z ciekawszych decyzji projektowych pojawiła się po rekomendacji OCR providera, żeby łączyć wiele dokumentów w jeden duży batch payload. Na papierze miało to sens: mniej requestów, większe jobs, lepsze wykorzystanie ich processing infrastructure.
+
+W praktyce wybraliśmy odwrotne podejście: **one batch job per document**.
+
+Model billingowy był efektywnie taki sam w obu wariantach, ale operational behaviour było kompletnie inne. Przy bundled jobs jeden problematyczny dokument mógł wymusić niepotrzebne re-submission work dla całej grupy. Przy jednym batch job per document awarie były izolowane, retry logic była prosta, a dashboard mógł pokazać dokładny stan każdego papera niezależnie.
+
+To był jeden z tych przypadków, gdzie mniej „zoptymalizowana” architektura okazała się lepszą production architecture.
+
+Najważniejsza optymalizacja kosztowa była prosta: **nigdy nie uruchamiaj OCR dwa razy dla tej samej wersji dokumentu**.
+
+Jeżeli markdown już istniał w object storage, OCR stage całkowicie pomijał model call i używał wcześniejszego outputu. Miało to ogromne znaczenie, bo re-indexing był częsty podczas iteracji nad chunkingiem, table handling i figure enrichment. Mogliśmy ponownie przetwarzać setki tysięcy paperów bez ponownego płacenia za OCR.
+
+OCR output — markdown plus extracted images — stał się durable artefact, a nie tymczasowym intermediate result.
+
+#### Radzenie sobie z OCR hallucinations
+
+Żaden OCR model nie jest perfekcyjny, a przy 300 000 dokumentów nawet failure rate poniżej 1% oznacza tysiące dotkniętych plików. OCR model, którego używaliśmy, miał konkretny failure mode na low-quality scans i blank pages: potrafił wygenerować output, który był składniowo poprawnym markdownem, ale semantycznie był bezsensowny — losowe znaki, powtarzająca się interpunkcja albo strony, które wyglądały na puste, ale zawierały zaszumione garbage data. Zmierzyliśmy ten hallucination rate na poziomie około **0,5% przetworzonych stron**.
+
+Obsłużyliśmy to w chunking stage. Chunks poniżej minimalnego progu meaningful content były odrzucane, a dokumenty złożone prawie wyłącznie z noisy output były oznaczane do review, zamiast po cichu produkować bezużyteczne search results.
+
+To rozróżnienie miało znaczenie: failed extraction powinien być widoczny jako failed extraction, a nie ukryty jako pozornie poprawnie przetworzony dokument bez wartościowych chunks.
+
+### Step 3 — Chunking: zamiana dokumentów w searchable units
+
+Kiedy dokument znajduje się już w markdownie, pracę przejmuje chunking function. Surowy OCR markdown to dopiero punkt startowy. Żeby był użyteczny dla retrievalu, musieliśmy zamienić długie dokumenty w mniejsze jednostki, które nadal zachowują wystarczający kontekst, żeby poprawnie odpowiadać na scientific queries.
+
+Chunker wspiera kilka strategii, które ewoluowały w trakcie życia projektu:
+
+- **Flat markdown chunking** — oryginalne podejście: split po heading boundaries, pilnowanie maksymalnego token size per chunk i przenoszenie heading context.
+- **Hierarchical chunking** — podejście po rebuildzie: parsowanie dokumentu do drzewa sections i sub-sections, zachowywanie parent context między splitami i produkowanie chunks, które nadal wiedzą, gdzie znajdują się w strukturze papera. Poprawiło to retrieval dla queries zależnych od section-level context, a nie tylko od izolowanych paragrafów.
+
+Tabele wymagały osobnej ścieżki. Embedding surowych markdown tables dawał słabe wyniki, szczególnie kiedy znaczenie zależało od column headers, captions albo nearby text.
+
+Zamiast tego tabele przechodziły przez **table description step**. Language model czytał tabelę razem z otaczającym kontekstem i generował natural-language summary. To summary stawało się embedded representation, podczas gdy oryginalna tabela nadal była dostępna jako source data.
+
+Chunks są zapisywane do object storage w strukturalnym formacie, a state store jest aktualizowany przed przekazaniem kontroli dalej.
+
+### Step 4 — Figure Enrichment
+
+Figury — graphs, charts, microscopy images, diagrams — należą do najbardziej informacyjnie gęstych elementów w pracy naukowej, a jednocześnie są najtrudniejsze do zaindeksowania przy użyciu czystego text extraction. OCR step ekstrahuje i zapisuje wszystkie embedded images do object storage obok markdowna, dzięki czemu figure enrichment stage ma bezpośredni dostęp do raw image bytes.
+
+#### Image Classification: meaningful vs. non-meaningful
+
+Jednym z problemów, który na początku niedoszacowaliśmy, było to, że **prace naukowe zawierają zaskakująco dużo image noise**.
+
+OCR model ekstrahował author headshots, publisher logos, institutional seals, decorative borders i inne obrazy, które nie niosły żadnej użytecznej informacji naukowej. Co ważniejsze, część paperów zawierała human subjects, clinical imagery albo sensitive visual content, który nie powinien być swobodnie surfacowany w search results.
+
+Zanim jakikolwiek figure description albo fact extraction się uruchomił, każdy obraz przechodził przez **classification step**, który określał, czy jest _meaningful_ — chart, graph, diagram, data visualisation, microscopy image, chemical structure — czy _non-meaningful_ — portrait, logo, decorative element albo flagged sensitive image. Non-meaningful images były całkowicie wykluczane z enrichment pipeline: nie dostawały descriptions, nie generowały chunks i nie trafiały do vector index. Ten classification step był kluczowy zarówno dla jakości, jak i bezpieczeństwa.
+
+#### Enrichment dla meaningful figures
+
+Dla obrazów, które przeszły classification, vision-capable language model przetwarzał każdą figurę w kontekście — widział obraz razem z otaczającymi paragrafami i figure caption. Na tej podstawie generował:
+
+- **natural language description** tego, co przedstawia figura,
+- zestaw **key facts and findings**, które są bezpośrednio wskazane w figurze albo przez nią wspierane.
+
+Wynikowe figure chunks zawierały zarówno raw figure reference, jak i AI-generated textual representation, dzięki czemu stawały się semantically searchable w sposób, którego sam filename albo caption number nigdy by nie zapewnił.
+
+### Step 5 — Embedding and Vector Storage
+
+Ostatni aktywny step w pipeline generuje dense vector embeddings dla wszystkich chunks i wykonuje upsert do vector database.
+
+Embedding function ładuje wszystkie chunks z object storage i wybiera, które z nich mają zostać embedded na podstawie aktualnego **pipeline mode** — feature flag-controlled configuration, która pozwala na selective re-indexing tylko text chunks, tylko table chunks, tylko figure chunks albo wszystkich trzech typów. Ta granularność była kluczowa podczas iterative rebuild phase: mogliśmy poprawić table description strategy i re-indexować wyłącznie tabele, bez dotykania text albo figure vectors.
+
+Przed zapisaniem nowych vectors embedding stage sprawdza, czy dokument już istnieje w collection. Jeżeli tak, usuwane i zastępowane są tylko affected chunk types. To zapobiegało stale duplicates, jednocześnie pozwalając na partial re-indexing.
+
+Na przykład mogliśmy wygenerować ponownie table descriptions i zastąpić wyłącznie table vectors, bez dotykania text albo figure chunks.
+
+Po sukcesie publikowana jest notification do output topic, którą downstream systems konsumują, żeby oznaczyć dokument jako fully indexed i poinformować klienta o poprawnym zakończeniu procesu.
+
+## Reliability patterns, które pozwoliły działać w skali
+
+Architektura działała tylko dlatego, że operational rules były wbudowane w pipeline od samego początku. Najważniejsze okazały się te wzorce:
+
+**Idempotency everywhere.** Każda function sprawdza state store pod kątem completed steps, zanim wykona jakąkolwiek pracę. Lambda, która crashuje po uploadzie markdowna, ale przed aktualizacją state store, może być bezpiecznie retry’owana — ponownie zapisze markdown albo pominie ten krok, jeżeli artefakt już istnieje, i przejdzie dalej. Ta właściwość sprawiła, że nasze re-indexing campaigns były dużo bezpieczniejsze operacyjnie.
+
+**Selective resumption.** Zamiast restartować failed documents od początku, pipeline wznawia pracę od ostatniego poprawnie ukończonego checkpointu. Dokument, który failował podczas embedding, nie musi ponownie przechodzić przez OCR i chunking.
+
+**Config-driven re-indexing.** Processing każdego dokumentu jest sterowany przez configuration snapshot zapisany do object storage na etapie intake. Kiedy musieliśmy zmienić chunking parameters, table description prompts albo figure classification thresholds, mogliśmy uruchomić re-indexing run, który pobierał nową konfigurację, ale nadal pomijał niezmienione, kosztowne kroki, takie jak OCR. To oddzielenie configuration od execution było kluczowe dla bezpiecznej, incremental iteration na całym corpusie.
+
+**Observable state.** Każdy step zapisuje timestamped entry do processing record. Dało nam to document-level source of truth do debugowania: zamiast zgadywać wyłącznie na podstawie logs, mogliśmy zobaczyć, który stage się zakończył, który failował i od którego miejsca processing powinien zostać wznowiony.
+
+**Batching and flow control.** Mass ingestion trigger nie odpalał po prostu wszystkich 300 000 dokumentów naraz. Tunable batch controller zarządzał send rate, monitorował depth OCR provider job queue i wstrzymywał nowe submissions, dopóki queue nie była wystarczająco krótka, żeby przyjąć kolejną paczkę. To zapobiegało queue saturation i utrzymywało latency na przewidywalnym poziomie.
+
+## Budowanie Operational Dashboard
+
+Jednym z największych wyzwań podczas dużych indexing runs była observability.
+
+Pipeline miał wiele moving parts: wiele Lambda functions, osobne stacks, queue-driven stages, scheduled pollers, OCR jobs i document-level processing state. Cloud logs były przydatne, ale nie wystarczały do codziennego debugowania. Kiedy coś się zatrzymywało, potrzebowaliśmy szybszego sposobu na odpowiedź na podstawowe operational questions: który stage jest blocked, który stack jest affected, którą Lambdę powinniśmy sprawdzić i czy poller trzeba triggerować manualnie.
+
+Żeby to rozwiązać, zbudowałem `indexing_dashboard.py` jako side project after hours — lekkie text user interface uruchamiane bezpośrednio w terminalu. Dawało developerom prosty sposób na inspectowanie indexing pipeline bez skakania między cloud consoles.
+
+Tool potrafił wyszukiwać indexing-related Lambda functions w dowolnym stacku i environment, inspectować relevant pipeline resources oraz manualnie triggerować poller używany przez batched OCR mode. Poller normalnie działał według schedule, ale podczas large backfills i debugging sessions możliwość odpalenia go bezpośrednio z konsoli sprawiała, że system był dużo łatwiejszy w obsłudze.
+
+To, co zaczęło się jako mały Python TUI dla indexing pipeline, później ewoluowało w szersze Rust-based Ratatui tool do pracy z wieloma pipelines, queues i Lambda functions. Utrzymywałem to narzędzie jako operational surface dla zespołu, zamieniając powtarzalne kroki debugowania w szybszy i bezpieczniejszy developer workflow.
+
+## The Rebuild
+
+Pipeline opisany tutaj nie był pierwszą wersją.
+
+Oryginalna implementacja była bardziej monolityczna: zbyt dużo logiki żyło w jednym flow, retry było trudniejsze do zrozumienia, a re-indexing zwykle oznaczał powtarzanie większej ilości pracy, niż było to potrzebne. Na początku było to akceptowalne, ale stało się bolesne, kiedy corpus urósł, a indexing strategy zaczęła szybko się zmieniać.
+
+Rebuild wprowadził clean stage separation, dual OCR modes, hierarchical chunking, figure enrichment i selective re-indexing by chunk type.
+
+Motywacją nie była architectural purity. Wynikała z operational pain: długie runs, których nie dało się bezpiecznie przerwać, duplicate vectors po partial failures, kosztowne OCR calls podczas reprocessingu i zmiany w chunkingu, które wymagały full re-runs, żeby je zwalidować.
+
+Po rebuildzie system stał się dużo łatwiejszy w obsłudze. Mogliśmy pause’ować ingestion, zmieniać configuration, retry’ować failed documents, re-indexować tylko wybrane chunk types i kontynuować processing bez utraty kontroli nad corpusem.
+
+## Closing Thoughts
+
+Największa lekcja z tego projektu była taka, że large-scale AI pipelines rzadko są trudne z powodu jednego model call. OCR, embeddings, vector search i vision models są ważne, ale same w sobie nie wystarczą.
+
+Najtrudniejszy jest system wokół nich: checkpoints, retries, state tracking, cost control, partial reprocessing, queue management i observability.
+
+Gdybym budował podobny pipeline ponownie, zainwestowałbym w state layer jeszcze wcześniej. Kiedy każdy dokument ma reliable source of truth, failures stają się recoverable events zamiast production mysteries.
+
+Przy 300 000 paperów ta różnica ma większe znaczenie niż wybór pojedynczego modelu.
