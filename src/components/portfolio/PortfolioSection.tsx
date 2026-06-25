@@ -52,18 +52,21 @@ export function PortfolioSection({ projects }: PortfolioSectionProps) {
       scale: 0.95,
       get x() {
         return typeof window !== "undefined" ? getNavDirection() * 50 : 50;
-      }
+      },
     },
     visible: {
       opacity: 1,
       scale: 1,
       x: 0,
-      transition: { duration: 0.5, type: "spring", stiffness: 60 }
-    }
+      transition: { duration: 0.5, type: "spring", stiffness: 60 },
+    },
   };
 
   return (
-    <section id="portfolio" className="w-screen h-screen overflow-y-auto flex flex-col bg-background border-r border-border/40 relative py-32">
+    <section
+      id="portfolio"
+      className="w-screen h-screen overflow-y-auto flex flex-col bg-background border-r border-border/40 relative py-32"
+    >
       <motion.div
         variants={slideDirectionVariants}
         initial="hidden"
@@ -78,9 +81,7 @@ export function PortfolioSection({ projects }: PortfolioSectionProps) {
               <Folder size={36} className="text-primary animate-pulse shrink-0" />
               {t.portfolio.title}
             </h2>
-            <p className="text-sm text-muted-foreground">
-              {t.portfolio.subtitle}
-            </p>
+            <p className="text-sm text-muted-foreground">{t.portfolio.subtitle}</p>
           </div>
 
           {/* Filtering Tabs */}
@@ -186,7 +187,9 @@ export function PortfolioSection({ projects }: PortfolioSectionProps) {
 
         {filteredProjects.length === 0 && (
           <div className="p-12 text-center border border-dashed border-border/60 rounded-2xl max-w-sm mx-auto">
-            <p className="text-sm text-muted-foreground font-mono">No projects found for this selection.</p>
+            <p className="text-sm text-muted-foreground font-mono">
+              No projects found for this selection.
+            </p>
           </div>
         )}
       </motion.div>

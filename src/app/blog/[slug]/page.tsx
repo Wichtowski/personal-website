@@ -45,11 +45,14 @@ export default async function ArticlePage({ params }: PageProps) {
           <div className="flex flex-wrap items-center gap-6 text-xs font-mono text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <Calendar size={14} />
-              {new Date(metadata.date).toLocaleDateString(metadata.language === "pl" ? "pl-PL" : "en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
+              {new Date(metadata.date).toLocaleDateString(
+                metadata.language === "pl" ? "pl-PL" : "en-US",
+                {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                },
+              )}
             </span>
             <span className="flex items-center gap-1.5">
               <Clock size={14} />
@@ -60,7 +63,9 @@ export default async function ArticlePage({ params }: PageProps) {
 
         {/* MDX Body Content */}
         <article className="prose dark:prose-invert prose-primary max-w-none prose-mono prose-headings:font-mono prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:text-muted-foreground prose-p:leading-relaxed prose-pre:bg-muted/15 prose-pre:border prose-pre:border-border/40 prose-code:text-primary prose-code:bg-primary/5 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-semibold prose-strong:text-foreground">
-          <Suspense fallback={<div className="font-mono text-xs animate-pulse">Rendering Article...</div>}>
+          <Suspense
+            fallback={<div className="font-mono text-xs animate-pulse">Rendering Article...</div>}
+          >
             <MDXRemote
               source={content}
               options={{

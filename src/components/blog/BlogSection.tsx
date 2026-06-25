@@ -6,6 +6,7 @@ import { ArticleMetadata } from "@/lib/mdx";
 import { BookOpen, Calendar, Clock, ArrowRight } from "lucide-react";
 import { motion, Variants } from "framer-motion";
 import { getNavDirection } from "@/lib/navigation";
+import { formatDate } from "@/lib/date";
 import Link from "next/link";
 
 interface BlogSectionProps {
@@ -14,6 +15,7 @@ interface BlogSectionProps {
 
 export function BlogSection({ articles }: BlogSectionProps) {
   const { language, t } = useLanguage();
+  const slideOffset = getNavDirection() * 50;
 
   // Filter articles by active client language
   const filteredArticles = articles.filter((article) => article.language === language);
@@ -35,20 +37,21 @@ export function BlogSection({ articles }: BlogSectionProps) {
     hidden: {
       opacity: 0,
       scale: 0.95,
-      get x() {
-        return typeof window !== "undefined" ? getNavDirection() * 50 : 50;
-      }
+      x: slideOffset,
     },
     visible: {
       opacity: 1,
       scale: 1,
       x: 0,
-      transition: { duration: 0.5, type: "spring", stiffness: 60 }
-    }
+      transition: { duration: 0.5, type: "spring", stiffness: 60 },
+    },
   };
 
   return (
-    <section id="articles" className="w-screen h-screen overflow-y-auto flex flex-col bg-background/50 border-r border-border/40 relative py-32">
+    <section
+      id="articles"
+      className="w-screen h-screen overflow-y-auto flex flex-col bg-background/50 border-r border-border/40 relative py-32"
+    >
       <div className="absolute inset-0 bg-radial-gradient from-primary/3 via-transparent to-transparent -z-10" />
 
       <motion.div
@@ -61,12 +64,10 @@ export function BlogSection({ articles }: BlogSectionProps) {
         {/* Section Header */}
         <div className="max-w-2xl mb-16">
           <h2 className="flex flex-row items-center gap-2 text-3xl md:text-4xl font-extrabold text-foreground mb-3 tracking-tight">
-            <BookOpen size={36} className="text-primary animate-pulse shrink-0"/>
+            <BookOpen size={36} className="text-primary animate-pulse shrink-0" />
             {t.blog.title}
           </h2>
-          <p className="text-sm text-muted-foreground">
-            {t.blog.subtitle}
-          </p>
+          <p className="text-sm text-muted-foreground">{t.blog.subtitle}</p>
         </div>
 
         {/* Article Stack */}
@@ -88,7 +89,7 @@ export function BlogSection({ articles }: BlogSectionProps) {
                   <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-muted-foreground mb-3">
                     <span className="flex items-center gap-1">
                       <Calendar size={12} />
-                      {new Date(article.date).toLocaleDateString(undefined, {
+                      {formatDate(article.date, language, {
                         year: "numeric",
                         month: "short",
                         day: "numeric",
