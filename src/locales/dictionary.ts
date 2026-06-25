@@ -6,7 +6,6 @@ export interface TranslationDict {
     portfolio: string;
     articles: string;
     github: string;
-    cv: string;
     contact: string;
   };
   hero: {
@@ -63,8 +62,9 @@ export interface TranslationDict {
     title: string;
     subtitle: string;
     emailMe: string;
+    downloadCv: string;
+    cvConfirm: string;
     copyEmail: string;
-    copied: string;
     viewSocials: string;
   };
   theme: {
@@ -81,7 +81,6 @@ export const dictionaries: Record<Language, TranslationDict> = {
       portfolio: "Portfolio",
       articles: "Articles",
       github: "Activity",
-      cv: "Download CV",
       contact: "Contact",
     },
     hero: {
@@ -94,7 +93,8 @@ export const dictionaries: Record<Language, TranslationDict> = {
     },
     github: {
       title: "Real-time WorkStream",
-      subtitle: "My latest development activity, powered directly by public GitHub APIs. Serverless and live.",
+      subtitle:
+        "My latest development activity, powered directly by public GitHub APIs. Serverless and live.",
       latestActivity: "Latest GitHub Action",
       lastPushedRepo: "Last Public Repo Pushed To",
       pushedAt: "Pushed",
@@ -118,7 +118,8 @@ export const dictionaries: Record<Language, TranslationDict> = {
     },
     portfolio: {
       title: "Portfolio Showcase",
-      subtitle: "Selected works written in MDX. Explore project documentation, tech specs, and architectural details.",
+      subtitle:
+        "Selected works written in MDX. Explore project documentation, tech specs, and architectural details.",
       all: "All Projects",
       ai: "AI & ML",
       dev: "Software Eng",
@@ -128,7 +129,8 @@ export const dictionaries: Record<Language, TranslationDict> = {
     },
     blog: {
       title: "Insight & Articles",
-      subtitle: "My thoughts on artificial intelligence, software design patterns, and rigorous testing methodologies.",
+      subtitle:
+        "My thoughts on artificial intelligence, software design patterns, and rigorous testing methodologies.",
       readTime: "min read",
       published: "Published on",
       backToArticles: "Back to Articles",
@@ -136,9 +138,11 @@ export const dictionaries: Record<Language, TranslationDict> = {
     },
     contact: {
       title: "Let's Build Something Great",
-      subtitle: "Looking for an engineer who can connect AI models, write clean code, and guarantee software quality? Let's connect.",
+      subtitle:
+        "Looking for an engineer who can connect AI models, write clean code, and guarantee software quality? Let's connect.",
       emailMe: "Email Me Directly",
-      copied: "Copied!",
+      downloadCv: "Download CV",
+      cvConfirm: "Do you want to download my CV now?",
       viewSocials: "Connect on Socials",
     },
     theme: {
@@ -153,7 +157,6 @@ export const dictionaries: Record<Language, TranslationDict> = {
       portfolio: "Portfolio",
       articles: "Artykuły",
       github: "Aktywność",
-      cv: "Pobierz CV",
       contact: "Kontakt",
     },
     hero: {
@@ -166,7 +169,8 @@ export const dictionaries: Record<Language, TranslationDict> = {
     },
     github: {
       title: "Aktywność deweloperska",
-      subtitle: "Moje najnowsze działania na GitHub, pobierane bezpośrednio przez publiczne API. Bezserwerowe i na żywo.",
+      subtitle:
+        "Moje najnowsze działania na GitHub, pobierane bezpośrednio przez publiczne API. Bezserwerowe i na żywo.",
       latestActivity: "Ostatnie zdarzenie",
       lastPushedRepo: "Ostatnie repozytoria z wypchniętymi zmianami",
       pushedAt: "Wypchnięto",
@@ -190,7 +194,8 @@ export const dictionaries: Record<Language, TranslationDict> = {
     },
     portfolio: {
       title: "Moje portfolio",
-      subtitle: "Wybrane projekty opisane w formacie MDX. Przeczytaj studia przypadków, specyfikacje techniczne i szczegóły architektury.",
+      subtitle:
+        "Wybrane projekty opisane w formacie MDX. Przeczytaj studia przypadków, specyfikacje techniczne i szczegóły architektury.",
       all: "Wszystkie projekty",
       ai: "Sztuczna Inteligencja",
       dev: "Oprogramowanie",
@@ -200,7 +205,8 @@ export const dictionaries: Record<Language, TranslationDict> = {
     },
     blog: {
       title: "Artykuły i Przemyślenia",
-      subtitle: "Moje refleksje na temat sztucznej inteligencji, wzorców projektowych i rygorystycznych metodologii testowania.",
+      subtitle:
+        "Moje refleksje na temat sztucznej inteligencji, wzorców projektowych i rygorystycznych metodologii testowania.",
       readTime: "min czytania",
       published: "Opublikowano",
       backToArticles: "← Powrót do artykułów",
@@ -208,10 +214,12 @@ export const dictionaries: Record<Language, TranslationDict> = {
     },
     contact: {
       title: "Zbudujmy coś niezwykłego",
-      subtitle: "Szukasz inżyniera, który połączy modele AI, napisze czysty kod i zagwarantuje jakość oprogramowania? Skontaktuj się ze mną.",
+      subtitle:
+        "Szukasz inżyniera, który połączy modele AI, napisze czysty kod i zagwarantuje jakość oprogramowania? Skontaktuj się ze mną.",
       emailMe: "Napisz bezpośrednio",
+      downloadCv: "Pobierz CV",
+      cvConfirm: "Czy chcesz teraz pobrać moje CV?",
       copyEmail: "Skopiuj adres e-mail",
-      copied: "Skopiowano!",
       viewSocials: "Znajdź mnie w mediach społecznościowych",
     },
     theme: {
