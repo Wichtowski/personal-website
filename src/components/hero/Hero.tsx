@@ -41,7 +41,6 @@ export function Hero() {
       <div className="max-w-4xl mx-auto px-6 w-full text-center flex flex-col items-center justify-center space-y-8">
         {/* Hero Intro */}
         <div className="space-y-6 flex flex-col items-center text-center hero-intro">
-
           {/* Title Heading */}
           <HeroTitle greeting={t.hero.greeting} role={t.hero.role} />
 

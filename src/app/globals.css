@@ -38,7 +38,9 @@ body {
   font-family: var(--font-sans), sans-serif;
 }
 
-button, a, [role="button"] {
+button,
+a,
+[role="button"] {
   cursor: pointer;
 }
 
@@ -48,7 +50,9 @@ button, a, [role="button"] {
   line-height: 1.75;
 }
 
-.prose h1, .prose h2, .prose h3 {
+.prose h1,
+.prose h2,
+.prose h3 {
   font-family: var(--font-mono), monospace;
   color: var(--foreground);
   font-weight: 800;
@@ -109,7 +113,8 @@ button, a, [role="button"] {
   font-size: 0.85em;
 }
 
-.prose ul, .prose ol {
+.prose ul,
+.prose ol {
   margin-bottom: 1.5rem;
   padding-left: 1.5rem;
   color: var(--muted-foreground);
@@ -136,12 +141,21 @@ button, a, [role="button"] {
   }
 
   /* Hide headers, footers, section grids, buttons, widgets */
-  header, footer, nav, button, a[href^="#"], #github, #portfolio, #articles {
+  header,
+  footer,
+  nav,
+  button,
+  a[href^="#"],
+  #github,
+  #portfolio,
+  #articles {
     display: none !important;
   }
 
   /* Make sure background is light and text is black */
-  main, div, section {
+  main,
+  div,
+  section {
     background: transparent !important;
     color: #000000 !important;
     border-color: #000000 !important;
@@ -175,6 +189,6 @@ button, a, [role="button"] {
 }
 /* Hide scrollbar for IE, Edge and Firefox */
 .no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }

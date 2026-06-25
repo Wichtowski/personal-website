@@ -7,9 +7,5 @@ interface HeroBioProps {
 }
 
 export function HeroBio({ bio }: HeroBioProps) {
-  return (
-    <p className="text-base text-muted-foreground leading-relaxed max-w-xl">
-      {bio}
-    </p>
-  );
+  return <p className="text-base text-muted-foreground leading-relaxed max-w-xl">{bio}</p>;
 }

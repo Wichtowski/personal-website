@@ -20,7 +20,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Oskar Wichtowski | AI Engineer & Software Developer",
-  description: "Portfolio of Oskar Wichtowski - AI Engineer, Fullstack Software Developer, and Quality Assurance Specialist. Crafting intelligent systems and bulletproof test pipelines.",
+  description:
+    "Portfolio of Oskar Wichtowski - AI Engineer, Fullstack Software Developer, and Quality Assurance Specialist. Crafting intelligent systems and bulletproof test pipelines.",
 };
 
 export default function RootLayout({
@@ -35,19 +36,12 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="h-screen w-screen overflow-hidden relative bg-background text-foreground transition-colors duration-300">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <LanguageProvider>
             <SlideScrollHandler />
             <Navbar />
             <Footer />
-            <PageTransition>
-              {children}
-            </PageTransition>
+            <PageTransition>{children}</PageTransition>
           </LanguageProvider>
         </ThemeProvider>
       </body>

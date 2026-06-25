@@ -57,8 +57,14 @@ export function useSlideScroll() {
     const handleKeyDown = (e: KeyboardEvent) => {
       const tag = document.activeElement?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA") return;
-      if (e.key === "ArrowRight") { e.preventDefault(); navigate(1); }
-      if (e.key === "ArrowLeft")  { e.preventDefault(); navigate(-1); }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        navigate(1);
+      }
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        navigate(-1);
+      }
     };
 
     window.addEventListener("wheel", handleWheel, { passive: false, capture: true });
