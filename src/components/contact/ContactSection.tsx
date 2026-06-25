@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
-import { Mail, Copy, Check, Terminal, MapPin, Briefcase } from "lucide-react";
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import { Mail, MapPin, Briefcase, Download } from "lucide-react";
+import { motion, Variants } from "framer-motion";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { getNavDirection } from "@/lib/navigation";
 import { MdOutlineConnectWithoutContact } from "react-icons/md";
@@ -36,7 +35,21 @@ const socials = [
 
 export function ContactSection() {
   const { t } = useLanguage();
-  const [copied, setCopied] = useState(false);
+
+  const handleDownloadCV = () => {
+    const confirmed = window.confirm(t.contact.cvConfirm);
+    if (!confirmed) {
+      return;
+    }
+
+    const cvUrl = "/Oskar Wichtowski - Resume.pdf";
+    const link = document.createElement("a");
+    link.href = cvUrl;
+    link.download = cvUrl.split("/").pop() || "cv.pdf";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const slideDirectionVariants: Variants = {
     hidden: {
@@ -73,7 +86,10 @@ export function ContactSection() {
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
 
           <h2 className="text-3xl md:text-5xl font-extrabold text-foreground mb-4 tracking-tight font-mono flex flex-wrap items-center justify-center gap-3">
-            <MdOutlineConnectWithoutContact size={72} className="text-primary animate-pulse shrink-0"/>
+            <MdOutlineConnectWithoutContact
+              size={72}
+              className="text-primary animate-pulse shrink-0"
+            />
             {t.contact.title}
           </h2>
 
@@ -81,14 +97,22 @@ export function ContactSection() {
             {t.contact.subtitle}
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center gap-4 justify-center w-full max-w-md">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap items-center gap-4 justify-center w-full max-w-3xl">
             <a
               href={`mailto:${email}`}
-              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-primary text-primary-foreground font-mono text-sm font-bold hover:opacity-90 shadow-lg shadow-primary/25 hover:shadow-primary/35 transition-all duration-300 flex items-center justify-center gap-2"
+              className="w-full sm:w-auto min-w-[13rem] px-6 py-3 rounded-xl bg-primary text-primary-foreground font-mono text-sm font-bold hover:opacity-90 shadow-lg shadow-primary/25 hover:shadow-primary/35 transition-all duration-300 flex items-center justify-center gap-2"
             >
               <Mail size={16} />
               {t.contact.emailMe}
             </a>
+
+            <button
+              onClick={handleDownloadCV}
+              className="w-full sm:w-auto min-w-[13rem] px-6 py-3 rounded-xl border border-border/50 bg-background/80 text-foreground font-mono text-sm font-bold hover:bg-muted/60 hover:border-primary/40 transition-all duration-300 flex items-center justify-center gap-2"
+            >
+              <Download size={16} />
+              {t.contact.downloadCv}
+            </button>
           </div>
         </div>
 
