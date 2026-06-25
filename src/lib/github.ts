@@ -30,10 +30,19 @@ export async function fetchGitHubStats(username: string): Promise<GitHubStats | 
   try {
     const profileRes = await fetch(`https://api.github.com/users/${username}`);
     if (!profileRes.ok) {
-      console.warn(`GitHub API error (Status: ${profileRes.status}) for ${username}. Falling back to mock data.`);
+      console.warn(
+        `GitHub API error (Status: ${profileRes.status}) for ${username}. Falling back to mock data.`,
+      );
       return null;
     }
-    const profile = await profileRes.json() as { name?: string; login: string; avatar_url: string; public_repos?: number; followers?: number; following?: number };
+    const profile = (await profileRes.json()) as {
+      name?: string;
+      login: string;
+      avatar_url: string;
+      public_repos?: number;
+      followers?: number;
+      following?: number;
+    };
 
     // Fetch repos to calculate stars (GitHub API defaults to 30 per page, let's fetch up to 100)
     const reposRes = await fetch(`https://api.github.com/users/${username}/repos?per_page=100`);
@@ -41,7 +50,10 @@ export async function fetchGitHubStats(username: string): Promise<GitHubStats | 
     if (reposRes.ok) {
       const repos = await reposRes.json();
       if (Array.isArray(repos)) {
-        stars = (repos as GitHubRepo[]).reduce((acc: number, repo: GitHubRepo) => acc + (repo.stargazers_count || 0), 0);
+        stars = (repos as GitHubRepo[]).reduce(
+          (acc: number, repo: GitHubRepo) => acc + (repo.stargazers_count || 0),
+          0,
+        );
       }
     }
 
@@ -90,18 +102,25 @@ interface GitHubEvent {
  */
 export async function fetchLatestActivity(username: string): Promise<GitHubActivity | null> {
   try {
-    const eventsRes = await fetch(`https://api.github.com/users/${username}/events/public?per_page=10`);
+    const eventsRes = await fetch(
+      `https://api.github.com/users/${username}/events/public?per_page=10`,
+    );
     if (!eventsRes.ok) {
-      console.warn(`GitHub API activity error (Status: ${eventsRes.status}) for ${username}. Falling back to mock activity.`);
+      console.warn(
+        `GitHub API activity error (Status: ${eventsRes.status}) for ${username}. Falling back to mock activity.`,
+      );
     }
-    const events = await eventsRes.json() as GitHubEvent[];
+    const events = (await eventsRes.json()) as GitHubEvent[];
     if (!Array.isArray(events) || events.length === 0) {
       return null;
     }
 
     // Find the first relevant push event or pull request event
     const pushOrPrEvent = events.find(
-      (event) => event.type === "PushEvent" || event.type === "PullRequestEvent" || event.type === "CreateEvent"
+      (event) =>
+        event.type === "PushEvent" ||
+        event.type === "PullRequestEvent" ||
+        event.type === "CreateEvent",
     );
 
     const activeEvent = pushOrPrEvent || events[0];
@@ -112,7 +131,11 @@ export async function fetchLatestActivity(username: string): Promise<GitHubActiv
     const pushedAt = activeEvent.created_at;
     const type = activeEvent.type;
 
-    if (activeEvent.type === "PushEvent" && activeEvent.payload?.commits && activeEvent.payload.commits.length > 0) {
+    if (
+      activeEvent.type === "PushEvent" &&
+      activeEvent.payload?.commits &&
+      activeEvent.payload.commits.length > 0
+    ) {
       commitMessage = activeEvent.payload.commits[0].message;
       commitSha = activeEvent.payload.commits[0].sha.substring(0, 7);
     } else if (activeEvent.type === "PullRequestEvent") {

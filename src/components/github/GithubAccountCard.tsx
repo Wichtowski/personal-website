@@ -30,13 +30,13 @@ export function GithubAccountCard({
         )}
 
         <div className="min-w-0">
-          <span className={`text-[9px] font-mono font-bold block uppercase tracking-wider ${labelClassName}`}>
+          <span
+            className={`text-[9px] font-mono font-bold block uppercase tracking-wider ${labelClassName}`}
+          >
             {label}
           </span>
 
-          <p className="text-xs font-mono font-bold text-foreground truncate">
-            @{username}
-          </p>
+          <p className="text-xs font-mono font-bold text-foreground truncate">@{username}</p>
         </div>
       </div>
     </div>

@@ -11,11 +11,7 @@ interface GithubAccountsPanelProps {
   };
 }
 
-export function GithubAccountsPanel({
-  mainStats,
-  workStats,
-  labels,
-}: GithubAccountsPanelProps) {
+export function GithubAccountsPanel({ mainStats, workStats, labels }: GithubAccountsPanelProps) {
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}

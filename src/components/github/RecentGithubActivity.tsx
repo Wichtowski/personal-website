@@ -2,6 +2,8 @@ import React from "react";
 import { ArrowRight, GitBranch, GitCommit } from "lucide-react";
 import { motion } from "framer-motion";
 import type { GitHubActivity } from "@/lib/github";
+import type { Language } from "@/locales/dictionary";
+import { formatDate } from "@/lib/date";
 
 interface RecentGithubActivityProps {
   activities: GitHubActivity[];
@@ -9,6 +11,7 @@ interface RecentGithubActivityProps {
   emptyMessage: string;
   viewOnGithub: string;
   pushedAtLabel: string;
+  language: Language;
 }
 
 function getRepoDisplayName(repoName: string) {
@@ -19,12 +22,21 @@ function formatEventType(type: string) {
   return type.replace("Event", "");
 }
 
+function formatCommitSha(commitSha: string) {
+  if (!commitSha || commitSha.startsWith("#")) {
+    return commitSha;
+  }
+
+  return commitSha.length > 7 ? commitSha.slice(0, 7) : commitSha;
+}
+
 export function RecentGithubActivity({
   activities,
   title,
   emptyMessage,
   viewOnGithub,
   pushedAtLabel,
+  language,
 }: RecentGithubActivityProps) {
   return (
     <motion.div
@@ -85,13 +97,16 @@ export function RecentGithubActivity({
                   <div className="flex items-center gap-2 flex-wrap mt-2">
                     {activity.commitSha && (
                       <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                        {activity.commitSha}
+                        {formatCommitSha(activity.commitSha)}
                       </span>
                     )}
 
                     <span className="text-[10px] text-muted-foreground font-mono">
                       {pushedAtLabel}{" "}
-                      {new Date(activity.pushedAt).toLocaleDateString(undefined, {
+                      {formatDate(activity.pushedAt, language, {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
@@ -103,9 +118,7 @@ export function RecentGithubActivity({
           ))}
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground font-mono">
-          {emptyMessage}
-        </p>
+        <p className="text-sm text-muted-foreground font-mono">{emptyMessage}</p>
       )}
     </motion.div>
   );

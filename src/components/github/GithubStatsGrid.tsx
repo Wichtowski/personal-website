@@ -32,19 +32,12 @@ const itemVariants: Variants = {
   },
 };
 
-export function GithubStatsGrid({
-  mainStats,
-  workStats,
-  labels,
-}: GithubStatsGridProps) {
-  const combinedRepos =
-    (mainStats?.publicRepos ?? 0) + (workStats?.publicRepos ?? 0);
+export function GithubStatsGrid({ mainStats, workStats, labels }: GithubStatsGridProps) {
+  const combinedRepos = (mainStats?.publicRepos ?? 0) + (workStats?.publicRepos ?? 0);
 
-  const combinedStars =
-    (mainStats?.stars ?? 0) + (workStats?.stars ?? 0);
+  const combinedStars = (mainStats?.stars ?? 0) + (workStats?.stars ?? 0);
 
-  const combinedFollowers =
-    (mainStats?.followers ?? 0) + (workStats?.followers ?? 0);
+  const combinedFollowers = (mainStats?.followers ?? 0) + (workStats?.followers ?? 0);
 
   return (
     <motion.div

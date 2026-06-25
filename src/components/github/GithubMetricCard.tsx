@@ -29,9 +29,7 @@ export function GithubMetricCard({
 
       <div>
         <span className="text-xs text-muted-foreground block">{label}</span>
-        <span className="text-2xl font-bold font-mono text-foreground">
-          {value}
-        </span>
+        <span className="text-2xl font-bold font-mono text-foreground">{value}</span>
       </div>
     </motion.div>
   );
