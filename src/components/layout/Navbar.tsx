@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/context/LanguageContext";
 import { useRouter, usePathname } from "next/navigation";
-import { Sun, Moon, Menu, X, Terminal, Languages, Download } from "lucide-react";
+import { Sun, Moon, Menu, X, Terminal, Languages } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/cn";
 import { ROUTES, setNavDirection } from "@/lib/navigation";
@@ -25,7 +25,9 @@ export function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  useEffect(() => { setTimeout(() => setMounted(true), 0); }, []);
+  useEffect(() => {
+    setTimeout(() => setMounted(true), 0);
+  }, []);
 
   const activeSection = ROUTE_TO_SECTION[pathname] ?? "home";
   const scrolled = pathname !== "/";
@@ -42,8 +44,11 @@ export function Navbar() {
   ];
 
   const SECTION_TO_ROUTE: Record<string, string> = {
-    home: "/", github: "/github", portfolio: "/portfolio",
-    articles: "/articles", contact: "/contact",
+    home: "/",
+    github: "/github",
+    portfolio: "/portfolio",
+    articles: "/articles",
+    contact: "/contact",
   };
 
   const handleScrollTo = (id: string) => {
@@ -51,13 +56,8 @@ export function Navbar() {
     const target = SECTION_TO_ROUTE[id] ?? "/";
     const currentIdx = ROUTES.indexOf(pathname);
     const nextIdx = ROUTES.indexOf(target);
-    setNavDirection(nextIdx >= currentIdx ? 1 : -1);
+    setNavDirection(nextIdx >= currentIdx ? -1 : 1);
     router.push(target);
-  };
-
-  // Printable CV handler
-  const handlePrintCV = () => {
-    window.print();
   };
 
   return (
@@ -66,7 +66,7 @@ export function Navbar() {
         "fixed top-0 left-0 right-0 z-50 py-4 transition-all duration-300 border-b",
         scrolled
           ? "bg-background/80 backdrop-blur-md border-border/40 shadow-md"
-          : "bg-transparent border-transparent"
+          : "bg-transparent border-transparent",
       )}
     >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
@@ -93,7 +93,7 @@ export function Navbar() {
                 onClick={() => handleScrollTo(item.id)}
                 className={cn(
                   "text-sm font-medium transition-colors relative py-1 focus:outline-none group",
-                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 {item.label}
@@ -113,15 +113,6 @@ export function Navbar() {
 
         {/* Action Controls */}
         <div className="hidden md:flex items-center gap-3">
-          {/* Print / Download CV Button */}
-          <button
-            onClick={handlePrintCV}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border/60 text-xs font-mono font-medium text-foreground hover:bg-muted/50 hover:border-primary/40 transition-all duration-300"
-          >
-            <Download size={14} />
-            {t.nav.cv}
-          </button>
-
           {/* Language Selector */}
           <button
             onClick={toggleLanguage}
@@ -189,21 +180,15 @@ export function Navbar() {
                     onClick={() => handleScrollTo(item.id)}
                     className={cn(
                       "text-left py-2 text-base font-medium transition-all focus:outline-none",
-                      isActive ? "text-primary font-semibold pl-2 border-l-2 border-primary" : "text-muted-foreground hover:text-foreground hover:pl-2"
+                      isActive
+                        ? "text-primary font-semibold pl-2 border-l-2 border-primary"
+                        : "text-muted-foreground hover:text-foreground hover:pl-2",
                     )}
                   >
                     {item.label}
                   </button>
                 );
               })}
-
-              <button
-                onClick={handlePrintCV}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border border-border/60 text-sm font-mono font-medium text-foreground hover:bg-muted/50 hover:border-primary/40 transition-all duration-300 mt-2"
-              >
-                <Download size={15} />
-                {t.nav.cv}
-              </button>
             </div>
           </motion.div>
         )}
