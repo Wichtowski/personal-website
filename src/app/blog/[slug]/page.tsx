@@ -1,0 +1,75 @@
+import React, { Suspense } from "react";
+import { getArticleBySlug } from "@/lib/mdx";
+import { notFound } from "next/navigation";
+import { MDXRemote } from "next-mdx-remote/rsc";
+import { ArrowLeft, Calendar, Clock } from "lucide-react";
+import Link from "next/link";
+import { dictionaries, Language } from "@/locales/dictionary";
+
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
+
+export default async function ArticlePage({ params }: PageProps) {
+  const resolvedParams = await params;
+  const article = getArticleBySlug(resolvedParams.slug);
+
+  if (!article) {
+    notFound();
+  }
+
+  const { metadata, content } = article;
+  const t = dictionaries[(metadata.language as Language) ?? "en"];
+
+  return (
+    <main className="h-screen overflow-y-auto py-24 bg-background">
+      <div className="max-w-4xl mx-auto px-6">
+        {/* Back Button */}
+        <Link
+          href="/articles"
+          className="inline-flex items-center gap-2 text-sm font-mono font-bold text-muted-foreground hover:text-primary transition-colors mb-12 focus:outline-none"
+        >
+          <ArrowLeft size={16} />
+          {t.blog.backToArticles}
+        </Link>
+
+        {/* Article Header */}
+        <div className="border-b border-border/40 pb-8 mb-10">
+          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-foreground font-mono mb-4 leading-tight">
+            {metadata.title}
+          </h1>
+          <p className="text-lg text-muted-foreground leading-relaxed mb-6">
+            {metadata.description}
+          </p>
+
+          <div className="flex flex-wrap items-center gap-6 text-xs font-mono text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <Calendar size={14} />
+              {new Date(metadata.date).toLocaleDateString(metadata.language === "pl" ? "pl-PL" : "en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Clock size={14} />
+              {metadata.readTime}
+            </span>
+          </div>
+        </div>
+
+        {/* MDX Body Content */}
+        <article className="prose dark:prose-invert prose-primary max-w-none prose-mono prose-headings:font-mono prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:text-muted-foreground prose-p:leading-relaxed prose-pre:bg-muted/15 prose-pre:border prose-pre:border-border/40 prose-code:text-primary prose-code:bg-primary/5 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-semibold prose-strong:text-foreground">
+          <Suspense fallback={<div className="font-mono text-xs animate-pulse">Rendering Article...</div>}>
+            <MDXRemote
+              source={content}
+              options={{
+                parseFrontmatter: true,
+              }}
+            />
+          </Suspense>
+        </article>
+      </div>
+    </main>
+  );
+}

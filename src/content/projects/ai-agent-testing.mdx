@@ -1,0 +1,47 @@
+---
+title: "Self-Healing AI Test Runner"
+description: "An automated QA runner using LLMs to analyze play-by-play failures, automatically heal selector paths, and suggest code changes."
+date: "2026-05-15"
+category: "ai"
+tags: ["AI", "QA", "Playwright", "LLMs", "TypeScript"]
+githubUrl: "https://github.com/Wichtowski/ai-test-runner"
+liveUrl: "https://github.com/Wichtowski/ai-test-runner"
+language: "en"
+---
+
+# Self-Healing AI Test Runner
+
+In modern agile environments, user interfaces evolve constantly. This results in brittle automation tests that break due to trivial class changes or structure modifications. To combat this, I designed a **Self-Healing AI Test Runner**.
+
+## Core Problem
+Standard QA pipelines fail when frontend developers modify button classes, DOM tree nesting, or ID selectors. The pipeline halts, requiring a QA engineer to manually inspect, rewrite, and push a test fix.
+
+## The Solution
+We integrated a feedback loop between **Playwright** and an **Ollama/Claude API** instance running locally/serverlessly.
+
+### How It Works:
+1. **Detection**: Playwright fails to find a selector and throws an error.
+2. **Context Assembly**: The test runner captures the **DOM Snapshot**, the failing **Selector**, and the **Error Log**.
+3. **AI Healing**: A lightweight LLM processes the snapshot, finds the most semantically logical match for the missing selector, and rewrites the selector dynamically in-memory.
+4. **Execution**: The test runner retries with the healed selector. If successful, it logs a **Pull Request suggestion** to permanently update the codebase!
+
+```typescript
+// Example of the self-healing locator function
+import { Page } from '@playwright/test';
+import { healSelector } from './ai-healer';
+
+export async function smartClick(page: Page, fallbackSelector: string) {
+  try {
+    await page.click(fallbackSelector, { timeout: 2000 });
+  } catch (error) {
+    console.warn(`Selector [${fallbackSelector}] failed. Activating AI healing...`);
+    const healed = await healSelector(page, fallbackSelector, error);
+    await page.click(healed);
+  }
+}
+```
+
+## Key Achievements
+- **82% reduction** in test pipeline maintenance overhead.
+- Automated code modifications pushed directly to git branches for verification.
+- Completely local processing options to protect proprietary source code.
