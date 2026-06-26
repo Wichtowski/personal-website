@@ -65,7 +65,7 @@ export function PortfolioSection({ projects }: PortfolioSectionProps) {
   return (
     <section
       id="portfolio"
-      className="w-screen h-screen overflow-y-auto flex flex-col bg-background border-r border-border/40 relative py-32"
+      className="w-screen h-full overflow-y-auto no-scrollbar flex flex-col bg-background border-r border-border/40 relative pt-6 pb-20 md:py-32"
     >
       <motion.div
         variants={slideDirectionVariants}

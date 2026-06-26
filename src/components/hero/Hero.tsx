@@ -32,7 +32,7 @@ export function Hero() {
   return (
     <section
       id="home"
-      className="w-screen h-screen overflow-y-auto flex items-center justify-center relative overflow-hidden pt-32 pb-20"
+      className="w-screen h-full overflow-y-auto no-scrollbar flex items-center justify-center relative overflow-hidden pt-6 pb-20 md:pt-32"
     >
       {/* Background glow meshes */}
       <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-primary/10 rounded-full blur-[120px] -z-10 animate-pulse" />

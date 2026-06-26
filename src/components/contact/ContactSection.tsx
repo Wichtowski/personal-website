@@ -70,7 +70,7 @@ export function ContactSection() {
   return (
     <section
       id="contact"
-      className="w-screen h-screen overflow-y-auto flex flex-col justify-center bg-muted/10 relative pt-20 pb-16"
+      className="w-screen h-full overflow-y-auto no-scrollbar flex flex-col justify-start md:justify-center bg-muted/10 relative pt-6 pb-20 md:pt-20 md:pb-16"
     >
       <div className="absolute inset-0 bg-radial-gradient from-primary/3 via-transparent to-transparent -z-10" />
 

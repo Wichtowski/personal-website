@@ -136,23 +136,7 @@ export function Navbar() {
         </div>
 
         {/* Mobile Menu Button */}
-        <div className="flex items-center gap-2 md:hidden">
-          <button
-            onClick={toggleLanguage}
-            className="p-2 rounded-lg border border-border/40 hover:bg-muted/50 text-foreground text-xs font-mono"
-          >
-            {language.toUpperCase()}
-          </button>
-
-          {mounted && (
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg border border-border/40 hover:bg-muted/50 text-foreground"
-            >
-              {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
-            </button>
-          )}
-
+        <div className="flex items-center md:hidden">
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="p-2 rounded-lg border border-border/40 text-foreground hover:bg-muted/50 focus:outline-none"
@@ -189,6 +173,27 @@ export function Navbar() {
                   </button>
                 );
               })}
+
+              <div className="flex items-center gap-2 pt-2 border-t border-border/40">
+                <button
+                  onClick={toggleLanguage}
+                  className="p-2 rounded-lg border border-border/40 hover:bg-muted/50 hover:border-primary/40 text-foreground text-xs font-mono font-medium flex items-center gap-1.5 focus:outline-none"
+                  title="Toggle Language / Zmień język"
+                >
+                  <Languages size={14} />
+                  {language.toUpperCase()}
+                </button>
+
+                {mounted && (
+                  <button
+                    onClick={toggleTheme}
+                    className="p-2 rounded-lg border border-border/40 hover:bg-muted/50 hover:border-primary/40 text-foreground transition-all duration-300 focus:outline-none"
+                    title="Toggle Theme"
+                  >
+                    {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
+                  </button>
+                )}
+              </div>
             </div>
           </motion.div>
         )}

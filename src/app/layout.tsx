@@ -5,7 +5,8 @@ import { LanguageProvider } from "@/context/LanguageContext";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { SlideScrollHandler } from "@/components/layout/SlideScrollHandler";
-import { PageTransition } from "@/components/layout/PageTransition";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { getProjects, getArticles } from "@/lib/mdx";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -41,7 +42,9 @@ export default function RootLayout({
             <SlideScrollHandler />
             <Navbar />
             <Footer />
-            <PageTransition>{children}</PageTransition>
+            <AppLayout projects={getProjects()} articles={getArticles()}>
+              {children}
+            </AppLayout>
           </LanguageProvider>
         </ThemeProvider>
       </body>

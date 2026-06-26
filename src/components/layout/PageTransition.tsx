@@ -16,7 +16,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
         animate={{ x: "0vw" }}
         exit={{ x: `${dir * -100}vw` }}
         transition={{ type: "tween", duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
-        className="absolute inset-0 overflow-hidden"
+        className="absolute top-20 md:top-0 inset-x-0 bottom-0 overflow-hidden"
       >
         {children}
       </motion.div>
