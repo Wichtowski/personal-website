@@ -6,6 +6,9 @@ import { Language, TranslationDict, dictionaries } from "@/locales/dictionary";
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
+  toggleLanguage: () => void;
+  isEnglish: boolean;
+  isPolish: boolean;
   t: TranslationDict;
 }
 
@@ -32,10 +35,22 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("preferred-language", lang);
   };
 
+  const toggleLanguage = () => {
+    setLanguageState((current) => {
+      const next = current === "en" ? "pl" : "en";
+      localStorage.setItem("preferred-language", next);
+      return next;
+    });
+  };
+
   const t = dictionaries[language];
+  const isEnglish = language === "en";
+  const isPolish = language === "pl";
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider
+      value={{ language, setLanguage, toggleLanguage, isEnglish, isPolish, t }}
+    >
       {children}
     </LanguageContext.Provider>
   );

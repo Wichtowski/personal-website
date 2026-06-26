@@ -19,9 +19,9 @@ const ROUTE_TO_SECTION: Record<string, string> = {
 
 export function Navbar() {
   const { theme, setTheme } = useTheme();
-  const { language, setLanguage, t } = useLanguage();
+  const { language, toggleLanguage, t } = useLanguage();
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "/";
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -32,7 +32,6 @@ export function Navbar() {
   const activeSection = ROUTE_TO_SECTION[pathname] ?? "home";
   const scrolled = pathname !== "/";
 
-  const toggleLanguage = () => setLanguage(language === "en" ? "pl" : "en");
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
 
   const navItems = [

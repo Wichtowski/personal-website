@@ -22,7 +22,7 @@ function isAtScrollBoundary(el: HTMLElement, deltaY: number): boolean {
 
 export function useSlideScroll() {
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "/";
 
   useEffect(() => {
     let lastFlip = 0;

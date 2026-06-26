@@ -1,3 +1,5 @@
+import { env } from "@/lib/env";
+
 export interface GitHubPulseStats {
   username: string;
   name: string;
@@ -66,7 +68,7 @@ async function githubFetch<T>(path: string): Promise<T> {
       Accept: "application/vnd.github+json",
       "X-GitHub-Api-Version": "2022-11-28",
       "User-Agent": "oskar-wichtowski-portfolio",
-      ...(process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}),
+      ...(env.GITHUB_TOKEN ? { Authorization: `Bearer ${env.GITHUB_TOKEN}` } : {}),
     },
     cache: "no-store",
   });

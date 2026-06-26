@@ -9,14 +9,16 @@ import GithubPageClient from "@/app/github/page-client";
 import { PortfolioSection } from "@/components/portfolio/PortfolioSection";
 import { BlogSection } from "@/components/blog/BlogSection";
 import { ContactSection } from "@/components/contact/ContactSection";
+import type { LastFmNowPlaying } from "@/lib/lastfm";
 
 interface MainSliderProps {
   projects: ProjectMetadata[];
   articles: ArticleMetadata[];
   activePathname: string;
+  nowPlaying?: LastFmNowPlaying;
 }
 
-export function MainSlider({ projects, articles, activePathname }: MainSliderProps) {
+export function MainSlider({ projects, articles, activePathname, nowPlaying }: MainSliderProps) {
   const activeIndex = ROUTES.indexOf(activePathname);
   const index = activeIndex === -1 ? 0 : activeIndex;
 
@@ -28,7 +30,7 @@ export function MainSlider({ projects, articles, activePathname }: MainSliderPro
         className="flex h-full w-[500vw]"
       >
         <div className="w-screen h-full shrink-0">
-          <Hero />
+          <Hero nowPlaying={nowPlaying} />
         </div>
         <div className="w-screen h-full shrink-0">
           <GithubPageClient initialData={null} />

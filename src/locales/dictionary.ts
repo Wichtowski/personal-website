@@ -15,6 +15,23 @@ export interface TranslationDict {
     ctaPrimary: string;
     ctaSecondary: string;
     statusActive: string;
+    listeningTo: string;
+    lastPlayed: string;
+    nothingPlaying: string;
+    lastFmLabel: string;
+    idleTrack: string;
+    idleArtist: string;
+  };
+  techStack: {
+    eyebrow: string;
+    heading: string;
+    categories: Array<{
+      key: string;
+      title: string;
+      summary: string;
+      icon: "monitor" | "sparkles" | "server" | "layers" | "wrench";
+      items: string[];
+    }>;
   };
   github: {
     title: string;
@@ -89,6 +106,70 @@ export const dictionaries: Record<Language, TranslationDict> = {
       ctaPrimary: "View Projects",
       ctaSecondary: "Get in Touch",
       statusActive: "Available for freelance & full-time roles",
+      listeningTo: "Listening to",
+      lastPlayed: "Last played",
+      nothingPlaying: "Nothing playing",
+      lastFmLabel: "Last.fm",
+      idleTrack: "purring of my cat",
+      idleArtist: "Sezamek & Florka",
+    },
+    techStack: {
+      eyebrow: "Selected stack",
+      heading: "Tools I actually use",
+      categories: [
+        {
+          key: "current-os",
+          title: "Current OS",
+          summary: "The desktop setup I live in every day.",
+          icon: "monitor",
+          items: ["EndeavourOS", "Ubuntu", "Windows"],
+        },
+        {
+          key: "ai-data",
+          title: "AI & Data",
+          summary: "Experimentation, models, and data tooling.",
+          icon: "sparkles",
+          items: ["ChatGPT", "Gemini", "Mistral AI", "Qwen", "PyTorch", "NumPy", "Pandas"],
+        },
+        {
+          key: "backend-storage",
+          title: "Backend & Storage",
+          summary: "APIs, persistence, and infra that scales.",
+          icon: "server",
+          items: ["Postgres", "MongoDB", "Redis", "SurrealDB", "DynamoDB", "AWS", "Azure", "GCP"],
+        },
+        {
+          key: "frontend",
+          title: "Frontend",
+          summary: "Interfaces and build tooling I ship with.",
+          icon: "layers",
+          items: ["React", "React Native", "Next.js", "Vite", "Angular", "Bun"],
+        },
+        {
+          key: "quality-delivery",
+          title: "Quality & Delivery",
+          summary: "Testing, coverage, and release confidence.",
+          icon: "wrench",
+          items: ["Playwright", "Cypress", "Vitest", "Jest", "Pytest", "Testing Library", "Snyk"],
+        },
+        {
+          key: "languages-tools",
+          title: "Languages & Tools",
+          summary: "The daily drivers behind the keyboard.",
+          icon: "wrench",
+          items: [
+            "TypeScript",
+            "Python",
+            "FastAPI",
+            "Pydantic",
+            "Bash",
+            "Git",
+            "Docker",
+            "Figma",
+            "Cursor",
+          ],
+        },
+      ],
     },
     github: {
       title: "Real-time WorkStream",
@@ -164,6 +245,70 @@ export const dictionaries: Record<Language, TranslationDict> = {
       ctaPrimary: "Zobacz Projekty",
       ctaSecondary: "Skontaktuj się",
       statusActive: "Dostępny na zlecenia i pełen etat",
+      listeningTo: "Słucham",
+      lastPlayed: "Ostatnio słuchane",
+      nothingPlaying: "Nic nie gra",
+      lastFmLabel: "Last.fm",
+      idleTrack: "mruczenia mojego kota",
+      idleArtist: "Sezamek & Florka",
+    },
+    techStack: {
+      eyebrow: "Wybrany stack",
+      heading: "Narzędzia, których używam",
+      categories: [
+        {
+          key: "current-os",
+          title: "Używany OS",
+          summary: "Codzienne środowisko, w którym pracuję.",
+          icon: "monitor",
+          items: ["EndeavourOS", "Ubuntu", "Windows"],
+        },
+        {
+          key: "ai-data",
+          title: "AI i Dane",
+          summary: "Eksperymenty, modele i narzędzia danych.",
+          icon: "sparkles",
+          items: ["ChatGPT", "Gemini", "Mistral AI", "Qwen", "PyTorch", "NumPy", "Pandas"],
+        },
+        {
+          key: "backend-storage",
+          title: "Backend i Bazy",
+          summary: "API, zapis danych i infrastruktura pod skalę.",
+          icon: "server",
+          items: ["Postgres", "MongoDB", "Redis", "SurrealDB", "DynamoDB", "AWS", "Azure", "GCP"],
+        },
+        {
+          key: "frontend",
+          title: "Frontend",
+          summary: "Interfejsy i narzędzia, z którymi dowożę UI.",
+          icon: "layers",
+          items: ["React", "React Native", "Next.js", "Vite", "Angular", "Bun"],
+        },
+        {
+          key: "quality-delivery",
+          title: "Jakość i Delivery",
+          summary: "Testy, pokrycie i pewność przy wdrożeniach.",
+          icon: "wrench",
+          items: ["Playwright", "Cypress", "Vitest", "Jest", "Pytest", "Testing Library", "Snyk"],
+        },
+        {
+          key: "languages-tools",
+          title: "Języki i Narzędzia",
+          summary: "Codzienne narzędzia spod klawiatury.",
+          icon: "wrench",
+          items: [
+            "TypeScript",
+            "Python",
+            "FastAPI",
+            "Pydantic",
+            "Bash",
+            "Git",
+            "Docker",
+            "Figma",
+            "Cursor",
+          ],
+        },
+      ],
     },
     github: {
       title: "Aktywność deweloperska",
