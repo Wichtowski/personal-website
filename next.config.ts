@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
+import createMDX from "@next/mdx";
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["172.19.4.113"],
+  allowedDevOrigins: process.env.ALLOWED_DEV_ORIGINS ? [process.env.ALLOWED_DEV_ORIGINS] : [],
+  pageExtensions: ["md", "mdx", "tsx"],
 };
 
-export default nextConfig;
+const withMDX = createMDX({});
+
+export default withMDX(nextConfig);
