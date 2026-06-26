@@ -1,0 +1,185 @@
+---
+title: "Testing AI Services at Scale with Playwright — A Practical Guide"
+description: "How we built a layered integration testing strategy for a multi-service AI platform using Playwright's API testing, contract-driven test data from S3, evaluation metrics with percentage failure thresholds, and a Friday-to-Monday batched indexing verification workflow."
+date: "2026-07-01"
+readTime: "12 min"
+tags:
+  ["Testing", "AI", "Playwright", "Integration Testing", "CI/CD", "Evaluation Metrics", "Quality"]
+language: "en"
+---
+
+# Testing AI Services at Scale with Playwright — A Practical Guide
+
+When you are the team at the end of a service chain, every upstream change lands on your doorstep.
+
+We built and operated a platform of AI-powered services — OCR, object detection, spellchecking, tone analysis, scientific-accuracy pipelines, and more. Each service had its own contract, its own failure modes, and its own team. Early on, breaking changes arrived without warning: a renamed field, a shifted bounding-box format, a quietly altered response shape. When users reported broken results, the investigation almost always started with us — the last service in the chain — regardless of where the actual fault originated.
+
+That had to stop. We needed a testing strategy that could protect us from upstream drift, validate that AI outputs stayed within acceptable quality bounds, and scale across dozens of services without drowning the team in maintenance. This is how we built it.
+
+## Why Playwright for API Testing
+
+The first decision — and one of the best — was choosing Playwright as the API testing framework.
+
+Most people associate Playwright with browser automation. Its API testing capabilities tend to be overlooked, which is a shame, because they are excellent for integration testing of backend services. Here is why it worked so well for us:
+
+**Built-in HTTP client with zero boilerplate.** Playwright's `request` context gives you a native, async HTTP client that handles headers, authentication, and JSON serialisation out of the box. No Axios setup, no custom wrappers, no fetch polyfills. You define `baseURL` and default headers once in the config and every test inherits them.
+
+**Parallel execution that actually works.** Playwright runs tests fully in parallel across configurable workers. When you have hundreds of test cases hitting different AI services, that parallelism matters. We ran four workers in CI and could scale further with sharding across multiple containers — something Playwright supports natively with the `--shard` flag.
+
+**Projects for logical separation.** Playwright's project system let us define completely separate test suites — content validation, synchronous indexing, batched OCR — each with its own test match pattern, timeout, teardown logic, and retry policy. One config file, multiple independent test pipelines.
+
+**Retries, traces, and reporting built in.** AI services are inherently non-deterministic. A vision model might classify a borderline image differently on consecutive runs. Playwright's retry mechanism gave us resilience against transient failures, while traces on first retry provided the exact request/response data needed for debugging. The JSON reporter fed our custom analytics pipeline; the blob reporter powered merged HTML reports across shards.
+
+**TypeScript-native.** The entire test suite was TypeScript from top to bottom. Contracts were Zod schemas, configs were typed objects, evaluation metrics were strongly typed functions. Playwright's native TypeScript support meant no transpilation hassles and full IDE support for every test author.
+
+Frankly, Playwright's API testing capabilities gave us more than most dedicated API testing frameworks offer, and the fact that it ships as a single, well-maintained package with excellent documentation made it an easy sell to the rest of the team.
+
+## Phase 1: Contract Testing — Stop the Blame Game
+
+The first implementation was small and done by an AI engineer on the team. It validated basic response shapes, which was a start. But it needed significant rewriting — the test structure was not built for scale, the assertion logic was fragile, and the data management was entirely local.
+
+I spent a lot of hours reverse-engineering the pipelines: understanding how each service responded, what the expected contracts looked like, which fields were optional, and where upstream services tended to diverge silently. That investment was painful but necessary. You cannot write meaningful integration tests for a system you do not deeply understand.
+
+### The Big Decision: Test Data in S3
+
+One of the most impactful decisions we made was pulling test data from S3 instead of checking it into the repository.
+
+Each service had a directory of test cases: a `request.json` containing the input payload, an `expected-response.json` containing the validated ground truth, and optionally image files or other assets. These lived in a dedicated S3 bucket and were synced down at the start of every CI run.
+
+This design had several consequences that turned out to be crucial:
+
+**AI developers owned the test data.** The contract was simple: if you fix a bug or add a feature, you add or update the corresponding test case in S3. A valid bug meant a fix meant a new test case. This did not always happen perfectly, but it shifted the incentive structure in the right direction. Over time, the test suite grew organically as the services improved.
+
+**Test data was decoupled from code changes.** Updating expected responses did not require a pull request. Data scientists and AI engineers could adjust ground truth without touching the test repository, which reduced friction significantly.
+
+**Large assets stayed out of Git.** Some services operated on images — design mockups, scientific figures, document scans. These files were often megabytes each. Keeping them in S3 kept the repository lean and CI checkout times fast.
+
+The test runner would dynamically discover test cases by scanning the downloaded directories. If a test case folder contained `expected-response.json`, it was a content validation case. If it contained images, the runner knew to base64-encode or upload them to a temporary S3 bucket before sending the request. No manual test registration was needed — drop a folder, get a test.
+
+### Contract Validation with Zod
+
+Every service response was validated against a Zod schema before any content assertions ran. This was the first line of defence.
+
+If an upstream team changed a response shape — renamed a field, changed a type, added a required property — the schema validation would fail immediately with a clear error message. No more ambiguous assertion failures deep in the evaluation logic. The contract was explicit, versioned in code, and enforced on every run.
+
+We maintained schemas for every service: contrast ratios, object detection bounding boxes, spellcheck corrections, emotion analysis labels, font matching results, statement verification, and more. Each schema was a single source of truth for what the service was supposed to return.
+
+## Phase 2: Content Validation — Making AI Quality Measurable
+
+Contract tests told us _whether_ a response was structurally correct. They did not tell us _how correct_ the content was. For AI services, that distinction is everything.
+
+The next step was building a content validation layer with real evaluation metrics — precision, recall, F1 score, and domain-specific measures like Intersection over Union for bounding boxes. This is where the testing strategy started to deliver operational insight, not just pass/fail signals.
+
+### Percentage-Based Failure Thresholds
+
+The key idea was that each service had a defined quality threshold. Instead of asserting exact equality between expected and actual responses — which is unrealistic for non-deterministic AI models — we computed evaluation metrics and asserted that they exceeded a minimum acceptable level.
+
+For example, an object detection service might require precision ≥ 0.85 and recall ≥ 0.80. A contrast analysis service might allow a relative tolerance on predicted values. A tone-of-language classifier might need an F1 score above 0.90.
+
+These thresholds turned test results into a quality dashboard. When a service degraded, we did not just see a red test — we saw _how much_ it degraded. A precision drop from 0.92 to 0.88 told a very different story than a drop from 0.92 to 0.40. The first might be an acceptable model variation; the second was a regression that needed immediate attention.
+
+### Per-Service Evaluation Metrics
+
+Each service had its own metric calculation function. These were not generic comparisons — they were tailored to the specific output format and semantics of each service.
+
+- **Bounding box services** (object detection, solid areas, wave detection) used IoU-based matching between predicted and expected regions, with configurable overlap thresholds for true positive classification.
+- **Classification services** (emotion analysis, tone of language, junk section detection) computed standard precision/recall/F1 over categorical labels.
+- **Numerical services** (contrast ratios) used relative tolerance comparisons, counting predictions within an acceptable range as true positives.
+- **Text services** (spellcheck, statement verification) used specialised string-matching and Levenshtein distance metrics.
+- **Complex detection services** (reference sections, complex statements) mapped predicted structures to expected references and computed category-level metrics.
+
+Every metric function returned a standard structure — true positives, false positives, false negatives, and totals — which fed into the shared precision/recall/F1 calculation. This uniformity meant that every service, regardless of its domain, produced comparable quality signals.
+
+### Custom Reporting and Service Summaries
+
+Raw Playwright JSON reports were useful but not sufficient for the kind of operational visibility we needed. We built a custom reporting pipeline that processed test results into per-service summaries.
+
+After each CI run, a post-processing script parsed the Playwright JSON report, grouped results by service name (extracted from test annotations), and produced a service summary showing pass/fail/flaky/skipped counts per service. These summaries were merged across shards and uploaded as artefacts.
+
+A separate custom report captured the detailed evaluation metrics — F1 scores, precision, recall — for every test case. This data allowed us to track quality trends over time and identify services that were slowly degrading before they crossed the failure threshold.
+
+The result was a system where, every weekday morning at 08:00, the team received a clear signal: which services were healthy, which had degraded, and which had broken contracts. Failures triggered Slack notifications with enough context to start debugging immediately.
+
+## Phase 3: Testing Asynchronous Pipelines
+
+Not every AI service returns a result in a single request-response cycle. Some of our most critical services — particularly the scientific paper indexing pipeline — were fully asynchronous. You submit a document, and the result appears in object storage minutes or hours later after passing through OCR, chunking, enrichment, and embedding stages.
+
+Testing these pipelines required a different approach.
+
+### Sync-to-Async Wrapper Pattern
+
+We built a wrapper layer that unified the testing interface across synchronous and asynchronous services. The sync wrapper made a POST request and validated the response immediately. The async wrapper made a POST request, then polled for the result using a retry strategy with configurable intervals, backoff factors, and maximum attempts.
+
+The same expected-response data, the same evaluation metrics, and the same assertion logic worked for both. A helper function normalised async response wrappers (which returned results nested inside an object) into the flat format that sync services used, so test data could be shared across both modes.
+
+This meant that when a service migrated from synchronous to asynchronous execution — which happened several times as we optimised for cost and throughput — the test cases did not need to be rewritten. Only the configuration changed.
+
+### Indexing Pipeline Tests
+
+The indexing tests exercised the full document processing pipeline: submit a document, wait for it to pass through OCR, chunking, figure enrichment, and embedding, then validate the final output.
+
+These tests were configuration-driven. Each test configuration specified the pipeline mode — full pipeline, text chunks only, table chunks only, figure chunks only, chunking disabled, skip embedding — allowing us to test individual stages in isolation or the complete flow end-to-end.
+
+The indexing test suite had its own timeout policy (up to 20 minutes per test), zero retries (to avoid masking genuine pipeline failures), and a dedicated teardown step that cleaned up test documents from the vector store and state store after each run.
+
+## Phase 4: Batched OCR Testing — The Friday-to-Monday Problem
+
+And then there was batched indexing. Oh boy.
+
+The batched OCR mode submits documents to an external provider as background jobs. These jobs are cost-efficient at scale but take time to complete — sometimes hours, sometimes longer. You cannot poll for results in a CI pipeline with a 60-minute timeout.
+
+We tried several approaches. Longer timeouts. Faster polling. Smaller test documents. None of them worked reliably. The batch processing time was inherently unpredictable, and trying to squeeze it into a synchronous test run was fighting the wrong battle.
+
+### The Solution: Split the Test Across Days
+
+We settled on a two-phase approach that embraced the asynchronous nature of the problem instead of fighting it.
+
+**Friday: Submit.** A scheduled workflow runs every Friday morning. It submits test documents to the batched OCR pipeline and exits. No result checking, no polling, no waiting. The submit phase just fires the requests and records trace IDs. The timeout is generous (10 minutes per test case) but only needs to cover the submission, not the processing.
+
+**Monday: Check.** A second scheduled workflow runs every Monday morning. It looks up the documents submitted on Friday, checks whether the batch jobs have completed, downloads the results, and runs the full content validation suite against them. If a batch job is still marked as processing after three days, the test fails immediately — something is genuinely wrong.
+
+The check phase uses a minimal retry configuration: one attempt, short timeout, no backoff. The batch _should_ be finished. If it is not, retrying will not help.
+
+This was one of those solutions that felt slightly absurd when we first proposed it — "just test it on Monday" — but it was the right engineering decision. It gave the batch pipeline realistic conditions, avoided flaky timeouts, and caught real regressions. The Monday check became the team's weekly heartbeat for batch processing health.
+
+### Teardown and Cleanup
+
+Both the indexing and batched OCR test suites had dedicated teardown steps that ran after the check phase. These cleanup scripts removed test documents from the vector database and processing state store, ensuring that test data never polluted the production index.
+
+Playwright's project-level teardown feature made this clean to implement: the test project declared a teardown project, and Playwright guaranteed it would run after the main tests completed, regardless of pass or fail status.
+
+## The Testing Architecture in Practice
+
+Pulling it all together, here is what the testing infrastructure looked like in daily operation:
+
+**Every weekday at 08:00**, the Integration Guardian workflow ran. It downloaded test data from S3, executed content validation tests across all services in parallel (sharded across two containers), generated per-service summaries and custom evaluation reports, merged blob reports into a browsable HTML report, and notified the team on Slack if anything failed.
+
+**Every Friday at 08:00**, the batched submit workflow fired test documents into the batch OCR pipeline.
+
+**Every Monday at 08:00**, the batched check workflow verified that Friday's submissions had been processed correctly.
+
+**On any code change** to indexing-related files, the indexing test suite ran as part of the guardian workflow, triggered by path-based file change detection.
+
+The entire suite was also manually triggerable from the GitHub Actions UI, with environment selection for running against integration or security environments.
+
+## Lessons Learned
+
+**Playwright is an underrated API testing tool.** Its combination of parallel execution, project-based organisation, retry policies, trace capture, sharding, and native TypeScript support made it more capable than most dedicated API testing frameworks. If you are testing HTTP services and not using Playwright, you are probably working harder than you need to.
+
+**Put test data ownership on the people closest to the models.** The "valid bug equals fix equals new test case" rule was not always followed perfectly, but it was good enough. The test suite grew steadily, and the people who understood the AI models best were the ones defining what correct output looked like.
+
+**Evaluation metrics beat binary assertions for AI services.** A pass/fail signal is not enough when your service is non-deterministic. Precision, recall, and F1 scores gave us a continuous quality signal that made regressions visible before they became outages.
+
+**Embrace asynchronous testing when the system is asynchronous.** Trying to force a synchronous test model onto a batch processing pipeline created nothing but flaky tests and wasted CI minutes. Splitting submit and check across days was counterintuitive but correct.
+
+**Invest in reporting early.** The custom service summaries and evaluation reports were more valuable than the raw test results. They turned a wall of green and red into an operational dashboard that the entire team could read.
+
+## Closing Thoughts
+
+Testing AI services is not fundamentally different from testing any other software — the same principles of isolation, repeatability, and clear assertions apply. What _is_ different is the tolerance model. AI outputs are probabilistic, contracts shift more frequently than in traditional APIs, and some processing pipelines take hours to complete.
+
+The testing strategy we built acknowledged those realities instead of pretending they did not exist. Percentage-based quality thresholds replaced exact equality. S3-based test data replaced hardcoded fixtures. A Friday-to-Monday workflow replaced impossible timeout gymnastics.
+
+None of these ideas are revolutionary. But together, they gave a small team reliable, measurable confidence in a platform of over a dozen AI services running at production scale. That confidence is what made it possible to iterate quickly without constantly firefighting regressions.
+
+And we finally stopped getting blamed for upstream breaking changes.

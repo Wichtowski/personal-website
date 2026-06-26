@@ -1,0 +1,102 @@
+---
+title: "Serverless Is a Lie and We All Just Agreed to Pretend"
+description: "A rant about how 'serverless' still runs on servers — they're just someone else's servers, and you're still paying for them."
+date: "2026-06-26"
+readTime: "6 min"
+tags: ["serverless", "cloud", "rant", "devops", "marketing"]
+language: "en"
+---
+
+# Serverless Is a Lie and We All Just Agreed to Pretend
+
+Okay. I need to get this off my chest. Pour yourself a coffee. Or something stronger. You're going to need it.
+
+**Serverless.**
+
+Say it out loud. _Server. Less._ As in: less server. As in: no server. As in: the server has been removed from the equation entirely, vanished into the ether, ascended to a higher plane of existence where electrons compute without hardware and your code runs on pure vibes.
+
+Except — and stop me if you've heard this one — **there is a server.**
+
+There is _always_ a server.
+
+## Where, exactly, do you think the code runs?
+
+Genuinely. I want someone to walk me through it. When you deploy your precious little Lambda function, where does it go? Does it float? Does it manifest in the cloud like a benevolent spirit? No. It runs on a **server.** A physical machine. Made of metal and silicon and the tears of the operations engineers who used to have jobs naming things.
+
+There is a building. The building has racks. The racks have servers. The servers have fans, and the fans make noise, and the noise is the sound of your "serverless" architecture screaming the truth that the marketing department refuses to acknowledge.
+
+You didn't get rid of the server. You just moved it to a warehouse in Virginia and stopped getting invited to its birthday parties.
+
+## "But I don't manage the server!"
+
+Cool. Cool cool cool. You know what we used to call "a server you don't manage"?
+
+**Someone else's server!!!**
+
+That's it. That's the whole innovation. We took the oldest concept in computing — _paying someone else to run a computer for you_ — slapped a frosty new label on it, and convinced an entire industry that we'd invented fire. Mainframe time-sharing did this in the 1960s. We just gave it a hoodie and a Series B.
+
+"Serverless" doesn't mean there's no server. It means **the server is now a trust exercise.** It's there. You just can't see it, can't SSH into it, and can't do anything about it when it has an existential crisis at 3 AM and starts cold-starting your functions like it's stretching after a nap.
+
+## The Cold Start: A Server Saying Hello
+
+Speaking of which — if there's no server, please, _please_ explain the cold start to me.
+
+You know the cold start. That delightful little delay where your "instant, infinitely scalable" function takes 4 seconds to wake up because **a literal server somewhere has to spin up a container, load your runtime, and reluctantly remember that it has a job to do.**
+
+That latency? That's the ghost of the server, knocking on the wall, whispering _"I'm still here. I never left. You just chose not to look."_
+
+You can't have a cold start without something getting cold. And the something is a **server.**
+
+## Follow the Money (It Leads to a Server)
+
+Here's my favorite part. You're still **paying** for the server. You're just paying for it in the most psychologically manipulative units ever devised:
+
+- Per invocation
+- Per gigabyte-second
+- Per millisecond of execution rounded up to the nearest unit of regret
+
+You don't get a bill that says "1 Server." You get a bill that says **"427,000,000 invocations"** and a number that makes your CFO's eye twitch. The server didn't disappear. The _bill_ just got abstracted into a slot machine.
+
+And the genius of it? You can no longer reason about your costs, because there's no server to point at. There's just _usage._ Beautiful, unpredictable, terrifying usage. One viral tweet and you're remortgaging your house to pay for compute that runs on — say it with me — **a server.**
+
+## The Vocabulary Crime
+
+What kills me is the _commitment_ to the bit. We didn't stop at serverless. Oh no.
+
+- **Serverless databases** — runs on a server.
+- **Serverless functions** — runs on a server.
+- **Serverless containers** — these are _literally servers wearing a costume._
+
+At some point "serverless" stopped describing a technology and started describing a _state of denial._ It's not an architecture. It's a coping mechanism. It's the tech industry equivalent of naming your kid "Calm" and then being surprised at the tantrums.
+
+By this logic I'd like to announce my new diet: **calorie-less eating.** I still eat the food. The calories are still there. I've just decided not to manage them personally. They're someone else's calories now. My pancreas can submit a ticket.
+
+## To Be Clear, I'm Not Even Mad at the Technology
+
+Look — managed compute is _great._ Genuinely. Not provisioning hardware, autoscaling, paying for what you use, letting a hyperscaler handle the boring infrastructure plumbing? **Fantastic.** Ten out of ten. I will use it. I do use it. I'm not a monster.
+
+I'm mad at the **word.**
+
+Because the word lies. It promises an absence and delivers a relocation. It tells junior engineers there's no server, and then they're baffled when they hit a concurrency limit, or a timeout, or a memory cap, or any of the **dozens of constraints that exist precisely because — surprise — there's a server with finite resources behind the curtain.**
+
+You haven't escaped the server. You've abstracted it just far enough away that when it breaks, it's not your fault — but it's also not your fix. You traded control for convenience and called it _transcendence._
+
+## In Conclusion
+
+Serverless is not serverless.
+
+It's _server-elsewhere._
+
+It's _server-not-my-problem._
+
+It's _server-Schrödinger,_ simultaneously present and absent until the bill collapses the waveform.
+
+There is a server. There has always been a server. Somewhere in a data center right now, a server is running your code, generating heat, drinking electricity, and quietly resenting the fact that an entire marketing campaign was built around pretending it doesn't exist.
+
+So next time someone tells you their architecture is "serverless," just smile, nod, and gently ask:
+
+> _"Oh nice — whose server?"_
+
+And watch the silence do the work.
+
+_— end rant. The server thanks you for reading. It's still on, by the way._
