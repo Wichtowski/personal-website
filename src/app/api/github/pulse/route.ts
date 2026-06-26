@@ -1,6 +1,6 @@
-export const runtime = "edge";
-
 import { buildGitHubPulse } from "@/lib/github-pulse";
+
+export const runtime = "nodejs";
 
 const CACHE_SECONDS = 60 * 30; // 30 min
 const STALE_SECONDS = 60 * 60 * 24; // 24h

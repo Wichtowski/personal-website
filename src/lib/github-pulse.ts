@@ -150,19 +150,39 @@ async function fetchRecentRepoActivities(
   return activities;
 }
 
-export async function buildGitHubPulse() {
+export const GITHUB_PULSE_CACHE_KEY = "github-pulse-cache";
+export const GITHUB_PULSE_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+
+type GitHubPulseResult = {
+  generatedAt: string;
+  mainStats: GitHubPulseStats;
+  latestActivity: GitHubPulseActivity[];
+  workStats: GitHubPulseStats | null;
+};
+
+let _serverCache: { data: GitHubPulseResult; cachedAt: number } | null = null;
+
+export async function buildGitHubPulse(): Promise<GitHubPulseResult> {
+  if (_serverCache && Date.now() - _serverCache.cachedAt < GITHUB_PULSE_CACHE_TTL_MS) {
+    return _serverCache.data;
+  }
+
   const [mainStats, latestActivity, workStats] = await Promise.all([
     fetchGitHubStats(MAIN_USERNAME),
     fetchRecentRepoActivities(MAIN_USERNAME, 3),
     fetchGitHubStats(WORK_USERNAME).catch(() => null),
   ]);
 
-  return {
+  const result: GitHubPulseResult = {
     generatedAt: new Date().toISOString(),
     mainStats,
     latestActivity,
     workStats,
   };
+
+  _serverCache = { data: result, cachedAt: Date.now() };
+
+  return result;
 }
 
 async function formatGitHubEvent(event: GitHubEvent): Promise<GitHubPulseActivity> {
@@ -217,6 +237,3 @@ async function formatGitHubEvent(event: GitHubEvent): Promise<GitHubPulseActivit
     payloadAction: event.payload?.action,
   };
 }
-
-export const GITHUB_PULSE_CACHE_KEY = "github-pulse-cache";
-export const GITHUB_PULSE_CACHE_TTL_MS = 6 * 60 * 60 * 1000;

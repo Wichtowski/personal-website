@@ -92,8 +92,7 @@ export const dictionaries: Record<Language, TranslationDict> = {
     },
     github: {
       title: "Real-time WorkStream",
-      subtitle:
-        "My latest development activity, powered directly by public GitHub APIs. Serverless and live.",
+      subtitle: "My latest development activity, powered directly by public GitHub APIs.",
       latestActivity: "Latest GitHub Action",
       lastPushedRepo: "Last Public Repo Pushed To",
       pushedAt: "Pushed",

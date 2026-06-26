@@ -23,7 +23,7 @@ type GithubPulseData = {
 };
 
 interface GithubPageClientProps {
-  initialData: GithubPulseData;
+  initialData?: GithubPulseData | null;
 }
 
 function isValidGithubPulseCache(value: unknown) {
@@ -42,9 +42,15 @@ export default function GithubPageClient({ initialData }: GithubPageClientProps)
   const { language, t } = useLanguage();
   const slideOffset = getNavDirection() * 50;
 
-  const [mainStats, setMainStats] = useState<GitHubPulseStats | null>(initialData.mainStats);
-  const [activities, setActivities] = useState<GitHubPulseActivity[]>(initialData.latestActivity);
-  const [workStats, setWorkStats] = useState<GitHubPulseStats | null>(initialData.workStats);
+  const [mainStats, setMainStats] = useState<GitHubPulseStats | null>(
+    initialData?.mainStats ?? null,
+  );
+  const [activities, setActivities] = useState<GitHubPulseActivity[]>(
+    initialData?.latestActivity ?? [],
+  );
+  const [workStats, setWorkStats] = useState<GitHubPulseStats | null>(
+    initialData?.workStats ?? null,
+  );
   const loading = false;
   const [error, setError] = useState<string | null>(null);
 
@@ -88,27 +94,55 @@ export default function GithubPageClient({ initialData }: GithubPageClientProps)
   }, [applyPulseData, persistPulseData, t.github.error]);
 
   useEffect(() => {
+    let active = true;
+    let timeoutId: number | undefined;
+
     try {
       const rawCache = localStorage.getItem(GITHUB_PULSE_CACHE_KEY);
       if (rawCache) {
         const parsed = JSON.parse(rawCache) as { cachedAt?: string; data?: GithubPulseData };
         if (isValidGithubPulseCache(parsed)) {
-          const timeoutId = window.setTimeout(() => {
-            applyPulseData(parsed.data);
+          timeoutId = window.setTimeout(() => {
+            if (active && parsed.data) {
+              applyPulseData(parsed.data);
+            }
           }, 0);
 
-          return () => window.clearTimeout(timeoutId);
+          return () => {
+            active = false;
+            if (timeoutId) window.clearTimeout(timeoutId);
+          };
         }
-
-        persistPulseData(initialData);
-        return;
       }
 
-      persistPulseData(initialData);
+      if (initialData) {
+        persistPulseData(initialData);
+      } else {
+        timeoutId = window.setTimeout(() => {
+          if (active) {
+            loadData();
+          }
+        }, 0);
+      }
     } catch {
-      persistPulseData(initialData);
+      if (initialData) {
+        persistPulseData(initialData);
+      } else {
+        timeoutId = window.setTimeout(() => {
+          if (active) {
+            loadData();
+          }
+        }, 0);
+      }
     }
-  }, [applyPulseData, initialData, persistPulseData]);
+
+    return () => {
+      active = false;
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [applyPulseData, initialData, persistPulseData, loadData]);
 
   const slideDirectionVariants: Variants = {
     hidden: {
@@ -127,7 +161,7 @@ export default function GithubPageClient({ initialData }: GithubPageClientProps)
   return (
     <section
       id="github"
-      className="w-screen h-screen overflow-y-auto flex items-center justify-center bg-background/50 border-r border-border/40 relative py-32"
+      className="w-screen h-screen overflow-y-auto no-scrollbar flex items-start justify-center bg-background/50 border-r border-border/40 relative pt-6 pb-36 md:py-32"
     >
       <div className="absolute inset-0 bg-radial-gradient from-primary/5 via-transparent to-transparent -z-10" />
 
@@ -138,8 +172,8 @@ export default function GithubPageClient({ initialData }: GithubPageClientProps)
         viewport={{ once: true, amount: 0.15 }}
         className="max-w-7xl mx-auto px-6 w-full"
       >
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-4 tracking-tight flex items-center justify-center gap-3">
+        <div className="text-left md:text-center max-w-3xl md:mx-auto mb-16">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-4 tracking-tight flex items-center justify-start md:justify-center gap-3">
             <Activity size={36} className="text-primary animate-pulse shrink-0" />
             {t.github.title}
           </h2>
