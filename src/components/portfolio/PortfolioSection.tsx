@@ -5,7 +5,6 @@ import { useLanguage } from "@/context/LanguageContext";
 import { ProjectMetadata } from "@/lib/mdx";
 import { Folder, ArrowUpRight, Cpu, Code2, ShieldAlert } from "lucide-react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
-import { getNavDirection } from "@/lib/navigation";
 import Link from "next/link";
 
 interface PortfolioSectionProps {
@@ -33,26 +32,21 @@ export function PortfolioSection({ projects }: PortfolioSectionProps) {
   ];
 
   const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.08 },
-    },
+    hidden: { opacity: 1 },
+    show: { opacity: 1, transition: { staggerChildren: 0.08 } },
   };
 
   const cardVariants: Variants = {
-    hidden: { opacity: 0, scale: 0.95, y: 15 },
+    hidden: { opacity: 1, scale: 1, y: 0 },
     show: { opacity: 1, scale: 1, y: 0, transition: { type: "spring", stiffness: 80 } },
     exit: { opacity: 0, scale: 0.95, y: 10, transition: { duration: 0.15 } },
   };
 
   const slideDirectionVariants: Variants = {
     hidden: {
-      opacity: 0,
-      scale: 0.95,
-      get x() {
-        return typeof window !== "undefined" ? getNavDirection() * 50 : 50;
-      },
+      opacity: 1,
+      scale: 1,
+      x: 0,
     },
     visible: {
       opacity: 1,

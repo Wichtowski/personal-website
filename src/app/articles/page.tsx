@@ -1,7 +1,13 @@
 import { BlogSection } from "@/components/blog/BlogSection";
 import { getArticles } from "@/lib/mdx";
 
-export default function ArticlesPage() {
+export default async function ArticlesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tag?: string }>;
+}) {
   const articles = getArticles();
-  return <BlogSection articles={articles} />;
+  const { tag } = await searchParams;
+
+  return <BlogSection articles={articles} activeTag={tag} />;
 }

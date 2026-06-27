@@ -17,9 +17,9 @@ export function GithubAccountsPanel({ mainStats, workStats, labels }: GithubAcco
     <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
-      className="p-6 md:p-8 rounded-2xl border border-border/40 bg-muted/15 backdrop-blur-sm flex flex-col justify-between"
+      className="p-6 md:p-8 rounded-2xl  bg-muted/15 backdrop-blur-sm flex flex-col justify-between"
     >
-      <div className="space-y-4">
+      <div className="space-y-4 gap-3 flex flex-col">
         <Link href="https://github.com/Wichtowski" target="_blank" rel="noopener noreferrer">
           <GithubAccountCard
             label={labels.primaryAccountLabel}

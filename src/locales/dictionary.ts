@@ -29,8 +29,7 @@ export interface TranslationDict {
       key: string;
       title: string;
       summary: string;
-      icon: "monitor" | "sparkles" | "server" | "layers" | "wrench";
-      items: string[];
+      icon: "monitor" | "sparkles" | "server" | "layers" | "wrench" | "brain" | "scan" | "database";
     }>;
   };
   github: {
@@ -83,6 +82,13 @@ export interface TranslationDict {
     cvConfirm: string;
     viewSocials: string;
   };
+  notFound: {
+    ticker: string;
+    eyebrow: string;
+    title: string;
+    description: string;
+    backHome: string;
+  };
   theme: {
     light: string;
     dark: string;
@@ -101,7 +107,7 @@ export const dictionaries: Record<Language, TranslationDict> = {
     },
     hero: {
       greeting: "Hi, I'm",
-      role: "AI Engineer / Fullstack Developer / QA Specialist",
+      role: "AI Engineer / Software Engineer / QA Specialist",
       bio: "An versatile tech professional blending Artificial Intelligence capabilities with robust software engineering and rigid Quality Assurance standards. I design intelligent agents, craft modern web experiences, and build production-ready test suites.",
       ctaPrimary: "View Projects",
       ctaSecondary: "Get in Touch",
@@ -110,64 +116,66 @@ export const dictionaries: Record<Language, TranslationDict> = {
       lastPlayed: "Last played",
       nothingPlaying: "Nothing playing",
       lastFmLabel: "Last.fm",
-      idleTrack: "purring of my cat",
+      idleTrack: "purring of my cats",
       idleArtist: "Sezamek & Florka",
     },
     techStack: {
-      eyebrow: "Selected stack",
+      eyebrow: "tech stack",
       heading: "Tools I actually use",
       categories: [
+        {
+          key: "llms",
+          title: "LLMs",
+          summary: "The models, assistants, and speech tooling I reach for first.",
+          icon: "sparkles",
+        },
+        {
+          key: "computer-vision",
+          title: "Computer Vision",
+          summary: "Object detection, annotation, and applied vision work.",
+          icon: "scan",
+        },
+        {
+          key: "deep-learning",
+          title: "Deep Learning",
+          summary: "Model development, experimentation, and fine-tuning.",
+          icon: "brain",
+        },
+        {
+          key: "data-science",
+          title: "Data Science",
+          summary: "Numerical and tabular analysis tools.",
+          icon: "database",
+        },
+        {
+          key: "backend-storage",
+          title: "Backend & Storage",
+          summary: "APIs, workers, persistence, and infra that scales.",
+          icon: "server",
+        },
+        {
+          key: "frontend",
+          title: "Frontend",
+          summary: "Interfaces, app shells, and build tooling I ship with.",
+          icon: "layers",
+        },
+        {
+          key: "quality-delivery",
+          title: "Quality & Delivery",
+          summary: "Testing, static analysis, and release confidence.",
+          icon: "wrench",
+        },
+        {
+          key: "languages-tools",
+          title: "Languages & Tools",
+          summary: "The daily drivers behind the keyboard and in automation.",
+          icon: "wrench",
+        },
         {
           key: "current-os",
           title: "Current OS",
           summary: "The desktop setup I live in every day.",
           icon: "monitor",
-          items: ["EndeavourOS", "Ubuntu", "Windows"],
-        },
-        {
-          key: "ai-data",
-          title: "AI & Data",
-          summary: "Experimentation, models, and data tooling.",
-          icon: "sparkles",
-          items: ["ChatGPT", "Gemini", "Mistral AI", "Qwen", "PyTorch", "NumPy", "Pandas"],
-        },
-        {
-          key: "backend-storage",
-          title: "Backend & Storage",
-          summary: "APIs, persistence, and infra that scales.",
-          icon: "server",
-          items: ["Postgres", "MongoDB", "Redis", "SurrealDB", "DynamoDB", "AWS", "Azure", "GCP"],
-        },
-        {
-          key: "frontend",
-          title: "Frontend",
-          summary: "Interfaces and build tooling I ship with.",
-          icon: "layers",
-          items: ["React", "React Native", "Next.js", "Vite", "Angular", "Bun"],
-        },
-        {
-          key: "quality-delivery",
-          title: "Quality & Delivery",
-          summary: "Testing, coverage, and release confidence.",
-          icon: "wrench",
-          items: ["Playwright", "Cypress", "Vitest", "Jest", "Pytest", "Testing Library", "Snyk"],
-        },
-        {
-          key: "languages-tools",
-          title: "Languages & Tools",
-          summary: "The daily drivers behind the keyboard.",
-          icon: "wrench",
-          items: [
-            "TypeScript",
-            "Python",
-            "FastAPI",
-            "Pydantic",
-            "Bash",
-            "Git",
-            "Docker",
-            "Figma",
-            "Cursor",
-          ],
         },
       ],
     },
@@ -224,6 +232,14 @@ export const dictionaries: Record<Language, TranslationDict> = {
       cvConfirm: "Do you want to download my CV now?",
       viewSocials: "Connect on Socials",
     },
+    notFound: {
+      ticker: "404 Error",
+      eyebrow: "Lost route",
+      title: "This page rolled into the void.",
+      description:
+        "The 404 is still here, but the destination is not. Grab the dice, throw them around and head back home.",
+      backHome: "Back home",
+    },
     theme: {
       light: "Light",
       dark: "Dark",
@@ -240,7 +256,7 @@ export const dictionaries: Record<Language, TranslationDict> = {
     },
     hero: {
       greeting: "Cześć, jestem",
-      role: "AI Engineer / Fullstack Developer / Specjalista QA",
+      role: "AI Engineer / Software Engineer / Specjalista QA",
       bio: "Wszechstronny inżynier łączący możliwości sztucznej inteligencji z solidną inżynierią oprogramowania i rygorystycznymi standardami zapewnienia jakości. Projektuję inteligentne agenty, tworzę nowoczesne strony oraz buduję produkcyjne zestawy testów automatycznych.",
       ctaPrimary: "Zobacz Projekty",
       ctaSecondary: "Skontaktuj się",
@@ -257,56 +273,58 @@ export const dictionaries: Record<Language, TranslationDict> = {
       heading: "Narzędzia, których używam",
       categories: [
         {
-          key: "current-os",
-          title: "Używany OS",
-          summary: "Codzienne środowisko, w którym pracuję.",
-          icon: "monitor",
-          items: ["EndeavourOS", "Ubuntu", "Windows"],
+          key: "computer-vision",
+          title: "Widzenie komputerowe",
+          summary: "Detekcja obiektów, anotacja i praktyczne projekty CV.",
+          icon: "scan",
         },
         {
-          key: "ai-data",
-          title: "AI i Dane",
-          summary: "Eksperymenty, modele i narzędzia danych.",
+          key: "deep-learning",
+          title: "Deep Learning",
+          summary: "Budowanie, eksperymentowanie i fine-tuning modeli.",
+          icon: "brain",
+        },
+        {
+          key: "data-science",
+          title: "Data Science",
+          summary: "Narzędzia do analizy numerycznej i tabelarycznej.",
+          icon: "database",
+        },
+        {
+          key: "llms",
+          title: "LLM-y",
+          summary: "Modele, asystenci i narzędzia głosowe, po które sięgam jako pierwszych.",
           icon: "sparkles",
-          items: ["ChatGPT", "Gemini", "Mistral AI", "Qwen", "PyTorch", "NumPy", "Pandas"],
         },
         {
           key: "backend-storage",
           title: "Backend i Bazy",
-          summary: "API, zapis danych i infrastruktura pod skalę.",
+          summary: "API, workerów, zapis danych i infrastruktura pod skalę.",
           icon: "server",
-          items: ["Postgres", "MongoDB", "Redis", "SurrealDB", "DynamoDB", "AWS", "Azure", "GCP"],
         },
         {
           key: "frontend",
           title: "Frontend",
-          summary: "Interfejsy i narzędzia, z którymi dowożę UI.",
+          summary: "Interfejsy, app shelle i narzędzia, z którymi dowożę UI.",
           icon: "layers",
-          items: ["React", "React Native", "Next.js", "Vite", "Angular", "Bun"],
         },
         {
           key: "quality-delivery",
           title: "Jakość i Delivery",
-          summary: "Testy, pokrycie i pewność przy wdrożeniach.",
+          summary: "Testy, statyczna analiza i pewność przy wdrożeniach.",
           icon: "wrench",
-          items: ["Playwright", "Cypress", "Vitest", "Jest", "Pytest", "Testing Library", "Snyk"],
         },
         {
           key: "languages-tools",
           title: "Języki i Narzędzia",
-          summary: "Codzienne narzędzia spod klawiatury.",
+          summary: "Codzienne narzędzia spod klawiatury i automatyzacji.",
           icon: "wrench",
-          items: [
-            "TypeScript",
-            "Python",
-            "FastAPI",
-            "Pydantic",
-            "Bash",
-            "Git",
-            "Docker",
-            "Figma",
-            "Cursor",
-          ],
+        },
+        {
+          key: "current-os",
+          title: "Używany OS",
+          summary: "Codzienne środowisko, w którym pracuję.",
+          icon: "monitor",
         },
       ],
     },
@@ -363,6 +381,14 @@ export const dictionaries: Record<Language, TranslationDict> = {
       downloadCv: "Pobierz CV",
       cvConfirm: "Czy chcesz teraz pobrać moje CV?",
       viewSocials: "Znajdź mnie w mediach społecznościowych",
+    },
+    notFound: {
+      ticker: "Błąd 404",
+      eyebrow: "Zgubiona ścieżka",
+      title: "Ta strona poturlała się w pustkę.",
+      description:
+        "Kod 404 nadal tu jest, ale celu już nie ma. Złap kości, porzucaj nimi i wróć na stronę główną.",
+      backHome: "Wróć do strony głównej",
     },
     theme: {
       light: "Jasny",

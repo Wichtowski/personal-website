@@ -13,12 +13,12 @@ interface BlogArticleStackProps {
   itemVariants: Variants;
 }
 
-export const BlogArticleStack = ({
+export function BlogArticleStack({
   articles,
   language,
   containerVariants,
   itemVariants,
-}: BlogArticleStackProps) => {
+}: BlogArticleStackProps) {
   return (
     <motion.div
       variants={containerVariants}
@@ -72,4 +72,4 @@ export const BlogArticleStack = ({
       ))}
     </motion.div>
   );
-};
+}

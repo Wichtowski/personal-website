@@ -18,21 +18,37 @@ const ROUTE_TO_SECTION: Record<string, string> = {
 };
 
 export function Navbar() {
-  const { theme, setTheme } = useTheme();
+  const { setTheme } = useTheme();
   const { language, toggleLanguage, t } = useLanguage();
   const router = useRouter();
   const pathname = usePathname() ?? "/";
-  const [mounted, setMounted] = useState(false);
+  const [themeMode, setThemeMode] = useState<"light" | "dark" | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    setTimeout(() => setMounted(true), 0);
+    const syncThemeMode = () => {
+      setThemeMode(document.documentElement.classList.contains("dark") ? "dark" : "light");
+    };
+
+    const timeout = setTimeout(syncThemeMode, 0);
+    const observer = new MutationObserver(syncThemeMode);
+
+    observer.observe(document.documentElement, {
+      attributeFilter: ["class"],
+      attributes: true,
+    });
+
+    return () => {
+      clearTimeout(timeout);
+      observer.disconnect();
+    };
   }, []);
 
   const activeSection = ROUTE_TO_SECTION[pathname] ?? "home";
   const scrolled = pathname !== "/";
+  const isDarkTheme = themeMode === "dark";
 
-  const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
+  const toggleTheme = () => setTheme(isDarkTheme ? "light" : "dark");
 
   const navItems = [
     { label: t.nav.home, id: "home" },
@@ -62,10 +78,17 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 py-4 transition-all duration-300 border-b",
-        scrolled
-          ? "bg-background/80 backdrop-blur-md border-border/40 shadow-md"
-          : "bg-transparent border-transparent",
+        "fixed top-0 left-0 right-0 z-50 py-4 transition-all duration-300 border-b backdrop-blur-md shadow-lg",
+        themeMode === null && "pointer-events-none opacity-0",
+        isDarkTheme
+          ? cn(
+              "bg-black/75 text-white/90 border-white/10 shadow-black/20",
+              scrolled ? "bg-black/80" : "bg-black/70",
+            )
+          : cn(
+              "bg-white/95 text-slate-900 border-slate-200/80 shadow-slate-900/5",
+              scrolled ? "bg-white/98" : "bg-white/95",
+            ),
       )}
     >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
@@ -74,10 +97,22 @@ export function Navbar() {
           onClick={() => handleScrollTo("home")}
           className="flex items-center gap-2 group focus:outline-none"
         >
-          <div className="p-2 rounded-lg bg-primary/10 border border-primary/20 text-primary transition-all group-hover:bg-primary/25 group-hover:border-primary/40">
+          <div
+            className={cn(
+              "p-2 rounded-lg transition-all",
+              isDarkTheme
+                ? "bg-primary/10 border border-primary/20 text-primary group-hover:bg-primary/25 group-hover:border-primary/40"
+                : "bg-slate-100 border border-slate-200 text-slate-700 group-hover:bg-slate-200 group-hover:border-slate-300",
+            )}
+          >
             <Terminal size={18} />
           </div>
-          <span className="font-mono text-sm tracking-widest font-bold text-foreground">
+          <span
+            className={cn(
+              "font-mono text-sm tracking-widest font-bold",
+              isDarkTheme ? "text-white" : "text-slate-900",
+            )}
+          >
             OSKAR.<span className="text-primary">WICHTOWSKI</span>
           </span>
         </button>
@@ -92,7 +127,11 @@ export function Navbar() {
                 onClick={() => handleScrollTo(item.id)}
                 className={cn(
                   "text-sm font-medium transition-colors relative py-1 focus:outline-none group",
-                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                  isActive
+                    ? "text-primary"
+                    : isDarkTheme
+                      ? "text-white/65 hover:text-white"
+                      : "text-slate-600 hover:text-slate-900",
                 )}
               >
                 {item.label}
@@ -115,7 +154,12 @@ export function Navbar() {
           {/* Language Selector */}
           <button
             onClick={toggleLanguage}
-            className="p-2 rounded-lg border border-border/40 hover:bg-muted/50 hover:border-primary/40 text-foreground transition-all duration-300 flex items-center gap-1.5 focus:outline-none text-xs font-mono font-medium"
+            className={cn(
+              "p-2 rounded-lg transition-all duration-300 flex items-center gap-1.5 focus:outline-none text-xs font-mono font-medium",
+              isDarkTheme
+                ? "border border-white/10 bg-white/5 hover:bg-white/10 hover:border-primary/40 text-white"
+                : "border border-slate-200 bg-white/90 hover:bg-slate-100 hover:border-slate-300 text-slate-900",
+            )}
             title="Toggle Language / Zmień język"
           >
             <Languages size={14} />
@@ -123,13 +167,18 @@ export function Navbar() {
           </button>
 
           {/* Theme Toggle */}
-          {mounted && (
+          {themeMode && (
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg border border-border/40 hover:bg-muted/50 hover:border-primary/40 text-foreground transition-all duration-300 focus:outline-none"
+              className={cn(
+                "p-2 rounded-lg transition-all duration-300 focus:outline-none",
+                isDarkTheme
+                  ? "border border-white/10 bg-white/5 hover:bg-white/10 hover:border-primary/40 text-white"
+                  : "border border-slate-200 bg-white/90 hover:bg-slate-100 hover:border-slate-300 text-slate-900",
+              )}
               title="Toggle Theme"
             >
-              {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
+              {isDarkTheme ? <Sun size={15} /> : <Moon size={15} />}
             </button>
           )}
         </div>
@@ -138,7 +187,12 @@ export function Navbar() {
         <div className="flex items-center md:hidden">
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-lg border border-border/40 text-foreground hover:bg-muted/50 focus:outline-none"
+            className={cn(
+              "p-2 rounded-lg transition-all focus:outline-none",
+              isDarkTheme
+                ? "border border-white/10 bg-white/5 text-white hover:bg-white/10"
+                : "border border-slate-200 bg-white/90 text-slate-900 hover:bg-slate-100",
+            )}
           >
             {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
@@ -152,7 +206,10 @@ export function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden border-t border-border/40 bg-background/95 backdrop-blur-md overflow-hidden"
+            className={cn(
+              "md:hidden border-t backdrop-blur-md overflow-hidden",
+              isDarkTheme ? "border-white/10 bg-black/90" : "border-slate-200/70 bg-white/98",
+            )}
           >
             <div className="px-6 py-4 flex flex-col gap-4">
               {navItems.map((item) => {
@@ -165,7 +222,9 @@ export function Navbar() {
                       "text-left py-2 text-base font-medium transition-all focus:outline-none",
                       isActive
                         ? "text-primary font-semibold pl-2 border-l-2 border-primary"
-                        : "text-muted-foreground hover:text-foreground hover:pl-2",
+                        : isDarkTheme
+                          ? "text-white/65 hover:text-white hover:pl-2"
+                          : "text-slate-600 hover:text-slate-900 hover:pl-2",
                     )}
                   >
                     {item.label}
@@ -173,23 +232,38 @@ export function Navbar() {
                 );
               })}
 
-              <div className="flex items-center gap-2 pt-2 border-t border-border/40">
+              <div
+                className={cn(
+                  "flex items-center gap-2 pt-2 border-t",
+                  isDarkTheme ? "border-white/10" : "border-slate-200/70",
+                )}
+              >
                 <button
                   onClick={toggleLanguage}
-                  className="p-2 rounded-lg border border-border/40 hover:bg-muted/50 hover:border-primary/40 text-foreground text-xs font-mono font-medium flex items-center gap-1.5 focus:outline-none"
+                  className={cn(
+                    "p-2 rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 focus:outline-none transition-all",
+                    isDarkTheme
+                      ? "border border-white/10 bg-white/5 hover:bg-white/10 hover:border-primary/40 text-white"
+                      : "border border-slate-200 bg-white/90 hover:bg-slate-100 hover:border-slate-300 text-slate-900",
+                  )}
                   title="Toggle Language / Zmień język"
                 >
                   <Languages size={14} />
                   {language.toUpperCase()}
                 </button>
 
-                {mounted && (
+                {themeMode && (
                   <button
                     onClick={toggleTheme}
-                    className="p-2 rounded-lg border border-border/40 hover:bg-muted/50 hover:border-primary/40 text-foreground transition-all duration-300 focus:outline-none"
+                    className={cn(
+                      "p-2 rounded-lg transition-all duration-300 focus:outline-none",
+                      isDarkTheme
+                        ? "border border-white/10 bg-white/5 hover:bg-white/10 hover:border-primary/40 text-white"
+                        : "border border-slate-200 bg-white/90 hover:bg-slate-100 hover:border-slate-300 text-slate-900",
+                    )}
                     title="Toggle Theme"
                   >
-                    {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
+                    {isDarkTheme ? <Sun size={15} /> : <Moon size={15} />}
                   </button>
                 )}
               </div>

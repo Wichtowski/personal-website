@@ -5,7 +5,7 @@ interface BlogSectionHeaderProps {
   subtitle: string;
 }
 
-export const BlogSectionHeader = ({ title, subtitle }: BlogSectionHeaderProps) => {
+export function BlogSectionHeader({ title, subtitle }: BlogSectionHeaderProps) {
   return (
     <div className="max-w-2xl mb-16">
       <h2 className="flex flex-row items-center gap-2 text-3xl md:text-4xl font-extrabold text-foreground mb-3 tracking-tight">
@@ -15,4 +15,4 @@ export const BlogSectionHeader = ({ title, subtitle }: BlogSectionHeaderProps) =
       <p className="text-sm text-muted-foreground">{subtitle}</p>
     </div>
   );
-};
+}

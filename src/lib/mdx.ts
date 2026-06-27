@@ -34,16 +34,16 @@ interface MdxModule {
 const blogModules = import.meta.glob<MdxModule>("../content/blog/*.mdx", { eager: true });
 const projectModules = import.meta.glob<MdxModule>("../content/projects/*.mdx", { eager: true });
 
-function pathToSlug(filePath: string): string {
+const pathToSlug = (filePath: string): string => {
   return (
     filePath
       .split("/")
       .pop()
       ?.replace(/\.mdx?$/, "") ?? ""
   );
-}
+};
 
-function toArticleMetadata(fm: Record<string, unknown>, slug: string): ArticleMetadata {
+const toArticleMetadata = (fm: Record<string, unknown>, slug: string): ArticleMetadata => {
   return {
     title: typeof fm.title === "string" ? fm.title : "Untitled Article",
     description: typeof fm.description === "string" ? fm.description : "",
@@ -53,9 +53,9 @@ function toArticleMetadata(fm: Record<string, unknown>, slug: string): ArticleMe
     slug,
     language: fm.language === "pl" ? "pl" : "en",
   };
-}
+};
 
-function toProjectMetadata(fm: Record<string, unknown>, slug: string): ProjectMetadata {
+const toProjectMetadata = (fm: Record<string, unknown>, slug: string): ProjectMetadata => {
   const validCategories = ["ai", "dev", "qa"] as const;
   const category = validCategories.find((c) => c === fm.category) ?? "dev";
   return {
@@ -70,7 +70,7 @@ function toProjectMetadata(fm: Record<string, unknown>, slug: string): ProjectMe
     slug,
     language: fm.language === "pl" ? "pl" : "en",
   };
-}
+};
 
 export function getArticleSlugs(): string[] {
   return Object.keys(blogModules).map(pathToSlug);
@@ -80,18 +80,14 @@ export function getProjectSlugs(): string[] {
   return Object.keys(projectModules).map(pathToSlug);
 }
 
-export function getArticleBySlug(
-  slug: string,
-): { metadata: ArticleMetadata; Component: ComponentType } | null {
+export function getArticleBySlug(slug: string) {
   const key = Object.keys(blogModules).find((k) => pathToSlug(k) === slug);
   if (!key) return null;
   const mod = blogModules[key];
   return { metadata: toArticleMetadata(mod.frontmatter, slug), Component: mod.default };
 }
 
-export function getProjectBySlug(
-  slug: string,
-): { metadata: ProjectMetadata; Component: ComponentType } | null {
+export function getProjectBySlug(slug: string) {
   const key = Object.keys(projectModules).find((k) => pathToSlug(k) === slug);
   if (!key) return null;
   const mod = projectModules[key];

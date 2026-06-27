@@ -8,7 +8,7 @@ import { HeroTitle } from "./HeroTitle";
 import { HeroBio } from "./HeroBio";
 import { HeroActions } from "./HeroActions";
 import { HeroSpotifyNowPlaying } from "./HeroSpotifyNowPlaying";
-import { TechStackShowcase } from "./TechStackShowcase";
+import { TechStackShowcase } from "../TechStackShowcase";
 import type { LastFmNowPlaying } from "@/lib/lastfm";
 
 interface HeroProps {

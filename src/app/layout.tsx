@@ -7,7 +7,6 @@ import { Footer } from "@/components/layout/Footer";
 import { SlideScrollHandler } from "@/components/layout/SlideScrollHandler";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { getProjects, getArticles } from "@/lib/mdx";
-import { getLastFmNowPlaying } from "@/lib/lastfm";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,15 +30,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const nowPlaying = await getLastFmNowPlaying().catch(() => ({
-    isPlaying: false,
-    track: null,
-    artist: null,
-    url: null,
-    source: "fallback" as const,
-    updatedAt: new Date().toISOString(),
-  }));
-
   return (
     <html
       lang="en"
@@ -52,7 +42,7 @@ export default async function RootLayout({
             <SlideScrollHandler />
             <Navbar />
             <Footer />
-            <AppLayout projects={getProjects()} articles={getArticles()} nowPlaying={nowPlaying}>
+            <AppLayout projects={getProjects()} articles={getArticles()}>
               {children}
             </AppLayout>
           </LanguageProvider>

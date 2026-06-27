@@ -1,4 +1,4 @@
-import { getLastFmNowPlaying } from "@/lib/lastfm";
+import { createFallbackLastFmNowPlaying, getLastFmNowPlaying } from "@/lib/lastfm";
 
 export const runtime = "nodejs";
 
@@ -24,17 +24,6 @@ export async function GET() {
   } catch (error) {
     console.error(error);
 
-    return jsonResponse(
-      {
-        isPlaying: false,
-        track: null,
-        artist: null,
-        url: null,
-        source: "fallback",
-        updatedAt: new Date().toISOString(),
-      },
-      "BYPASS",
-      502,
-    );
+    return jsonResponse(createFallbackLastFmNowPlaying(), "BYPASS", 502);
   }
 }

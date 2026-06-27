@@ -30,13 +30,24 @@ type LastFmCacheEntry = {
 const LASTFM_CACHE_TTL_MS = 180_000;
 let lastFmCache: LastFmCacheEntry | null = null;
 
-function pickCurrentTrack(tracks: LastFmTrack[] | LastFmTrack | undefined) {
+export function createFallbackLastFmNowPlaying(): LastFmNowPlaying {
+  return {
+    isPlaying: false,
+    track: null,
+    artist: null,
+    url: null,
+    source: "fallback",
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+const pickCurrentTrack = (tracks: LastFmTrack[] | LastFmTrack | undefined) => {
   if (!tracks) {
     return null;
   }
 
   return Array.isArray(tracks) ? (tracks[0] ?? null) : tracks;
-}
+};
 
 export async function getLastFmNowPlaying(): Promise<LastFmNowPlaying> {
   if (lastFmCache && lastFmCache.data.isPlaying && Date.now() < lastFmCache.expiresAt) {
@@ -55,14 +66,7 @@ export async function getLastFmNowPlaying(): Promise<LastFmNowPlaying> {
   const apiKey = env.LASTFM_API_KEY;
 
   if (!user || !apiKey) {
-    return {
-      isPlaying: false,
-      track: null,
-      artist: null,
-      url: null,
-      source: "fallback",
-      updatedAt: new Date().toISOString(),
-    };
+    return createFallbackLastFmNowPlaying();
   }
 
   const params = new URLSearchParams({

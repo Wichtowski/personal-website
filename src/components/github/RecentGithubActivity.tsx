@@ -14,21 +14,21 @@ interface RecentGithubActivityProps {
   language: Language;
 }
 
-function getRepoDisplayName(repoName: string) {
+const getRepoDisplayName = (repoName: string) => {
   return repoName.includes("/") ? repoName.split("/").at(-1) : repoName;
-}
+};
 
-function formatEventType(type: string) {
+const formatEventType = (type: string) => {
   return type.replace("Event", "");
-}
+};
 
-function formatCommitSha(commitSha: string) {
+const formatCommitSha = (commitSha: string) => {
   if (!commitSha || commitSha.startsWith("#")) {
     return commitSha;
   }
 
   return commitSha.length > 7 ? commitSha.slice(0, 7) : commitSha;
-}
+};
 
 export function RecentGithubActivity({
   activities,
