@@ -32,10 +32,34 @@
   --font-mono: var(--font-geist-mono);
 }
 
+@keyframes ticker {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), sans-serif;
+}
+
+.not-found-scene {
+  background:
+    radial-gradient(circle at top, rgba(109, 40, 217, 0.16), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(109, 40, 217, 0.1), transparent 24%),
+    linear-gradient(180deg, #eee5f6, #e5daf2 58%, #dbcee9);
+}
+
+.dark .not-found-scene {
+  background:
+    radial-gradient(circle at top, rgba(139, 92, 246, 0.15), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.06), transparent 24%),
+    linear-gradient(180deg, rgba(3, 3, 3, 0.98), rgba(8, 8, 10, 0.96));
 }
 
 button,
