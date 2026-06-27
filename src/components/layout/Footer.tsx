@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Mail } from "lucide-react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
@@ -27,7 +28,26 @@ const socials = [
 
 export function Footer() {
   const pathname = usePathname();
+  const [isNotFoundPage, setIsNotFoundPage] = useState(false);
+
+  useEffect(() => {
+    const syncNotFoundState = () => {
+      setIsNotFoundPage(document.body.classList.contains("not-found-page"));
+    };
+
+    syncNotFoundState();
+
+    const observer = new MutationObserver(syncNotFoundState);
+    observer.observe(document.body, {
+      attributeFilter: ["class"],
+      attributes: true,
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   if (pathname === "/contact") return null;
+  if (isNotFoundPage) return null;
 
   return (
     <footer className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/30 bg-background/80 backdrop-blur-md">

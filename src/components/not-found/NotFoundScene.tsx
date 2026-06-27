@@ -12,6 +12,8 @@ import { useThemeColors } from "../dice/diceThemeColors";
 
 export function NotFoundScene() {
   const [mode, setMode] = useState<ThemeMode | null>(null);
+  const [diceTotal, setDiceTotal] = useState<number | null>(null);
+  const [diceSettled, setDiceSettled] = useState(false);
   const colors = useThemeColors(mode ?? "dark");
   const { t } = useLanguage();
 
@@ -19,8 +21,12 @@ export function NotFoundScene() {
     const syncMode = () => {
       setMode(document.documentElement.classList.contains("dark") ? "dark" : "light");
     };
+    const syncFooterVisibility = () => {
+      document.body.classList.add("not-found-page");
+    };
 
     const timeout = setTimeout(syncMode, 0);
+    syncFooterVisibility();
     const observer = new MutationObserver(syncMode);
 
     observer.observe(document.documentElement, {
@@ -31,6 +37,7 @@ export function NotFoundScene() {
     return () => {
       clearTimeout(timeout);
       observer.disconnect();
+      document.body.classList.remove("not-found-page");
     };
   }, []);
 
@@ -84,6 +91,20 @@ export function NotFoundScene() {
         </div>
       </div>
 
+      <div className="pointer-events-none absolute bottom-6 left-1/2 z-30 w-[min(20rem,calc(100vw-2rem))] -translate-x-1/2 sm:bottom-8">
+        <div className="rounded-[1.5rem] border border-white/10 bg-black/52 px-5 py-4 text-center shadow-[0_18px_60px_rgba(0,0,0,0.28)] backdrop-blur-xl dark:bg-white/8">
+          <p className="text-[0.63rem] font-mono uppercase tracking-[0.42em] text-primary/80">
+            {t.notFound.rollLabel}
+          </p>
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
+            {diceSettled && diceTotal !== null ? diceTotal : "…"}
+          </p>
+          <p className="mt-1 text-xs leading-5 text-foreground/62">
+            {diceSettled ? "" : t.notFound.rollPending}
+          </p>
+        </div>
+      </div>
+
       <div className="absolute inset-0 z-0">
         {mode ? (
           <Canvas
@@ -96,7 +117,12 @@ export function NotFoundScene() {
             }}
             style={{ backgroundColor: mode === "dark" ? "#050507" : "#eee5f6" }}
           >
-            <DiceStage mode={mode} colors={colors} />
+            <DiceStage
+              mode={mode}
+              colors={colors}
+              onTotalChange={setDiceTotal}
+              onSettledChange={setDiceSettled}
+            />
           </Canvas>
         ) : (
           <div className="h-full w-full" />

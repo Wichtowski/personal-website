@@ -4,10 +4,28 @@ import { DieSpec } from "./types";
 import { FACE_VALUES, WORLD_UP } from "./consts";
 import { createGeometry, extractD10Faces, extractFaces } from "./geometry";
 
-export function getFacesForSpec(spec: DieSpec) {
-  const geometry = createGeometry(spec.geometry);
+const faceCache = new Map<DieSpec["kind"], ReturnType<typeof extractFaces>>();
 
-  return spec.kind === "d10" ? extractD10Faces() : extractFaces(geometry);
+export function getFacesForSpec(spec: DieSpec) {
+  const cachedFaces = faceCache.get(spec.kind);
+  if (cachedFaces) {
+    return cachedFaces;
+  }
+
+  const faces =
+    spec.kind === "d10"
+      ? extractD10Faces()
+      : (() => {
+          const geometry = createGeometry(spec.geometry);
+          const extractedFaces = extractFaces(geometry);
+
+          geometry.dispose();
+          return extractedFaces;
+        })();
+
+  faceCache.set(spec.kind, faces);
+
+  return faces;
 }
 
 export function getTopValueForBody(body: RapierRigidBody, spec: DieSpec) {
@@ -16,15 +34,16 @@ export function getTopValueForBody(body: RapierRigidBody, spec: DieSpec) {
 
   const faces = getFacesForSpec(spec);
   const values = FACE_VALUES[spec.kind];
+  const takeDownValue = spec.kind === "d4";
 
   let bestIndex = 0;
-  let bestDot = -Infinity;
+  let bestDot = takeDownValue ? Infinity : -Infinity;
 
   faces.slice(0, values.length).forEach((face, index) => {
     const worldNormal = face.normal.clone().applyQuaternion(quaternion);
     const dot = worldNormal.dot(WORLD_UP);
 
-    if (dot > bestDot) {
+    if ((takeDownValue && dot < bestDot) || (!takeDownValue && dot > bestDot)) {
       bestDot = dot;
       bestIndex = index;
     }

@@ -1,18 +1,23 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ThreeEvent, useThree } from "@react-three/fiber";
+import { ThreeEvent, useFrame, useThree } from "@react-three/fiber";
 import { Physics, CuboidCollider, RapierRigidBody, RigidBody } from "@react-three/rapier";
 import { MathUtils, Plane, PerspectiveCamera, Vector2, Vector3 } from "three";
 import { DICE } from "../dice/consts";
 import { ThemeMode, DragState } from "../dice/types";
 import { Die } from "../dice/Die";
+import { getTopValueForBody } from "./topValue";
 import { useThemeColors } from "./diceThemeColors";
 
 export function DiceStage({
   mode,
   colors,
+  onTotalChange,
+  onSettledChange,
 }: {
   mode: ThemeMode;
   colors: ReturnType<typeof useThemeColors>;
+  onTotalChange?: (total: number | null) => void;
+  onSettledChange?: (isSettled: boolean) => void;
 }) {
   const bodyRefs = useRef<Record<number, RapierRigidBody | null>>({});
   const dragRef = useRef<DragState>({
@@ -28,6 +33,9 @@ export function DiceStage({
   const [draggingId, setDraggingId] = useState<number | null>(null);
   const pointerNdc = useRef(new Vector2());
   const dragTarget = useRef(new Vector3());
+  const stillSinceRef = useRef<number | null>(null);
+  const settledRef = useRef(false);
+  const totalRef = useRef<number | null>(null);
   const perspectiveCamera = camera as PerspectiveCamera;
   const distanceToOrigin = Math.abs(perspectiveCamera.position.z);
   const halfVisibleHeight = Math.tan((perspectiveCamera.fov * Math.PI) / 360) * distanceToOrigin;
@@ -42,6 +50,9 @@ export function DiceStage({
   const playCeiling = 9.2;
   const wallThickness = 0.4;
   const dragPadding = 0.85;
+  const rollingLinearThreshold = 0.14;
+  const rollingAngularThreshold = 0.55;
+  const settleDelayMs = 240;
   const spawnPositions = useMemo<[number, number, number][]>(() => {
     const safeLeft = -playHalfWidth + 0.96;
     const safeRight = playHalfWidth - 1.0;
@@ -65,6 +76,81 @@ export function DiceStage({
       [middleX, 8.2, frontZ],
     ];
   }, [playBackDepth, playFrontDepth, playHalfWidth]);
+
+  useFrame(() => {
+    const bodies = DICE.reduce<Array<{ spec: (typeof DICE)[number]; body: RapierRigidBody }>>(
+      (accumulator, spec, index) => {
+        const body = bodyRefs.current[index];
+
+        if (body) {
+          accumulator.push({ spec, body });
+        }
+
+        return accumulator;
+      },
+      [],
+    );
+
+    if (bodies.length === 0) {
+      return;
+    }
+
+    const isStill =
+      draggingId === null &&
+      bodies.every(({ body }) => {
+        const linearVelocity = body.linvel();
+        const angularVelocity = body.angvel();
+
+        return (
+          Math.hypot(linearVelocity.x, linearVelocity.y, linearVelocity.z) <=
+            rollingLinearThreshold &&
+          Math.hypot(angularVelocity.x, angularVelocity.y, angularVelocity.z) <=
+            rollingAngularThreshold
+        );
+      });
+
+    const now = performance.now();
+
+    if (!isStill) {
+      stillSinceRef.current = null;
+
+      if (settledRef.current) {
+        settledRef.current = false;
+        onSettledChange?.(false);
+      }
+
+      if (totalRef.current !== null) {
+        totalRef.current = null;
+        onTotalChange?.(null);
+      }
+
+      return;
+    }
+
+    if (stillSinceRef.current === null) {
+      stillSinceRef.current = now;
+      return;
+    }
+
+    if (now - stillSinceRef.current < settleDelayMs) {
+      return;
+    }
+
+    const nextTotal = bodies.reduce(
+      (sum, { spec, body }) => sum + getTopValueForBody(body, spec),
+      0,
+    );
+
+    if (!settledRef.current) {
+      settledRef.current = true;
+      onSettledChange?.(true);
+    }
+
+    if (totalRef.current !== nextTotal) {
+      totalRef.current = nextTotal;
+      onTotalChange?.(nextTotal);
+    }
+  });
 
   useEffect(() => {
     const handleMove = (event: PointerEvent) => {
