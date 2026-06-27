@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { useLanguage } from "@/context/LanguageContext";
-import { TICKER_SEPARATOR } from "../dice/consts";
+import { DICE, TICKER_SEPARATOR } from "../dice/consts";
 import { ThemeMode } from "../dice/types";
 import { DiceStage } from "../dice/DiceStage";
 import { useThemeColors } from "../dice/diceThemeColors";
@@ -14,6 +14,7 @@ export function NotFoundScene() {
   const [mode, setMode] = useState<ThemeMode | null>(null);
   const [diceTotal, setDiceTotal] = useState<number | null>(null);
   const [diceSettled, setDiceSettled] = useState(false);
+  const [diceValues, setDiceValues] = useState<number[] | null>(null);
   const colors = useThemeColors(mode ?? "dark");
   const { t } = useLanguage();
 
@@ -91,17 +92,41 @@ export function NotFoundScene() {
         </div>
       </div>
 
-      <div className="pointer-events-none absolute bottom-6 left-1/2 z-30 w-[min(20rem,calc(100vw-2rem))] -translate-x-1/2 sm:bottom-8">
-        <div className="rounded-[1.5rem] border border-white/10 bg-black/52 px-5 py-4 text-center shadow-[0_18px_60px_rgba(0,0,0,0.28)] backdrop-blur-xl dark:bg-white/8">
-          <p className="text-[0.63rem] font-mono uppercase tracking-[0.42em] text-primary/80">
+      <div className="pointer-events-none absolute left-4 top-1/2 z-30 w-[min(11rem,calc(100vw-2rem))] -translate-y-1/2 sm:left-6 lg:left-8">
+        <div className="rounded-[1.25rem] border border-white/10 bg-black/52 px-3 py-3 text-left shadow-[0_14px_42px_rgba(0,0,0,0.24)] backdrop-blur-xl dark:bg-white/8">
+          <p className="text-[0.56rem] font-mono uppercase tracking-[0.38em] text-primary/80">
+            {t.notFound.rollBreakdown}
+          </p>
+          <div className="mt-2 space-y-1.5">
+            {DICE.map((die, index) => {
+              const value = diceSettled && diceValues ? diceValues[index] : null;
+
+              return (
+                <div
+                  key={die.kind}
+                  className="flex items-center justify-between gap-2 text-[0.7rem]"
+                >
+                  <span className="font-mono text-foreground/62">{die.kind.toUpperCase()}</span>
+                  <span className="text-sm font-semibold tracking-tight text-foreground">
+                    {value ?? "…"}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div className="mt-2 rounded-[1.25rem] border border-white/10 bg-black/52 px-3 py-3 text-left shadow-[0_14px_42px_rgba(0,0,0,0.24)] backdrop-blur-xl dark:bg-white/8">
+          <p className="text-[0.56rem] font-mono uppercase tracking-[0.38em] text-primary/80">
             {t.notFound.rollLabel}
           </p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
-            {diceSettled && diceTotal !== null ? diceTotal : "…"}
-          </p>
-          <p className="mt-1 text-xs leading-5 text-foreground/62">
-            {diceSettled ? "" : t.notFound.rollPending}
-          </p>
+          <div className="mt-1 flex items-end justify-between gap-3">
+            <span className="text-[0.68rem] leading-4 text-foreground/62">
+              {diceSettled ? "" : t.notFound.rollPending}
+            </span>
+            <span className="text-2xl font-semibold tracking-tight text-foreground">
+              {diceSettled && diceTotal !== null ? diceTotal : "…"}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -122,6 +147,7 @@ export function NotFoundScene() {
               colors={colors}
               onTotalChange={setDiceTotal}
               onSettledChange={setDiceSettled}
+              onValuesChange={setDiceValues}
             />
           </Canvas>
         ) : (

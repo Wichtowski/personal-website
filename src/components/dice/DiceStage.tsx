@@ -13,11 +13,13 @@ export function DiceStage({
   colors,
   onTotalChange,
   onSettledChange,
+  onValuesChange,
 }: {
   mode: ThemeMode;
   colors: ReturnType<typeof useThemeColors>;
   onTotalChange?: (total: number | null) => void;
   onSettledChange?: (isSettled: boolean) => void;
+  onValuesChange?: (values: number[] | null) => void;
 }) {
   const bodyRefs = useRef<Record<number, RapierRigidBody | null>>({});
   const dragRef = useRef<DragState>({
@@ -36,6 +38,7 @@ export function DiceStage({
   const stillSinceRef = useRef<number | null>(null);
   const settledRef = useRef(false);
   const totalRef = useRef<number | null>(null);
+  const valuesRef = useRef<number[] | null>(null);
   const perspectiveCamera = camera as PerspectiveCamera;
   const distanceToOrigin = Math.abs(perspectiveCamera.position.z);
   const halfVisibleHeight = Math.tan((perspectiveCamera.fov * Math.PI) / 360) * distanceToOrigin;
@@ -124,6 +127,11 @@ export function DiceStage({
         onTotalChange?.(null);
       }
 
+      if (valuesRef.current !== null) {
+        valuesRef.current = null;
+        onValuesChange?.(null);
+      }
+
       return;
     }
 
@@ -136,10 +144,8 @@ export function DiceStage({
       return;
     }
 
-    const nextTotal = bodies.reduce(
-      (sum, { spec, body }) => sum + getTopValueForBody(body, spec),
-      0,
-    );
+    const nextValues = bodies.map(({ spec, body }) => getTopValueForBody(body, spec));
+    const nextTotal = nextValues.reduce((sum, value) => sum + value, 0);
 
     if (!settledRef.current) {
       settledRef.current = true;
@@ -149,6 +155,15 @@ export function DiceStage({
     if (totalRef.current !== nextTotal) {
       totalRef.current = nextTotal;
       onTotalChange?.(nextTotal);
+    }
+
+    if (
+      valuesRef.current === null ||
+      valuesRef.current.length !== nextValues.length ||
+      valuesRef.current.some((value, index) => value !== nextValues[index])
+    ) {
+      valuesRef.current = nextValues;
+      onValuesChange?.(nextValues);
     }
   });
 

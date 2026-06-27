@@ -89,6 +89,7 @@ export interface TranslationDict {
     description: string;
     backHome: string;
     rollLabel: string;
+    rollBreakdown: string;
     rollPending: string;
   };
   theme: {
@@ -242,6 +243,7 @@ export const dictionaries: Record<Language, TranslationDict> = {
         "The 404 is still here, but the destination is not. Grab the dice, throw them around and head back home.",
       backHome: "Back home",
       rollLabel: "Roll total",
+      rollBreakdown: "Dice values",
       rollPending: "Counting the result...",
     },
     theme: {
@@ -394,6 +396,7 @@ export const dictionaries: Record<Language, TranslationDict> = {
         "Kod 404 nadal tu jest, ale celu już nie ma. Złap kości, porzucaj nimi i wróć na stronę główną.",
       backHome: "Wróć do strony głównej",
       rollLabel: "Suma rzutu",
+      rollBreakdown: "Wyniki kostek",
       rollPending: "Liczenie wyniku...",
     },
     theme: {
