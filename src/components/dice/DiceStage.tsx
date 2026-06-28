@@ -53,6 +53,7 @@ export function DiceStage({
   const playCeiling = 9.2;
   const wallThickness = 0.4;
   const dragPadding = 0.85;
+  const gravity: [number, number, number] = [0, -18.5, 0];
   const rollingLinearThreshold = 0.14;
   const rollingAngularThreshold = 0.55;
   const settleDelayMs = 240;
@@ -333,7 +334,7 @@ export function DiceStage({
       <directionalLight position={[-10, -2, 6]} intensity={0.8} color={colors.accent} />
       <pointLight position={[0, 6, 8]} intensity={1.6} color={colors.accent} distance={28} />
 
-      <Physics gravity={[0, -10.8, 0]} colliders={false}>
+      <Physics gravity={gravity} colliders={false}>
         <RigidBody type="fixed" colliders={false}>
           <CuboidCollider
             args={[playHalfWidth, 0.4, playDepthHalfExtent]}

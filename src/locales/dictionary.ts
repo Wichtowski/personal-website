@@ -25,11 +25,36 @@ export interface TranslationDict {
   techStack: {
     eyebrow: string;
     heading: string;
+    groups: Array<{
+      key:
+        | "ai-ml"
+        | "application-engineering"
+        | "data-infrastructure"
+        | "quality-workflow"
+        | "environment";
+      title: string;
+      description?: string;
+    }>;
     categories: Array<{
       key: string;
+      group:
+        | "ai-ml"
+        | "application-engineering"
+        | "data-infrastructure"
+        | "quality-workflow"
+        | "environment";
       title: string;
-      summary: string;
-      icon: "monitor" | "sparkles" | "server" | "layers" | "wrench" | "brain" | "scan" | "database";
+      icon:
+        | "monitor"
+        | "sparkles"
+        | "server"
+        | "layers"
+        | "wrench"
+        | "brain"
+        | "scan"
+        | "database"
+        | "shield";
+      summary?: string;
     }>;
   };
   github: {
@@ -125,60 +150,94 @@ export const dictionaries: Record<Language, TranslationDict> = {
     techStack: {
       eyebrow: "tech stack",
       heading: "Tools I actually use",
+      groups: [
+        {
+          key: "ai-ml",
+          title: "AI & Machine Learning",
+        },
+        {
+          key: "application-engineering",
+          title: "Application Engineering",
+        },
+        {
+          key: "data-infrastructure",
+          title: "Data & Infrastructure",
+        },
+        {
+          key: "quality-workflow",
+          title: "Quality & Workflow",
+        },
+        {
+          key: "environment",
+          title: "Environment",
+        },
+      ],
       categories: [
         {
           key: "llms",
+          group: "ai-ml",
           title: "LLMs",
-          summary: "The models, assistants, and speech tooling I reach for first.",
           icon: "sparkles",
         },
         {
           key: "computer-vision",
+          group: "ai-ml",
           title: "Computer Vision",
-          summary: "Object detection, annotation, and applied vision work.",
           icon: "scan",
         },
         {
           key: "deep-learning",
+          group: "ai-ml",
           title: "Deep Learning",
-          summary: "Model development, experimentation, and fine-tuning.",
           icon: "brain",
         },
         {
           key: "data-science",
+          group: "ai-ml",
           title: "Data Science",
-          summary: "Numerical and tabular analysis tools.",
           icon: "database",
         },
         {
-          key: "backend-storage",
-          title: "Backend & Storage",
-          summary: "APIs, workers, persistence, and infra that scales.",
+          key: "backend",
+          group: "application-engineering",
+          title: "Backend",
           icon: "server",
         },
         {
+          key: "storage",
+          group: "data-infrastructure",
+          title: "Storage",
+          icon: "database",
+        },
+        {
+          key: "retrieval",
+          group: "ai-ml",
+          title: "Retrieval",
+          icon: "scan",
+        },
+        {
+          key: "languages-runtimes",
+          group: "application-engineering",
+          title: "Languages & Runtimes",
+          icon: "monitor",
+        },
+        {
+          key: "developer-tools-platforms",
+          group: "application-engineering",
+          title: "Developer Tools & Platforms",
+          icon: "wrench",
+        },
+        {
           key: "frontend",
+          group: "application-engineering",
           title: "Frontend",
-          summary: "Interfaces, app shells, and build tooling I ship with.",
           icon: "layers",
         },
         {
           key: "quality-delivery",
+          group: "quality-workflow",
           title: "Quality & Delivery",
-          summary: "Testing, static analysis, and release confidence.",
-          icon: "wrench",
-        },
-        {
-          key: "languages-tools",
-          title: "Languages & Tools",
-          summary: "The daily drivers behind the keyboard and in automation.",
-          icon: "wrench",
-        },
-        {
-          key: "current-os",
-          title: "Current OS",
-          summary: "The desktop setup I live in every day.",
-          icon: "monitor",
+          icon: "shield",
         },
       ],
     },
@@ -277,60 +336,88 @@ export const dictionaries: Record<Language, TranslationDict> = {
     techStack: {
       eyebrow: "Wybrany stack",
       heading: "Narzędzia, których używam",
+      groups: [
+        {
+          key: "ai-ml",
+          title: "AI i Machine Learning",
+        },
+        {
+          key: "application-engineering",
+          title: "Inżynieria aplikacji",
+        },
+        {
+          key: "data-infrastructure",
+          title: "Dane i infrastruktura",
+        },
+        {
+          key: "quality-workflow",
+          title: "Jakość i workflow",
+        },
+        {
+          key: "environment",
+          title: "Środowisko",
+        },
+      ],
       categories: [
         {
           key: "computer-vision",
+          group: "ai-ml",
           title: "Widzenie komputerowe",
-          summary: "Detekcja obiektów, anotacja i praktyczne projekty CV.",
           icon: "scan",
         },
         {
           key: "deep-learning",
+          group: "ai-ml",
           title: "Deep Learning",
-          summary: "Budowanie, eksperymentowanie i fine-tuning modeli.",
           icon: "brain",
         },
         {
           key: "data-science",
+          group: "ai-ml",
           title: "Data Science",
-          summary: "Narzędzia do analizy numerycznej i tabelarycznej.",
           icon: "database",
         },
         {
-          key: "llms",
-          title: "LLM-y",
-          summary: "Modele, asystenci i narzędzia głosowe, po które sięgam jako pierwszych.",
-          icon: "sparkles",
-        },
-        {
-          key: "backend-storage",
-          title: "Backend i Bazy",
-          summary: "API, workerów, zapis danych i infrastruktura pod skalę.",
+          key: "backend",
+          group: "application-engineering",
+          title: "Backend",
           icon: "server",
         },
         {
+          key: "storage",
+          group: "data-infrastructure",
+          title: "Bazy i Storage",
+          icon: "database",
+        },
+        {
+          key: "retrieval",
+          group: "ai-ml",
+          title: "Retrieval",
+          icon: "scan",
+        },
+        {
+          key: "languages-runtimes",
+          group: "application-engineering",
+          title: "Języki i środowiska uruchomieniowe",
+          icon: "monitor",
+        },
+        {
+          key: "developer-tools-platforms",
+          group: "application-engineering",
+          title: "Narzędzia deweloperskie i platformy",
+          icon: "wrench",
+        },
+        {
           key: "frontend",
+          group: "application-engineering",
           title: "Frontend",
-          summary: "Interfejsy, app shelle i narzędzia, z którymi dowożę UI.",
           icon: "layers",
         },
         {
           key: "quality-delivery",
+          group: "quality-workflow",
           title: "Jakość i Delivery",
-          summary: "Testy, statyczna analiza i pewność przy wdrożeniach.",
-          icon: "wrench",
-        },
-        {
-          key: "languages-tools",
-          title: "Języki i Narzędzia",
-          summary: "Codzienne narzędzia spod klawiatury i automatyzacji.",
-          icon: "wrench",
-        },
-        {
-          key: "current-os",
-          title: "Używany OS",
-          summary: "Codzienne środowisko, w którym pracuję.",
-          icon: "monitor",
+          icon: "shield",
         },
       ],
     },

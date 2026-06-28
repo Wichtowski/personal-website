@@ -20,12 +20,17 @@ function isAtScrollBoundary(el: HTMLElement, deltaY: number): boolean {
   return el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
 }
 
+function isAtBottomBoundary(el: HTMLElement): boolean {
+  return el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
+}
+
 export function useSlideScroll() {
   const router = useRouter();
   const pathname = usePathname() ?? "/";
 
   useEffect(() => {
     let lastFlip = 0;
+    let bottomGuardStartedAt = 0;
 
     const navigate = (dir: number) => {
       const now = Date.now();
@@ -48,7 +53,26 @@ export function useSlideScroll() {
       if (currentIdx === -1) return;
 
       const scrollable = findScrollableParent(e.target as HTMLElement);
-      if (scrollable && !isAtScrollBoundary(scrollable, e.deltaY)) return;
+      if (scrollable && !isAtScrollBoundary(scrollable, e.deltaY)) {
+        bottomGuardStartedAt = 0;
+        return;
+      }
+
+      if (scrollable && e.deltaY > 0 && isAtBottomBoundary(scrollable)) {
+        const now = Date.now();
+        if (!bottomGuardStartedAt) {
+          bottomGuardStartedAt = now;
+          e.preventDefault();
+          return;
+        }
+
+        if (now - bottomGuardStartedAt < 1000) {
+          e.preventDefault();
+          return;
+        }
+      } else {
+        bottomGuardStartedAt = 0;
+      }
 
       e.preventDefault();
       navigate(e.deltaY > 0 ? 1 : -1);

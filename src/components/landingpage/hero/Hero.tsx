@@ -49,7 +49,7 @@ export function Hero({ nowPlaying }: HeroProps) {
         {/* Hero Intro */}
         <div className="space-y-6 flex flex-col items-center text-center hero-intro">
           {/* Title Heading */}
-          <HeroTitle greeting={t.hero.greeting} role={t.hero.role} />
+          <HeroTitle role={t.hero.role} />
 
           {/* Biography Paragraph */}
           <HeroBio bio={t.hero.bio} />

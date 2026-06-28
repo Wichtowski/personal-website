@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { FaSpotify } from "react-icons/fa";
 import { useLanguage } from "@/context/LanguageContext";
 import type { LastFmNowPlaying } from "@/lib/lastfm";
+import { CatsModal } from "./CatsModal";
 
 interface HeroSpotifyNowPlayingProps {
   nowPlaying?: LastFmNowPlaying;
@@ -12,6 +13,7 @@ interface HeroSpotifyNowPlayingProps {
 
 export function HeroSpotifyNowPlaying({ nowPlaying }: HeroSpotifyNowPlayingProps) {
   const { t } = useLanguage();
+  const [isCatsModalOpen, setIsCatsModalOpen] = React.useState(false);
   const safeNowPlaying: LastFmNowPlaying = nowPlaying ?? {
     isPlaying: false,
     track: null,
@@ -23,68 +25,71 @@ export function HeroSpotifyNowPlaying({ nowPlaying }: HeroSpotifyNowPlayingProps
 
   const hasTrack = Boolean(safeNowPlaying.track);
   const isLive = safeNowPlaying.isPlaying && hasTrack;
-  const title = hasTrack
-    ? isLive
-      ? `${t.hero.listeningTo} ${safeNowPlaying.track}`
-      : `${t.hero.lastPlayed} ${safeNowPlaying.track}`
+  const title = isLive
+    ? `${t.hero.listeningTo} ${safeNowPlaying.track}`
     : `${t.hero.listeningTo} ${t.hero.idleTrack}`;
-  const subtitle = hasTrack ? (safeNowPlaying.artist ?? t.hero.lastFmLabel) : t.hero.idleArtist;
+  const subtitle = isLive ? (safeNowPlaying.artist ?? t.hero.lastFmLabel) : t.hero.idleArtist;
+
+  const cardClassName = isLive
+    ? "group inline-flex min-w-[18rem] items-center gap-4 rounded-2xl border border-emerald-400/35 bg-emerald-400/12 px-5 py-4 text-sm text-emerald-950 shadow-[0_0_0_1px_rgba(16,185,129,0.08),0_10px_30px_rgba(16,185,129,0.12)] backdrop-blur-md dark:text-emerald-50"
+    : "group inline-flex min-w-[18rem] items-center gap-4 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-5 py-4 text-sm text-emerald-900 shadow-[0_0_0_1px_rgba(16,185,129,0.06),0_10px_30px_rgba(16,185,129,0.10)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-400/45 hover:bg-emerald-400/14 hover:text-emerald-950 dark:text-emerald-50";
 
   return (
     <div className="w-full flex flex-col items-center gap-4">
-      <motion.a
-        href="https://open.spotify.com/user/11144475049"
-        target="_blank"
-        rel="noopener noreferrer"
-        className={
-          isLive
-            ? "group inline-flex min-w-[18rem] items-center gap-4 rounded-2xl border border-emerald-400/35 bg-emerald-400/12 px-5 py-4 text-sm text-emerald-950 shadow-[0_0_0_1px_rgba(16,185,129,0.08),0_10px_30px_rgba(16,185,129,0.12)] backdrop-blur-md dark:text-emerald-50"
-            : "group inline-flex min-w-[18rem] items-center gap-4 rounded-2xl border border-border/40 bg-background/80 px-5 py-4 text-sm text-muted-foreground shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:bg-muted/60 hover:text-foreground"
-        }
-      >
-        <motion.span
-          animate={isLive ? { rotate: 360 } : undefined}
-          transition={
-            isLive
-              ? {
-                  duration: 10,
-                  repeat: Infinity,
-                  ease: "linear",
-                }
-              : undefined
-          }
-          className={
-            isLive
-              ? "shrink-0 text-emerald-600 dark:text-emerald-100"
-              : "shrink-0 text-foreground transition-colors duration-300 group-hover:text-primary"
-          }
+      {isLive ? (
+        <motion.a
+          href="https://open.spotify.com/user/11144475049"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cardClassName}
         >
-          <FaSpotify size={isLive ? 30 : 24} />
-        </motion.span>
-
-        <span className="flex min-w-0 flex-col items-start gap-0.5">
-          <span
-            className={
-              isLive
-                ? "truncate font-mono text-base sm:text-lg font-semibold"
-                : "truncate font-mono text-xs sm:text-sm"
-            }
+          <motion.span
+            animate={{ rotate: 360 }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+            className="shrink-0 text-emerald-600 dark:text-emerald-100"
           >
-            {title}
+            <FaSpotify size={30} />
+          </motion.span>
+
+          <span className="flex min-w-0 flex-col items-start gap-0.5">
+            <span className="truncate font-mono text-base font-semibold sm:text-lg">{title}</span>
+            {subtitle ? (
+              <span className="truncate font-mono text-[11px] uppercase tracking-[0.24em] text-emerald-700/80 dark:text-emerald-200/80">
+                {subtitle}
+              </span>
+            ) : null}
           </span>
-          {subtitle ? (
-            <span
-              className={
-                isLive
-                  ? "truncate font-mono text-[11px] uppercase tracking-[0.24em] text-emerald-700/80 dark:text-emerald-200/80"
-                  : "truncate font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground/70"
-              }
-            >
-              {subtitle}
+        </motion.a>
+      ) : (
+        <motion.button
+          type="button"
+          onClick={() => setIsCatsModalOpen(true)}
+          className={cardClassName}
+          aria-haspopup="dialog"
+          aria-expanded={isCatsModalOpen}
+        >
+          <motion.span className="shrink-0 text-emerald-700 transition-colors duration-300 group-hover:text-emerald-600 dark:text-emerald-200">
+            <FaSpotify size={24} />
+          </motion.span>
+
+          <span className="flex min-w-0 flex-col items-start gap-0.5">
+            <span className="truncate font-mono text-xs text-emerald-950 sm:text-sm dark:text-emerald-50">
+              {title}
             </span>
-          ) : null}
-        </span>
-      </motion.a>
+            {subtitle ? (
+              <span className="truncate font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-700/75 dark:text-emerald-200/75">
+                {subtitle}
+              </span>
+            ) : null}
+          </span>
+        </motion.button>
+      )}
+
+      <CatsModal open={isCatsModalOpen} onClose={() => setIsCatsModalOpen(false)} />
     </div>
   );
 }
