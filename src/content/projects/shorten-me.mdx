@@ -1,0 +1,95 @@
+---
+title: "Shorten Me"
+description: "I built a URL shortener with a historical Azure deployment pipeline that used Pulumi, GitHub Actions, Docker, Azure Container Registry, App Service, and Cosmos DB before the project moved to a Cloudflare Workers deployment."
+date: "2026-06-30"
+category: "dev"
+tags:
+  [
+    "URL Shortener",
+    "Pulumi",
+    "Azure",
+    "GitHub Actions",
+    "Docker",
+    "Cosmos DB",
+    "Cloudflare Workers",
+    "Vinext",
+  ]
+githubUrl: "https://github.com/Wichtowski/shorten"
+liveUrl: "https://shorten.oskarwichtowski.com"
+language: "en"
+---
+
+## Overview
+
+I built **Shorten Me** as a full-stack URL shortening service with accounts, anonymous usage limits, shortened URL management, and redirect handling.
+The project started as a college class project, so one of the most important parts was not only building the app, but also proving that it could be deployed through infrastructure as code and CI/CD.
+
+The current active version runs on **Cloudflare Workers** at `shorten.oskarwichtowski.com`.
+The Azure + Pulumi setup is now historical/reference infrastructure, but it is still the most interesting part of the original deployment story because it shows how I wired the app into a reproducible cloud pipeline.
+
+## What I Built
+
+The application is a **Vinext full-stack app** with API routes and a React UI.
+It supports signup, login, URL creation, account-specific URL lists, anonymous shortening, and redirect pages.
+
+The earlier Azure version used:
+
+- **Pulumi with Python** to provision Azure resources
+- **Azure Resource Groups** per environment
+- **Azure Cosmos DB** with SQL containers for users, URLs, and anonymous usage
+- **Azure Container Registry** for the frontend container image
+- **Azure App Service for Linux** to run the containerized app
+- **Application configuration** injected through App Service settings
+- **GitHub Actions** as the CI/CD orchestrator
+
+That setup made the deployment repeatable instead of relying on manual Azure Portal steps.
+
+## Pulumi Infrastructure
+
+The Pulumi program in `infra/__main__.py` defined the Azure side of the system.
+It created the resource group, Cosmos DB account, SQL database, containers, storage account, container registry, App Service plan, and Linux Web App.
+
+Pulumi stack names were used as part of the resource naming strategy, so development, staging, and production could each get their own isolated resources.
+The stack exported deployment outputs such as the resource group name, Cosmos DB endpoint, frontend app name, and container registry credentials.
+
+Those outputs were important because the application deployment did not hard-code Azure resource names.
+The deploy script read the current stack outputs and used them to build, push, and activate the frontend container.
+
+## Azure Deployment Pipeline
+
+The CI/CD pipeline was split into reusable GitHub Actions workflows.
+One workflow deployed infrastructure, another deployed the frontend, and an environment-level workflow chained them together so the frontend waited for infrastructure to finish first.
+
+The infrastructure workflow installed Python dependencies, authenticated to Azure, selected the Pulumi stack for the target environment, and ran `pulumi up --yes`.
+It used Azure service principal credentials, Pulumi configuration secrets, and the Azure provider environment variables needed by Pulumi.
+
+After that, the frontend workflow authenticated to Azure again, selected the same Pulumi stack, and ran the Python deployment script.
+That script pulled Pulumi outputs, logged into Azure Container Registry, built the Docker image with Cosmos DB configuration, pushed the image, updated the App Service container configuration, set App Service environment variables, and restarted the app.
+
+The result was a two-stage deployment process:
+
+- provision or update Azure infrastructure with Pulumi
+- build and publish the frontend container to the App Service created by that stack
+
+For staging and production, the deprecated release workflows also checked that deployment was triggered from a semantic version tag before calling the shared environment deployment workflow.
+That gave the project a simple promotion model where environments were explicit and production deploys were not just accidental branch pushes.
+
+## Why This Was Useful
+
+The biggest value of this setup was learning how application code, infrastructure code, secrets, and CI/CD fit together as one deployable system.
+Pulumi handled the cloud shape, GitHub Actions handled orchestration, Docker made the app portable, and Azure App Service provided the runtime target.
+
+It also forced me to think through practical deployment details: stack-specific configuration, resource outputs, secret handling, container registry authentication, environment isolation, and the difference between provisioning infrastructure and shipping an application version.
+
+## Current State
+
+The project has since moved away from the Azure class-project deployment path.
+The active version is now Cloudflare-native, with Cloudflare Workers and KV backing the newest API surface.
+
+I still keep the Azure + Pulumi code as a useful record of the original CI/CD architecture.
+It shows the progression from a class requirement into a more practical deployment model, and it captures the kind of infrastructure work I had to understand before simplifying the production setup.
+
+## Takeaway
+
+Shorten Me is a small product, but the deployment work made it a proper full-stack exercise.
+The most valuable part was designing the handoff between Pulumi, GitHub Actions, Docker, and Azure so the app could be recreated and deployed through code instead of manual steps.
