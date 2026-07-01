@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useLanguage } from "@/context/LanguageContext";
-import { setNavDirection } from "@/lib/navigation";
+import { useLanguage } from "@context/LanguageContext";
+import { setNavDirection } from "@lib/navigation";
 import { HeroTitle } from "./HeroTitle";
 import { HeroBio } from "./HeroBio";
 import { HeroActions } from "./HeroActions";
 import { HeroSpotifyNowPlaying } from "./HeroSpotifyNowPlaying";
 import { TechStackShowcase } from "../TechStackShowcase";
-import type { LastFmNowPlaying } from "@/lib/lastfm";
+import type { LastFmNowPlaying } from "@lib/lastfm";
 
 interface HeroProps {
   nowPlaying?: LastFmNowPlaying;

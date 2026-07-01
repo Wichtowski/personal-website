@@ -66,8 +66,8 @@ import {
   Zap,
   Wrench,
 } from "lucide-react";
-import { OpenRouterIcon } from "@/components/icons/openrouter-icon";
-import { QdrantIcon } from "@/components/icons/qdrant-icon";
+import { OpenRouterIcon } from "@components/icons/openrouter-icon";
+import { QdrantIcon } from "@components/icons/qdrant-icon";
 import { GiArtificialHive, GiThorHammer } from "react-icons/gi";
 import { FaAws } from "react-icons/fa";
 import { LuBrainCircuit } from "react-icons/lu";

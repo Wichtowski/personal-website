@@ -1,10 +1,11 @@
 import React from "react";
-import { getProjectSlugs, getProjectBySlug } from "@/lib/mdx";
+import { getProjectSlugs, getProjectBySlug } from "@lib/mdx";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Globe, Calendar, Tag } from "lucide-react";
 import Link from "next/link";
 import { FaGithub } from "react-icons/fa";
-import { dictionaries, Language } from "@/locales/dictionary";
+import { dictionaries, Language } from "@locales/dictionary";
+import { getStatusConfig } from "@lib/status";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -24,6 +25,7 @@ export default async function ProjectPage({ params }: PageProps) {
 
   const { metadata, Component } = project;
   const t = dictionaries[(metadata.language as Language) ?? "en"];
+  const statusConfig = getStatusConfig(metadata.status, metadata.language);
 
   return (
     <main className="h-full overflow-y-auto no-scrollbar py-24 bg-background">
@@ -39,9 +41,19 @@ export default async function ProjectPage({ params }: PageProps) {
 
         {/* Article Header */}
         <div className="border-b border-border/40 pb-8 mb-10">
-          <span className="text-xs font-mono font-bold text-primary bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-md uppercase tracking-wider mb-4 inline-block">
-            {metadata.category}
-          </span>
+          <div className="flex flex-wrap items-center gap-2.5 mb-4">
+            <span className="text-xs font-mono font-bold text-primary bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-md uppercase tracking-wider">
+              {metadata.category}
+            </span>
+            {statusConfig && (
+              <span
+                className={`text-xs font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-md border flex items-center gap-1.5 ${statusConfig.className}`}
+              >
+                <statusConfig.icon size={13} />
+                {statusConfig.label}
+              </span>
+            )}
+          </div>
           <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-foreground font-mono mb-4">
             {metadata.title}
           </h1>

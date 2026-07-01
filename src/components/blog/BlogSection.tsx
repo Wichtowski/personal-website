@@ -1,8 +1,8 @@
 "use client";
 
-import { useLanguage } from "@/context/LanguageContext";
-import { ArticleMetadata } from "@/lib/mdx";
-import { matchesArticleTag, normalizeArticleTag } from "@/lib/article-tags";
+import { useLanguage } from "@context/LanguageContext";
+import { ArticleMetadata } from "@lib/mdx";
+import { matchesArticleTag, normalizeArticleTag } from "@lib/article-tags";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {

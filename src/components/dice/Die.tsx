@@ -5,7 +5,7 @@ import { DieSpec } from "./types";
 import { RapierRigidBody, RigidBody } from "@react-three/rapier";
 import { createGeometry, extractD10Faces, extractFaces } from "./geometry";
 import { FACE_VALUES, FORWARD } from "./consts";
-import { useFaceTextures } from "@/hooks/useFaceTextures";
+import { useFaceTextures } from "@hooks/useFaceTextures";
 
 export function Die({
   spec,

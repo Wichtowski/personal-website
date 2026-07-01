@@ -3,8 +3,8 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { FaSpotify } from "react-icons/fa";
-import { useLanguage } from "@/context/LanguageContext";
-import type { LastFmNowPlaying } from "@/lib/lastfm";
+import { useLanguage } from "@context/LanguageContext";
+import type { LastFmNowPlaying } from "@lib/lastfm";
 import { CatsModal } from "./CatsModal";
 
 interface HeroSpotifyNowPlayingProps {

@@ -2,13 +2,13 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { ROUTES } from "@/lib/navigation";
-import { ProjectMetadata, ArticleMetadata } from "@/lib/mdx";
-import { Hero } from "@/components/landingpage/hero/Hero";
-import GithubPageClient from "@/app/github/page-client";
-import { PortfolioSection } from "@/components/portfolio/PortfolioSection";
-import { BlogSection } from "@/components/blog/BlogSection";
-import { ContactSection } from "@/components/contact/ContactSection";
+import { ROUTES } from "@lib/navigation";
+import { ProjectMetadata, ArticleMetadata } from "@lib/mdx";
+import { Hero } from "@components/landingpage/hero/Hero";
+import GithubPageClient from "@app/github/page-client";
+import { PortfolioSection } from "@components/portfolio/PortfolioSection";
+import { BlogSection } from "@components/blog/BlogSection";
+import { ContactSection } from "@components/contact/ContactSection";
 
 interface MainSliderProps {
   projects: ProjectMetadata[];

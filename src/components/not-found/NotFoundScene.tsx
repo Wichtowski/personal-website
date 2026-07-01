@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@context/LanguageContext";
 import { DICE, TICKER_SEPARATOR } from "../dice/consts";
 import { ThemeMode } from "../dice/types";
 import { DiceStage } from "../dice/DiceStage";

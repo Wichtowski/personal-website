@@ -1,10 +1,10 @@
 import { motion, Variants } from "framer-motion";
-import { ArticleMetadata } from "@/lib/mdx";
+import { ArticleMetadata } from "@lib/mdx";
 import { Calendar, Clock } from "lucide-react";
-import { formatDate } from "@/lib/date";
+import { formatDate } from "@lib/date";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { Language } from "@/locales/dictionary";
+import { Language } from "@locales/dictionary";
 
 interface BlogArticleStackProps {
   articles: ArticleMetadata[];

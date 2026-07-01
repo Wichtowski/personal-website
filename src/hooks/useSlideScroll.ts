@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { ROUTES, setNavDirection } from "@/lib/navigation";
+import { ROUTES, setNavDirection } from "@lib/navigation";
 
 function findScrollableParent(el: HTMLElement | null): HTMLElement | null {
   while (el && el !== document.documentElement) {

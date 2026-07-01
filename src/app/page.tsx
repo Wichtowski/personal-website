@@ -1,5 +1,5 @@
-import { createFallbackLastFmNowPlaying, getLastFmNowPlaying } from "@/lib/lastfm";
-import { Hero } from "@/components/landingpage/hero/Hero";
+import { createFallbackLastFmNowPlaying, getLastFmNowPlaying } from "@lib/lastfm";
+import { Hero } from "@components/landingpage/hero/Hero";
 
 export const dynamic = "force-dynamic";
 

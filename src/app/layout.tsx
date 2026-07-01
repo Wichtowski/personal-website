@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import { LanguageProvider } from "@/context/LanguageContext";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
-import { SlideScrollHandler } from "@/components/layout/SlideScrollHandler";
-import { AppLayout } from "@/components/layout/AppLayout";
-import { getProjects, getArticles } from "@/lib/mdx";
+import { ThemeProvider } from "@components/ThemeProvider";
+import { LanguageProvider } from "@context/LanguageContext";
+import { Navbar } from "@components/layout/Navbar";
+import { Footer } from "@components/layout/Footer";
+import { SlideScrollHandler } from "@components/layout/SlideScrollHandler";
+import { AppLayout } from "@components/layout/AppLayout";
+import { getProjects, getArticles } from "@lib/mdx";
 import "./globals.css";
 
 const geistSans = Geist({

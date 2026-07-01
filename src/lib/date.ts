@@ -1,4 +1,4 @@
-import type { Language } from "@/locales/dictionary";
+import type { Language } from "@locales/dictionary";
 
 const LANGUAGE_TO_LOCALE: Record<Language, string> = {
   en: "en-US",

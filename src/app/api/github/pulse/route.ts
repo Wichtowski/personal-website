@@ -1,4 +1,4 @@
-import { buildGitHubPulse } from "@/lib/github-pulse";
+import { buildGitHubPulse } from "@lib/github-pulse";
 
 export const runtime = "nodejs";
 

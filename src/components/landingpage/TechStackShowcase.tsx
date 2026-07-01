@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
-import { useLanguage } from "@/context/LanguageContext";
-import type { TranslationDict } from "@/locales/dictionary";
-import { setNavDirection } from "@/lib/navigation";
-import { cn } from "@/lib/cn";
-import { TECH_STACK_GROUPS, TECH_STACK_SECTIONS } from "@/lib/tech-stack";
+import { useLanguage } from "@context/LanguageContext";
+import type { TranslationDict } from "@locales/dictionary";
+import { setNavDirection } from "@lib/navigation";
+import { cn } from "@lib/cn";
+import { TECH_STACK_GROUPS, TECH_STACK_SECTIONS } from "@lib/tech-stack";
 
 export function TechStackShowcase() {
   const { t } = useLanguage();

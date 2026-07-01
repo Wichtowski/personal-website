@@ -1,10 +1,10 @@
 "use client";
 
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@context/LanguageContext";
 import { Mail, MapPin, Briefcase, Download } from "lucide-react";
 import { motion, Variants } from "framer-motion";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
-import { getNavDirection } from "@/lib/navigation";
+import { getNavDirection } from "@lib/navigation";
 import { MdOutlineConnectWithoutContact } from "react-icons/md";
 
 const email = "oskar.wichtowski3@gmail.com";

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import type { GitHubStats } from "@/lib/github";
+import type { GitHubStats } from "@lib/github";
 import { GithubAccountCard } from "./GithubAccountCard";
 import Link from "next/link";
 

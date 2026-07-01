@@ -1,4 +1,4 @@
-import { createFallbackLastFmNowPlaying, getLastFmNowPlaying } from "@/lib/lastfm";
+import { createFallbackLastFmNowPlaying, getLastFmNowPlaying } from "@lib/lastfm";
 
 export const runtime = "nodejs";
 

@@ -1,9 +1,9 @@
 import React from "react";
 import { ArrowRight, GitBranch, GitCommit } from "lucide-react";
 import { motion } from "framer-motion";
-import type { GitHubActivity } from "@/lib/github";
-import type { Language } from "@/locales/dictionary";
-import { formatDate } from "@/lib/date";
+import type { GitHubActivity } from "@lib/github";
+import type { Language } from "@locales/dictionary";
+import { formatDate } from "@lib/date";
 
 interface RecentGithubActivityProps {
   activities: GitHubActivity[];

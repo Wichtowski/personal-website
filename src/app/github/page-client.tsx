@@ -1,19 +1,19 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { useLanguage } from "@/context/LanguageContext";
-import type { GitHubPulseActivity, GitHubPulseStats } from "@/lib/github-pulse";
-import { GITHUB_PULSE_CACHE_KEY, GITHUB_PULSE_CACHE_TTL_MS } from "@/lib/github-pulse";
+import { useLanguage } from "@context/LanguageContext";
+import type { GitHubPulseActivity, GitHubPulseStats } from "@lib/github-pulse";
+import { GITHUB_PULSE_CACHE_KEY, GITHUB_PULSE_CACHE_TTL_MS } from "@lib/github-pulse";
 import { Activity } from "lucide-react";
 import { motion, type Variants } from "framer-motion";
-import { getNavDirection } from "@/lib/navigation";
+import { getNavDirection } from "@lib/navigation";
 import {
   RecentGithubActivity,
   GithubAccountsPanel,
   GithubLoadingState,
   GithubErrorState,
   GithubStatsGrid,
-} from "@/components/github";
+} from "@components/github";
 
 type GithubPulseData = {
   generatedAt: string;

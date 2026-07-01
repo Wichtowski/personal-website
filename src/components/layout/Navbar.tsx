@@ -2,12 +2,12 @@
 
 import React, { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage } from "@context/LanguageContext";
 import { useRouter, usePathname } from "next/navigation";
 import { Sun, Moon, Menu, X, Terminal, Languages } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/cn";
-import { ROUTES, setNavDirection } from "@/lib/navigation";
+import { cn } from "@lib/cn";
+import { ROUTES, setNavDirection } from "@lib/navigation";
 
 const ROUTE_TO_SECTION: Record<string, string> = {
   "/": "home",

@@ -1,4 +1,4 @@
-import { buildGitHubPulse } from "@/lib/github-pulse";
+import { buildGitHubPulse } from "@lib/github-pulse";
 import GithubPageClient from "./page-client";
 
 export default async function GithubPage() {

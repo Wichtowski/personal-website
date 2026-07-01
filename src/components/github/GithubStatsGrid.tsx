@@ -1,6 +1,6 @@
 import { motion, type Variants } from "framer-motion";
 import { FolderCode, Star, Users } from "lucide-react";
-import type { GitHubStats } from "@/lib/github";
+import type { GitHubStats } from "@lib/github";
 import { GithubMetricCard } from "./GithubMetricCard";
 
 interface GithubStatsGridProps {

@@ -11,6 +11,7 @@ export interface ProjectMetadata {
   liveUrl?: string;
   slug: string;
   language: "en" | "pl";
+  status?: string;
 }
 
 export interface ArticleMetadata {
@@ -69,6 +70,7 @@ const toProjectMetadata = (fm: Record<string, unknown>, slug: string): ProjectMe
     liveUrl: typeof fm.liveUrl === "string" ? fm.liveUrl : undefined,
     slug,
     language: fm.language === "pl" ? "pl" : "en",
+    status: typeof fm.status === "string" ? fm.status : undefined,
   };
 };
 

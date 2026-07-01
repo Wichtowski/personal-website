@@ -2,10 +2,10 @@
 
 import React from "react";
 import { usePathname } from "next/navigation";
-import { ROUTES } from "@/lib/navigation";
+import { ROUTES } from "@lib/navigation";
 import { MainSlider } from "./MainSlider";
 import { PageTransition } from "./PageTransition";
-import { ProjectMetadata, ArticleMetadata } from "@/lib/mdx";
+import { ProjectMetadata, ArticleMetadata } from "@lib/mdx";
 
 interface AppLayoutProps {
   projects: ProjectMetadata[];

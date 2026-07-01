@@ -1,9 +1,9 @@
 import React from "react";
-import { getArticleSlugs, getArticleBySlug } from "@/lib/mdx";
+import { getArticleSlugs, getArticleBySlug } from "@lib/mdx";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Calendar, Clock } from "lucide-react";
 import Link from "next/link";
-import { dictionaries, Language } from "@/locales/dictionary";
+import { dictionaries, Language } from "@locales/dictionary";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
