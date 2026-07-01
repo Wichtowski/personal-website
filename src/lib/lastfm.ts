@@ -27,6 +27,11 @@ type LastFmCacheEntry = {
   expiresAt: number;
 };
 
+type LastFmOptions = {
+  user?: string;
+  apiKey?: string;
+};
+
 const LASTFM_CACHE_TTL_MS = 180_000;
 let lastFmCache: LastFmCacheEntry | null = null;
 
@@ -49,7 +54,7 @@ const pickCurrentTrack = (tracks: LastFmTrack[] | LastFmTrack | undefined) => {
   return Array.isArray(tracks) ? (tracks[0] ?? null) : tracks;
 };
 
-export async function getLastFmNowPlaying(): Promise<LastFmNowPlaying> {
+export async function getLastFmNowPlaying(options: LastFmOptions = {}): Promise<LastFmNowPlaying> {
   if (lastFmCache && lastFmCache.data.isPlaying && Date.now() < lastFmCache.expiresAt) {
     if (process.env.NODE_ENV !== "production") {
       console.info("[lastfm] cache hit", {
@@ -62,8 +67,8 @@ export async function getLastFmNowPlaying(): Promise<LastFmNowPlaying> {
     return lastFmCache.data;
   }
 
-  const user = env.LASTFM_USERNAME;
-  const apiKey = env.LASTFM_API_KEY;
+  const user = options.user ?? env.LASTFM_USERNAME;
+  const apiKey = options.apiKey ?? env.LASTFM_API_KEY;
 
   if (!user || !apiKey) {
     return createFallbackLastFmNowPlaying();

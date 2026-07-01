@@ -11,10 +11,10 @@ interface HeroSpotifyNowPlayingProps {
   nowPlaying?: LastFmNowPlaying;
 }
 
-export function HeroSpotifyNowPlaying({ nowPlaying }: HeroSpotifyNowPlayingProps) {
-  const { t } = useLanguage();
-  const [isCatsModalOpen, setIsCatsModalOpen] = React.useState(false);
-  const safeNowPlaying: LastFmNowPlaying = nowPlaying ?? {
+const LASTFM_REFRESH_INTERVAL_MS = 30_000;
+
+function createIdleNowPlaying(): LastFmNowPlaying {
+  return {
     isPlaying: false,
     track: null,
     artist: null,
@@ -22,6 +22,81 @@ export function HeroSpotifyNowPlaying({ nowPlaying }: HeroSpotifyNowPlayingProps
     source: "fallback",
     updatedAt: new Date().toISOString(),
   };
+}
+
+function isLastFmNowPlaying(value: unknown): value is LastFmNowPlaying {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const data = value as Partial<LastFmNowPlaying>;
+
+  return (
+    typeof data.isPlaying === "boolean" &&
+    (typeof data.track === "string" || data.track === null) &&
+    (typeof data.artist === "string" || data.artist === null) &&
+    (typeof data.url === "string" || data.url === null) &&
+    (data.source === "lastfm" || data.source === "fallback") &&
+    typeof data.updatedAt === "string"
+  );
+}
+
+export function HeroSpotifyNowPlaying({ nowPlaying }: HeroSpotifyNowPlayingProps) {
+  const { t } = useLanguage();
+  const [isCatsModalOpen, setIsCatsModalOpen] = React.useState(false);
+  const [currentNowPlaying, setCurrentNowPlaying] = React.useState<LastFmNowPlaying>(
+    nowPlaying ?? createIdleNowPlaying(),
+  );
+
+  React.useEffect(() => {
+    let active = true;
+    let timeoutId: number | undefined;
+    let controller: AbortController | undefined;
+
+    const refreshNowPlaying = async () => {
+      controller?.abort();
+      controller = new AbortController();
+
+      try {
+        const response = await fetch("/api/lastfm/now-playing", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch Last.fm now playing: ${response.status}`);
+        }
+
+        const data: unknown = await response.json();
+
+        if (active && isLastFmNowPlaying(data)) {
+          setCurrentNowPlaying(data);
+        }
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+
+        console.error(error);
+      } finally {
+        if (active) {
+          timeoutId = window.setTimeout(refreshNowPlaying, LASTFM_REFRESH_INTERVAL_MS);
+        }
+      }
+    };
+
+    timeoutId = window.setTimeout(refreshNowPlaying, 0);
+
+    return () => {
+      active = false;
+      controller?.abort();
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, []);
+
+  const safeNowPlaying = currentNowPlaying;
 
   const hasTrack = Boolean(safeNowPlaying.track);
   const isLive = safeNowPlaying.isPlaying && hasTrack;
