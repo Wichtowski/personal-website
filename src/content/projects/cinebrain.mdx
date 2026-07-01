@@ -1,0 +1,84 @@
+---
+title: "CineBrain"
+description: "A movie recommendation app built for an Advanced Databases exercise, using SurrealDB as a hybrid document and graph database after the project shifted away from the original Neo4j idea."
+date: "2026-02-14"
+category: "dev"
+tags:
+  [
+    "SurrealDB",
+    "SurrealQL",
+    "Recommendation Systems",
+    "FastAPI",
+    "React",
+    "Vite",
+    "D3",
+    "Docker",
+    "Docker Compose",
+  ]
+githubUrl: "https://github.com/Wichtowski/CineBrain"
+status: "Completed"
+language: "en"
+---
+
+## Overview
+
+**CineBrain** was built as an Advanced Databases exercise around movie recommendations.
+The original idea was to model recommendations with Neo4j, because users, movies, genres, ratings, and similar taste patterns fit naturally into a graph.
+Our professor pushed us toward SurrealDB instead, so the project became a practical experiment in using SurrealDB as a hybrid document and graph database.
+
+That constraint turned out to be the useful part.
+Instead of treating the database as a simple key-value store, I used SurrealDB relationships and SurrealQL traversal to connect users, movies, genres, and ratings in a way that still felt close to the graph model we wanted at the start.
+
+## What I Built
+
+CineBrain is a small full-stack recommendation app.
+Users can register, log in, browse movies, rate them on a 1-10 scale, and get recommendations based on what they have already liked.
+
+The system is split into a few clear parts:
+
+- **SurrealDB** stores users, movies, genres, and rating relationships
+- **FastAPI** exposes authentication, movie, rating, recommendation, fixture, graph, and health endpoints
+- **React** with Vite powers the frontend for login, browsing, rating, and recommendations
+- **D3** renders a graph view of users, movies, and rating edges
+- **Docker Compose** runs SurrealDB, the backend, and the frontend together
+- fixture scripts seed the database with demo users, movies, genres, ratings, and movie-genre links
+
+The demo data includes 8 users, 20 movies, 8 genres, more than 50 ratings, and more than 40 movie-genre relationships.
+That made the recommendation logic easier to test because the app starts with enough data to show real relationship traversal instead of an empty prototype.
+
+## Recommendation Logic
+
+The recommendation layer uses two main ideas.
+The first one looks for movies that share genres with movies the current user has rated.
+The second one looks at similar users by traversing from a movie back through rating edges to users, then forward to other movies those users rated.
+
+SurrealDB was interesting here because it allowed queries like:
+
+```sql
+SELECT ->rated->movie->belongs_to-><-belongs_to<-movie
+FROM user:oskar
+FETCH ->rated->movie->belongs_to;
+```
+
+That kind of query is the heart of the project.
+It keeps the database model flexible like a document store, but still lets the app move through relationships in a graph-like way.
+
+The backend also adds a more application-friendly layer on top of those queries.
+For similar-movie recommendations, it gathers genres and directors from the user's rated movies, excludes movies they already rated, scores candidates by overlap, and returns the top results.
+
+## SurrealDB Instead of Neo4j
+
+The project still carries the shape of the original Neo4j idea.
+Users rate movies, movies belong to genres, and recommendations come from walking those connections.
+The difference is that SurrealDB let us combine document-style records with relationship edges in one database.
+
+The repo includes a comparison document that looks at the same recommendation problem through SurrealDB, MongoDB, and Neo4j.
+That comparison was important for the exercise because it made the tradeoff visible: MongoDB is comfortable for documents but awkward for graph traversal, Neo4j is strongest for pure graph work, and SurrealDB sits in the middle with both JSON-like records and relationship queries.
+
+## Takeaway
+
+CineBrain is not a production recommendation engine, and it was never meant to be one.
+Its value is that it turns a database-class assignment into a runnable system where the database choice actually shapes the application.
+
+I liked that the project forced us to adapt.
+We started from the obvious graph-database answer, moved to SurrealDB because of the course requirement, and still ended up with a recommendation app where the relationships are visible in the data model, the API, and the D3 graph view.

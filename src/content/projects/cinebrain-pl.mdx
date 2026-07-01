@@ -1,0 +1,84 @@
+---
+title: "CineBrain"
+description: "Aplikacja rekomendująca filmy zbudowana na ćwiczenie z Zaawansowanych Baz Danych, wykorzystująca SurrealDB jako hybrydową bazę dokumentową i grafową po odejściu od pierwotnego pomysłu z Neo4j."
+date: "2026-02-14"
+category: "dev"
+tags:
+  [
+    "SurrealDB",
+    "SurrealQL",
+    "Systemy rekomendacji",
+    "FastAPI",
+    "React",
+    "Vite",
+    "D3",
+    "Docker",
+    "Docker Compose",
+  ]
+githubUrl: "https://github.com/Wichtowski/CineBrain"
+status: "Ukończony"
+language: "pl"
+---
+
+## Opis projektu
+
+**CineBrain** powstał jako ćwiczenie z Zaawansowanych Baz Danych wokół rekomendacji filmów.
+Pierwotny pomysł zakładał użycie Neo4j, bo użytkownicy, filmy, gatunki, oceny i podobieństwo gustów naturalnie układają się w graf.
+Profesor poprosił nas jednak o użycie SurrealDB, więc projekt stał się praktycznym eksperymentem z hybrydową bazą dokumentową i grafową.
+
+To ograniczenie okazało się najciekawszą częścią pracy.
+Zamiast traktować bazę jak prosty key-value store, wykorzystałem relacje SurrealDB i traversal w SurrealQL do połączenia użytkowników, filmów, gatunków i ocen w sposób, który nadal przypominał grafowy model, od którego chcieliśmy zacząć.
+
+## Co zbudowałem
+
+CineBrain jest małą aplikacją full-stack do rekomendacji filmów.
+Użytkownik może się zarejestrować, zalogować, przeglądać filmy, oceniać je w skali 1-10 i dostawać rekomendacje na podstawie tego, co już mu się spodobało.
+
+System jest podzielony na kilka czytelnych części:
+
+- **SurrealDB** przechowuje użytkowników, filmy, gatunki i relacje ocen
+- **FastAPI** wystawia endpointy do autoryzacji, filmów, ocen, rekomendacji, fixtures, grafu i health checka
+- **React** z Vite obsługuje frontend do logowania, przeglądania, oceniania i rekomendacji
+- **D3** renderuje widok grafu użytkowników, filmów i krawędzi ocen
+- **Docker Compose** uruchamia razem SurrealDB, backend i frontend
+- skrypty fixtures zasilają bazę przykładowymi użytkownikami, filmami, gatunkami, ocenami i relacjami film-gatunek
+
+Dane demo zawierają 8 użytkowników, 20 filmów, 8 gatunków, ponad 50 ocen i ponad 40 relacji między filmami a gatunkami.
+Dzięki temu logikę rekomendacji można było sprawdzać na danych, które faktycznie pokazują przechodzenie po relacjach, a nie tylko na pustym prototypie.
+
+## Logika rekomendacji
+
+Warstwa rekomendacji opiera się na dwóch głównych pomysłach.
+Pierwszy szuka filmów, które mają wspólne gatunki z filmami ocenionymi przez aktualnego użytkownika.
+Drugi patrzy na podobnych użytkowników, przechodząc od filmu przez relacje ocen do użytkowników, a potem dalej do innych filmów ocenianych przez te osoby.
+
+SurrealDB było tutaj ciekawe, bo pozwalało pisać zapytania takie jak:
+
+```sql
+SELECT ->rated->movie->belongs_to-><-belongs_to<-movie
+FROM user:oskar
+FETCH ->rated->movie->belongs_to;
+```
+
+To jest sedno projektu.
+Baza zachowuje elastyczność podobną do dokumentowej, ale aplikacja nadal może przechodzić po relacjach w sposób zbliżony do grafu.
+
+Backend dokłada do tego warstwę bardziej wygodną dla aplikacji.
+Dla rekomendacji podobnych filmów zbiera gatunki i reżyserów z ocenionych filmów użytkownika, odrzuca filmy już ocenione, punktuje kandydatów po liczbie trafień i zwraca najlepsze wyniki.
+
+## SurrealDB zamiast Neo4j
+
+Projekt nadal nosi w sobie kształt pierwotnego pomysłu z Neo4j.
+Użytkownicy oceniają filmy, filmy należą do gatunków, a rekomendacje wynikają z przechodzenia po tych połączeniach.
+Różnica polega na tym, że SurrealDB pozwoliło połączyć rekordy dokumentowe i krawędzie relacji w jednej bazie.
+
+Repo zawiera też dokument porównujący SurrealDB, MongoDB i Neo4j na przykładzie tego samego problemu rekomendacji.
+To porównanie było ważne dla ćwiczenia, bo dobrze pokazuje tradeoff: MongoDB jest wygodne dla dokumentów, ale niewygodne dla traversal po grafie, Neo4j jest najmocniejsze w czystych grafach, a SurrealDB trafia pomiędzy te podejścia, oferując rekordy podobne do JSON-a i relacyjne zapytania.
+
+## Podsumowanie
+
+CineBrain nie jest produkcyjnym silnikiem rekomendacji i nigdy nie miał nim być.
+Jego wartość polega na tym, że zamienia ćwiczenie z baz danych w działający system, w którym wybór bazy realnie wpływa na aplikację.
+
+Podobało mi się, że ten projekt wymusił adaptację.
+Zaczęliśmy od oczywistej odpowiedzi w postaci bazy grafowej, przeszliśmy na SurrealDB przez wymaganie z zajęć, a mimo to skończyliśmy z aplikacją rekomendacyjną, w której relacje są widoczne w modelu danych, API i widoku grafu w D3.

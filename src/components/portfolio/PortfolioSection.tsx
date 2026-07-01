@@ -121,72 +121,75 @@ export function PortfolioSection({ projects }: PortfolioSectionProps) {
                   initial="hidden"
                   animate="show"
                   exit="exit"
-                  className="group p-6 rounded-2xl border border-border/40 bg-muted/10 hover:bg-muted/15 transition-all duration-300 flex flex-col justify-between h-[280px] relative overflow-hidden focus-within:ring-2 focus-within:ring-primary/40"
                 >
-                  {/* Background soft gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                  <Link
+                    href={`/portfolio/${project.slug}`}
+                    className="group p-6 rounded-2xl border border-border/40 bg-muted/10 hover:bg-muted/15 transition-all duration-300 flex flex-col justify-between h-[280px] relative overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                    aria-label={project.title}
+                  >
+                    {/* Background soft gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-                  <div>
-                    {/* Card Header: Category & Icons */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex gap-2 items-center flex-wrap">
-                        <span className="text-[10px] font-mono font-bold uppercase tracking-widest px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/15">
-                          {project.category}
-                        </span>
-                        {statusConfig && (
-                          <span
-                            className={`text-[9px] font-mono font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md border flex items-center gap-1 ${statusConfig.className}`}
-                          >
-                            <statusConfig.icon size={10} />
-                            {statusConfig.label}
+                    <div>
+                      {/* Card Header: Category & Icons */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex gap-2 items-center flex-wrap">
+                          <span className="text-[10px] font-mono font-bold uppercase tracking-widest px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/15">
+                            {project.category}
                           </span>
-                        )}
+                          {statusConfig && (
+                            <span
+                              className={`text-[9px] font-mono font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md border flex items-center gap-1 ${statusConfig.className}`}
+                            >
+                              <statusConfig.icon size={10} />
+                              {statusConfig.label}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex gap-2 text-muted-foreground group-hover:text-primary transition-colors">
+                          {project.category === "ai" ? (
+                            <Cpu size={18} />
+                          ) : project.category === "qa" ? (
+                            <ShieldAlert size={18} />
+                          ) : (
+                            <Code2 size={18} />
+                          )}
+                        </div>
                       </div>
-                      <div className="flex gap-2 text-muted-foreground group-hover:text-primary transition-colors">
-                        {project.category === "ai" ? (
-                          <Cpu size={18} />
-                        ) : project.category === "qa" ? (
-                          <ShieldAlert size={18} />
-                        ) : (
-                          <Code2 size={18} />
-                        )}
-                      </div>
+
+                      {/* Title & Description */}
+                      <h3 className="text-lg font-bold font-mono text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
+                        {project.title}
+                      </h3>
+                      <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed">
+                        {project.description}
+                      </p>
                     </div>
 
-                    {/* Title & Description */}
-                    <h3 className="text-lg font-bold font-mono text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
-                      {project.title}
-                    </h3>
-                    <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed">
-                      {project.description}
-                    </p>
-                  </div>
+                    <div>
+                      {/* Tags */}
+                      <div className="flex flex-wrap gap-1.5 mb-4">
+                        {project.tags.slice(0, 3).map((tag) => (
+                          <span
+                            key={tag}
+                            className="text-[9px] font-mono px-2 py-0.5 rounded bg-background border border-border/40 text-muted-foreground"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
 
-                  <div>
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-1.5 mb-4">
-                      {project.tags.slice(0, 3).map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-[9px] font-mono px-2 py-0.5 rounded bg-background border border-border/40 text-muted-foreground"
-                        >
-                          {tag}
-                        </span>
-                      ))}
+                      {/* Read More */}
+                      <div className="flex items-center justify-between border-t border-border/30 pt-4 text-xs font-mono font-bold text-foreground group-hover:text-primary transition-colors">
+                        <span>{t.portfolio.viewProject}</span>
+                        <ArrowUpRight
+                          size={14}
+                          className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                          aria-hidden="true"
+                        />
+                      </div>
                     </div>
-
-                    {/* Read More Button */}
-                    <Link
-                      href={`/portfolio/${project.slug}`}
-                      className="flex items-center justify-between border-t border-border/30 pt-4 text-xs font-mono font-bold text-foreground hover:text-primary transition-colors group/link"
-                    >
-                      <span>{t.portfolio.viewProject}</span>
-                      <ArrowUpRight
-                        size={14}
-                        className="transition-transform group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5"
-                      />
-                    </Link>
-                  </div>
+                  </Link>
                 </motion.div>
               );
             })}

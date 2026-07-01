@@ -1,0 +1,57 @@
+---
+title: "RAG Asystent Prawny"
+description: "Zbudowałem asystenta retrieval-augmented dla polskich aktów prawnych, który pozwala wgrywać PDF-y, indeksować je do Qdrant i zadawać pytania oparte na źródłowym tekście przez backend FastAPI i panel Svelte."
+date: "2025-09-25"
+category: "ai"
+tags:
+  [
+    "RAG",
+    "Legal Tech",
+    "FastAPI",
+    "Qdrant",
+    "OpenAI",
+    "Svelte",
+    "RabbitMQ",
+    "Redis",
+    "Python",
+    "Docker",
+    "RAGAS",
+    "Hugging Face",
+  ]
+githubUrl: "https://github.com/Wichtowski/rag"
+status: "W trakcie"
+language: "pl"
+---
+
+## Opis projektu
+
+Zbudowałem **RAG Asystent Prawny** jako praktyczny system retrieval-augmented do polskich aktów prawnych.
+Założenie było proste: wgrywać PDF-y ustaw, indeksować je do bazy wektorowej i odpowiadać na pytania w oparciu o rzeczywisty tekst źródłowy, zamiast zgadywać z pamięci modelu.
+
+Repo zaczęło się jako wąski eksperyment z RAG w domenie prawnej, ale rozwinęło się w mały system full-stack z porządnym API, przetwarzaniem w tle i panelem administracyjnym do zarządzania dokumentami.
+
+## Co zbudowałem
+
+Architektura jest podzielona na kilka czytelnych usług:
+
+- **FastAPI** jako API do zapytań, endpointów administracyjnych i operacji na datasetach
+- **worker** pobierający zadania ingestu PDF-ów z RabbitMQ asynchronicznie przez aio-pika
+- usługa **embeddera** z Qwen3 Embedding samohostowana przez Hugging Face TEI
+- **Qdrant** jako baza wektorowa
+- **Redis** do przechowywania metadanych dokumentów, ścieżek i liczby chunków
+- panel administracyjny w **Svelte 5** i Vite do zarządzania dokumentami
+- usługa **evaluatora** do generowania datasetów i ewaluacji RAGAS
+
+Dodałem też **RAGAS** do ewaluacji, żebym mógł mierzyć jakość retrievalu zamiast opierać się tylko na intuicji.
+
+## Dlaczego to zbudowałem
+
+Ten projekt pozwolił mi przejść przez RAG od podstaw w domenie, w której poprawność naprawdę ma znaczenie.
+Akty prawne są dobrym testem dla systemów retrieval, bo odpowiedzi muszą być mocno zakotwiczone w źródle, a cały system musi radzić sobie z długimi dokumentami, chunkingiem i kompromisami przy indeksowaniu.
+
+To też dobrze pasuje do pracy, którą wykonuję zawodowo: systemy RAG, eksperymenty z chunkingiem, testy nastawione na niezawodność i infrastruktura AI, która ma być zrozumiała, a nie magiczna.
+
+## Podsumowanie
+
+Największa wartość tego repo polega na tym, że zamienia PDF-y prawne w coś, co można wyszukiwać, sprawdzać i ewaluować.
+To dla mnie zwięzły przykład stacku AI, który lubię budować: retrieval na pierwszym miejscu, mocne granice wokół modelu i wystarczająco dużo struktury operacyjnej, żeby system pozostawał uczciwy.

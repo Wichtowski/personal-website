@@ -1,0 +1,103 @@
+---
+title: "StreamSphere"
+description: "Projekt z czwartego semestru na Technologie internetowe, w którym banalne zadanie stworzenia strony bez backendu przerobiliśmy na mockup platformy streamingowej w Angularze, głównie dlatego, że chciałem, żeby zespół wyniósł z tego coś więcej niż wysyłanie ZIP-ów na Discordzie."
+date: "2024-06-29"
+category: "dev"
+tags: ["Angular", "TypeScript", "SCSS", "GitHub Pages", "Video.js", "Swiper", "Projekt zespołowy"]
+githubUrl: "https://github.com/Wichtowski/StreamSphere"
+liveUrl: "https://wichtowski.github.io/StreamSphere/"
+status: "Archived"
+language: "pl"
+---
+
+## Opis projektu
+
+**StreamSphere** był projektem zaliczeniowym z czwartego semestru na przedmiot Technologie internetowe.
+Samo zadanie było, delikatnie mówiąc, zaskakująco banalne jak na ten etap studiów: stworzyć stronę internetową, bez wymagania backendu.
+
+Bardzo mnie to zirytowało, bo wyglądało jak zmarnowana okazja do nauczenia się czegoś bliższego prawdziwej pracy frontendowej.
+Dlatego popchnąłem zespół w stronę Angulara.
+Jeden kolega kiedyś dotykał Angulara, więc uznaliśmy, że to wystarczająco dobry powód, żeby go użyć.
+
+Efektem jest mockup platformy streamingowej w stylu Netflixa, zbudowany w **Angularze 18**, TypeScripcie, SCSS, komponentach, guardach routingu, mockowanych danych z JSON-a i pipeline'em deploymentu na GitHub Pages.
+To nie jest poważny produkt, ale jako ćwiczenie zespołowe było znacznie ciekawsze niż zwykła statyczna strona.
+
+## Co zbudowaliśmy
+
+Aplikacja ma landing page, ekrany logowania i rejestracji, chronioną część do przeglądania treści, kilka karuzel, sekcje promocyjne i widok oglądania filmu.
+Dane pochodzą z lokalnych plików JSON w `src/app/assets`, w tym z mockowanych użytkowników i metadanych filmów.
+
+Frontend zawiera:
+
+- **routing Angulara** z chronionymi ścieżkami do przeglądania treści
+- **mockowane logowanie** oparte o `users.json`, sprawdzanie haseł przez bcrypt, session storage i local storage
+- **wybór jakości wideo zależny od subskrypcji**, który przełącza lokalne pliki 720p albo 1440p na podstawie planu użytkownika
+- **embedy z YouTube** dla części filmów
+- **odtwarzanie przez Video.js** dla lokalnie hostowanych trailerów
+- **Swiper i własne komponenty karuzel**, żeby zbudować wrażenie strony streamingowej
+- **style SCSS** oraz projekty w Figmie dla głównych ekranów
+- **deployment przez GitHub Actions** na GitHub Pages po merge'u do `main`
+
+Najzabawniejszy szczegół techniczny jest taki, że czytanie użytkowników z lokalnego pliku `.json` technicznie spełnia wymaganie "bez backendu", chociaż robi z całego logowania czystą frontendową iluzję.
+Na zaliczenie strony internetowej było to wystarczające.
+Do czegokolwiek prawdziwego absolutnie nie.
+
+## Praca z Angularem
+
+Angular był tutaj dobrym rodzajem dyskomfortu.
+Ma sporo ceremonii w porównaniu z prostszymi setupami frontendowymi, a część rzeczy na początku wydawała się dziwna: moduły obok standalone components, dependency injection wszędzie, dekoratory, serwisy, route guardy i ogólne poczucie, że framework każe nazwać każdy element zanim pozwoli cokolwiek wypchnąć.
+
+Ta struktura pomogła jednak utrzymać projekt w stanie, który dało się jeszcze zrozumieć, kiedy kilka osób pracowało nad nim równolegle.
+Mieliśmy serwisy od autha, sesji, local storage i hashowania haseł.
+Mieliśmy osobne komponenty dla navbaru, footera, reklam, homepage'a, karuzel i strony pojedynczego wideo.
+Nawet jeśli jakość kodu była miejscami bardzo nierówna, Angular przynajmniej pchał nas w stronę czytelniejszych granic między funkcjami.
+
+To prawdopodobnie była największa praktyczna wartość.
+Zadanie nie wymagało nauki frameworka, ale użycie go sprawiło, że projekt miał większy sens niż zwykła statyczna strona.
+
+## Rzeczywistość pracy zespołowej
+
+Ten projekt był też lekcją version control, niezależnie od tego, czy wszyscy chcieli tę lekcję dostać.
+W pewnym momencie preferowany model współpracy wyglądał mniej więcej jak wysyłanie ZIP-ów przez Discorda.
+To jest zabawne przez około pięć minut, a potem zamienia się w małą fabrykę problemów.
+
+Ostatecznie projekt trafił na GitHuba, a ja zostałem osobą, która musiała dużo rzeczy poskładać.
+Finalny kod nie jest czysty.
+Część nazw jest dziwna, część architektury improwizowana, a część decyzji bardzo wyraźnie pachnie deadline'em.
+
+Mimo wszystko przeniesienie pracy do Gita bardzo pomogło.
+Nawet niedoskonałe repozytorium było ogromnym krokiem naprzód względem modelu "final_final_v3.zip".
+
+## Prawie easter egg
+
+W historii repo jest też absolutnie przeklęty commit:
+`6ce0300 kappa chungus peter griffin rizzed up livy dunn made baby gronk looksmaxxed turned kai cenat into sigma by fanum tax`.
+
+Pamiętałem, że w aplikacji było coś w stylu easter egga, gdzie wpisanie czegoś pokazywało jakąś ukrytą rzecz.
+Po sprawdzeniu kodu i historii nie wygląda jednak na to, żeby w aktualnym projekcie istniał prawdziwy handler na sekwencję klawiszy.
+Nie ma Konami code, nie ma `keydown`, nie ma sekretnego wpisywanego słowa ukrytego w komponencie.
+
+Było za to coś zabawniejszego w bardzo frontendowo-projektowy sposób.
+Landing page reaguje na fragmenty URL `/#premium` i `/#regular`, przewija do planu, przekreśla starą cenę, pokazuje obniżoną cenę i podświetla kartę.
+Starsza wersja komponentu reklam czytała też wartość z localStorage, żeby wymusić konkretną reklamę promocyjną.
+
+Więc ten "easter egg" był prawdopodobnie mniej w stylu "wpisz magiczne słowo", a bardziej "znaj ukryty URL albo trik z localStorage".
+Szczerze mówiąc, to idealnie pasuje do całego projektu.
+
+## Deployment
+
+Deployment jest prosty, ale sensowny dla takiego projektu.
+Repo ma workflow GitHub Actions, który instaluje zależności przez npm, buduje aplikację Angulara z `--base-href /StreamSphere/` i publikuje `.build/browser` na branch `gh-pages` przez `JamesIves/github-pages-deploy-action`.
+
+Dzięki temu projekt dostał publiczny adres bez dokładania infrastruktury, której nie potrzebował.
+Dla frontendowego projektu zaliczeniowego GitHub Pages był odpowiednim poziomem powagi.
+
+## Podsumowanie
+
+StreamSphere to mały, trochę absurdalny projekt na zaliczenie i nie ma sensu udawać, że jest inaczej.
+Założenie było zbyt podstawowe jak na czwarty semestr, "backend" to lokalny JSON, a kod nosi ślady zespołu, który składał Angulara pod presją czasu.
+
+Ale mimo tego projekt nauczył nas przydatnych rzeczy.
+Przećwiczyliśmy prawdziwy framework frontendowy, granice komponentów, routing, chronione strony, mockowane dane, odtwarzanie multimediów, CI/CD i podstawową dyscyplinę używania Gita zamiast ZIP-ów.
+
+Dlatego trzymam go w portfolio jako zapis wczesnego, chaotycznego, ale naprawdę edukacyjnego projektu zespołowego.

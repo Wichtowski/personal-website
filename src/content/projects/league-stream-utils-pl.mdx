@@ -1,0 +1,106 @@
+---
+title: "League Stream Utils"
+description: "Turniej League of Legends i setup do wewnętrznego pracowniczego streama, z ponad 40 graczami, publicznością, wieloma etapami, doborem drużyn pod rankingi, finałami LAN, kamerami live, scenami OBS i przerwami reklamowymi."
+date: "2025-07-01"
+category: "dev"
+tags:
+  [
+    "League of Legends",
+    "Esport",
+    "Turnieje",
+    "Broadcasting",
+    "Vinext",
+    "React",
+    "TypeScript",
+    "Electron",
+    "OBS",
+    "Riot API",
+    "PostgreSQL",
+    "MongoDB",
+  ]
+githubUrl: "https://github.com/Wichtowski/League-Stream-Utils"
+status: "Wstrzymany"
+language: "pl"
+---
+
+## Opis projektu
+
+Zbudowałem **League Stream Utils**, bo w pracy mieliśmy turnieje Counter-Strike 2 i zacząłem się zastanawiać, co trzeba byłoby zrobić, żeby zorganizować podobny turniej w League of Legends.
+Pomysł urósł z luźnej idei w realne narzędzie do obsługi turnieju i transmisji: ponad 40 graczy, sporo oglądających, kilka etapów, finały LAN i dobór drużyn, który próbował zachować fair play na podstawie rang graczy.
+
+Nie chciałem, żeby był to tylko arkusz kalkulacyjny i wątek na Discordzie.
+Chciałem, żeby całość była bliżej prawdziwego wydarzenia esportowego: z draftem, drużynami, strukturą turnieju, informacjami dla widzów i narzędziami do ogarnięcia streama.
+Oprócz samej aplikacji ogarniałem też wewnętrzny stream pracowniczy: przełączanie scen, przerwy, reklamowe wstawki, kamery live podczas meczów i utrzymywanie transmisji w ruchu, nawet kiedy setup techniczny bardzo chciał przeszkadzać.
+
+## Co zbudowałem
+
+Projekt jest **monorepo opartym o Bun i Turbo**, z aplikacją webową w Vinext/React, aplikacją desktopową w Electronie i wspólnymi paczkami dla głównych domen.
+Część webowa zawiera moduły turniejów, drużyn, draftu, kamer, ustawień, uwierzytelniania i panelu administracyjnego.
+Część desktopowa obsługuje lokalne integracje, które mają więcej sensu blisko komputera odpowiadającego za transmisję, szczególnie integrację z OBS.
+
+Wspólne paczki dzielą system na konkretne obszary:
+
+- **draft** do obsługi pick/ban flow, kolejności tur, walidacji i zasad fearless draft
+- **tournament** do turniejów, meczów, drabinek, drużyn, zaproszeń i zgłoszeń
+- **riot-api** do integracji z League Client Update i danymi z champion select
+- **obs** oraz części **electron** do sterowania streamem i komunikacji IPC
+- **camera** do mapowania streamów graczy i konfiguracji kamer
+- **auth**, **db**, **db-mongo**, **team**, **api-client**, **i18n** i wspólne typy dla reszty aplikacji
+
+Lokalny stack developerski używa PostgreSQL i MongoDB przez Dockera.
+PostgreSQL obsługuje strukturalną część turniejową, a MongoDB jest używane do danych bardziej konfiguracyjnych, takich jak ustawienia kamer i dokumenty związane z draftem.
+
+## Kontekst turnieju
+
+Sam turniej był głównym powodem, dla którego to narzędzie miało sens.
+Nie chodziło tylko o wygenerowanie drabinki.
+Chciałem zbudować coś, co pomoże poprowadzić większy wewnętrzny event z sensownym doborem drużyn, prawdziwym draftem, czytelną strukturą dla graczy i widzów oraz taką oprawą transmisji, żeby finały LAN faktycznie miały klimat wydarzenia esportowego.
+
+To oznaczało też mniej efektowne, ale ważne elementy: dane graczy, balansowanie po rangach, rejestrację drużyn, stan meczów, przechodzenie przez etapy, informacje widoczne dla widzów i przepływ między draftem, grą oraz wewnętrznym streamem.
+Przy kilkudziesięciu osobach takie rzeczy decydują o tym, czy turniej wygląda na ogarnięty.
+
+## Zderzenie z integracjami Riotu
+
+Najtrudniejszą częścią nie był React ani modelowanie bazy danych.
+Najtrudniejsze było dogadanie się z ekosystemem League of Legends wokół lokalnych danych i meczów live.
+
+CommunityDragon jest community-maintained i naprawdę ratuje życie.
+Data Dragon jest w porządku do statycznych oficjalnych assetów.
+Lokalne API klienta League jest przydatne podczas draftu i champion select, i ta część działała wystarczająco dobrze dla pick/ban flow.
+
+Problem zaczął się wtedy, gdy potrzebowałem bogatszych danych z gry live podczas spectate.
+Lokalne API nie wystawiało wszystkiego, czego potrzebowałem z widoku obserwatora.
+Sprawdzałem League Client Update REST API, credentialsy z lockfile, dynamiczne porty i eventy WebSocket, ale dane były porozrzucane po różnych powierzchniach i nie udało mi się doprowadzić pełnej ścieżki live-game do stanu, któremu zaufałbym podczas wydarzenia.
+
+Finalnie użyłem **LeagueBroadcast** jako pragmatycznego mostu dla części danych broadcastowych.
+Pomogło, ale miało też swoje dziwne problemy konfiguracyjne: freezy, kruchy stan i sytuacje, w których skonfigurowane informacje o drużynach potrafiły zniknąć.
+Było to irytujące, ale też bardzo praktyczne przypomnienie, że eventowe oprogramowanie musi działać w prawdziwych warunkach, nie tylko w czystym demo.
+
+## Broadcast i organizacja
+
+Aplikacja była projektowana wokół realnej pracy przy turnieju, nie tylko wokół przechowywania danych.
+Integracja z OBS istniała po to, żeby aplikacja desktopowa mogła połączyć się z OBS WebSocket, pobierać sceny, przełączać sceny oraz startować lub zatrzymywać stream z poziomu narzędzia.
+Konfiguracja kamer była potrzebna, bo transmisja z League wymaga wiedzy o tym, który gracz albo stream należy do której drużyny i jak ma to być pokazane.
+
+Wewnętrzny stream finałów był osobnym problemem do ogarnięcia.
+Musiałem koordynować live feedy z sali, przełączać się między grą i kamerami, puszczać przerwy reklamowe oraz utrzymywać stream w stanie oglądalnym nawet wtedy, gdy setup nie zachowywał się idealnie.
+To sprawiło, że projekt był dużo bardziej fizyczny niż zwykła aplikacja webowa, bo każdy techniczny problem był od razu widoczny dla graczy, widzów i osób siedzących na miejscu.
+
+Najbardziej bolesnym problemem operacyjnym była sieć.
+Od początku wydarzenia Wi-Fi było niestabilne na moim komputerze, bo maszyna przełączała się między access pointami.
+Powodowało to dokładnie ten typ przerywanych problemów, które trudno odtworzyć w kodzie, ale bardzo łatwo poczuć podczas transmisji live.
+To było dobre przypomnienie, że eventowe oprogramowanie jest tylko tak stabilne, jak sala, sieć, laptopy, kable i narzędzia dookoła niego.
+
+Moduł draftu był jedną z czystszych części projektu.
+Jawnie modelował tury, walidował picki i bany, śledził wybrane championy oraz wspierał fearless draft przez blokowanie championów wybranych w poprzednich grach.
+Dzięki temu etap draftu był przewidywalny nawet wtedy, gdy reszta narzędzi wokół danych live z League była dużo mniej przyjemna.
+
+## Podsumowanie
+
+League Stream Utils było bardzo realną lekcją budowania aplikacji wokół trudnego zewnętrznego ekosystemu.
+Część rzeczy wyszła naprawdę dobrze: model turnieju, draft flow, planowanie drużyn pod rankingi, kontrola broadcastu i to, że event mógł obsłużyć dużą grupę graczy oraz widzów.
+Inne części były bolesne, szczególnie integracja z live-game data, niestabilne Wi-Fi, presja streama live i ilość nieudokumentowanych zachowań wokół lokalnych narzędzi Riotu.
+
+Nadal lubię ten projekt, bo znajduje się w ciekawym miejscu między inżynierią oprogramowania a prowadzeniem wewnętrznego wydarzenia live.
+To nie była tylko aplikacja webowa.
+To było narzędzie budowane dla ludzi siedzących w jednym miejscu, streama z widzami i turnieju, który musiał iść dalej nawet wtedy, gdy integracje nie były tak przyjazne, jak chciałem.

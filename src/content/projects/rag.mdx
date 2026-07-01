@@ -1,0 +1,57 @@
+---
+title: "RAG Legal Assistant"
+description: "I built a retrieval-augmented assistant for Polish legal codes that lets users upload PDF acts, index them into Qdrant, and ask grounded questions through a FastAPI backend and Svelte admin UI."
+date: "2025-09-25"
+category: "ai"
+tags:
+  [
+    "RAG",
+    "Legal Tech",
+    "FastAPI",
+    "Qdrant",
+    "OpenAI",
+    "Svelte",
+    "RabbitMQ",
+    "Redis",
+    "Python",
+    "Docker",
+    "RAGAS",
+    "Hugging Face",
+  ]
+githubUrl: "https://github.com/Wichtowski/rag"
+status: "In Progress"
+language: "en"
+---
+
+## Overview
+
+I built **RAG Legal Assistant** as a practical retrieval-augmented system for Polish legal acts.
+The goal was simple: upload PDF statutes, index them into a vector database, and answer questions with responses grounded in the source text rather than guessing from model memory.
+
+The repo started as a focused experiment in legal-domain RAG, but it grew into a small full-stack system with a proper API, background processing, and an admin UI for managing documents.
+
+## What I Built
+
+The architecture is split into a few clear services:
+
+- a **FastAPI API** for queries, admin endpoints, and dataset operations
+- a **worker** that consumes PDF ingest jobs from RabbitMQ asynchronously via aio-pika
+- an **embedder** service running Qwen3 embeddings self-hosted on Hugging Face TEI
+- **Qdrant** for vector storage
+- **Redis** for document metadata, paths, and parent-child chunk counts
+- a **Svelte 5** and Vite admin frontend for document management
+- an **evaluator** service running RAGAS evaluation to measure retrieval quality
+
+I also added **RAGAS evaluation** so I could measure retrieval quality instead of relying on intuition alone.
+
+## Why I Built It
+
+This project let me explore RAG from the ground up in a domain where correctness matters.
+Legal documents are a good stress test for retrieval systems because answers need to stay anchored in the actual source, and the system has to cope with long documents, chunking decisions, and indexing tradeoffs.
+
+It also matched the kind of work I have been doing professionally: RAG systems, chunking experiments, reliability-focused testing, and AI infrastructure that has to be understandable instead of magical.
+
+## Takeaway
+
+The main value of this repo is that it turns legal PDFs into something searchable, inspectable, and evaluable.
+It is a compact example of the AI stack I like building: retrieval first, strong boundaries around the model, and enough operational structure to keep the system honest.

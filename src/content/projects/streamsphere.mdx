@@ -1,0 +1,103 @@
+---
+title: "StreamSphere"
+description: "A fourth-semester Internet Technologies project where a very simple no-backend website assignment turned into an Angular streaming-platform mockup, mostly because I wanted the team to learn something more useful than passing ZIP files around on Discord."
+date: "2024-06-29"
+category: "dev"
+tags: ["Angular", "TypeScript", "SCSS", "GitHub Pages", "Video.js", "Swiper", "Team Project"]
+githubUrl: "https://github.com/Wichtowski/StreamSphere"
+liveUrl: "https://wichtowski.github.io/StreamSphere/"
+status: "Archived"
+language: "en"
+---
+
+## Overview
+
+**StreamSphere** was a fourth-semester university project for an Internet Technologies class.
+The assignment itself was almost comically small for that stage of the degree: build a website, with no backend requirement.
+
+That annoyed me more than it probably should have, because it felt like a missed chance to practice something closer to real frontend work.
+So I pushed the team toward Angular.
+One person had touched Angular before, which was apparently enough of a reason for us to use it.
+
+The result is a Netflix-style streaming-platform mockup built with **Angular 18**, TypeScript, SCSS, reusable components, route guards, mocked JSON data, and a GitHub Pages deployment pipeline.
+It is not a serious product, but it was a useful group exercise in moving beyond static pages.
+
+## What We Built
+
+The app has a landing page, sign-in and sign-up screens, a guarded browsing area, several carousels, promotional sections, and a video-watch route.
+Content comes from local JSON files under `src/app/assets`, including mocked users and video metadata.
+
+The frontend includes:
+
+- **Angular routing** with protected browse routes
+- **mocked authentication** backed by `users.json`, bcrypt password checks, session storage, and local storage
+- **subscription-aware video quality** that chooses 720p or 1440p local files based on the mocked user plan
+- **YouTube embeds** for some videos
+- **Video.js playback** for locally hosted trailer files
+- **Swiper and custom carousel components** for the streaming-homepage feel
+- **SCSS components** and a set of Figma designs for the main screens
+- **GitHub Actions deployment** to GitHub Pages on merge to `main`
+
+The funniest technical detail is that reading users from a local `.json` file technically satisfies "no backend", even though it also makes the entire authentication model a frontend illusion.
+For a class website assignment, that was fine.
+For anything real, absolutely not.
+
+## Working With Angular
+
+Angular was a good kind of uncomfortable here.
+It has a lot of ceremony compared with simpler frontend setups, and some parts felt strange at first: modules next to standalone components, dependency injection everywhere, decorators, services, route guards, and the general feeling that the framework wants you to name every moving part before it lets you ship anything.
+
+But that structure also helped the project stay somewhat understandable once multiple people were touching it.
+We had services for auth, session state, local storage, and password hashing.
+We had separate components for the navbar, footer, ads, homepage, carousels, and single-video page.
+Even when the code quality was rough, Angular at least nudged us toward clear feature boundaries.
+
+That was probably the biggest practical win.
+The assignment did not require us to learn a framework, but using one made the project more useful than a plain static site would have been.
+
+## Team Reality
+
+The project also became a lesson in version control, whether everyone wanted that lesson or not.
+At one point, the preferred collaboration model was basically sending ZIP files through Discord.
+That is funny for about five minutes, then it becomes a tiny disaster generator.
+
+Eventually the project landed on GitHub, and I ended up being the person who had to stitch a lot of it together.
+The final codebase is not clean.
+Some naming is odd, some architecture is improvised, and some decisions are clearly shaped by deadline pressure.
+
+Still, moving the work into Git made the team project far more manageable.
+Even an imperfect repository was a massive upgrade over "final_final_v3.zip".
+
+## The Almost Easter Egg
+
+There is also a beautifully cursed commit in the history:
+`6ce0300 kappa chungus peter griffin rizzed up livy dunn made baby gronk looksmaxxed turned kai cenat into sigma by fanum tax`.
+
+I remembered there being some kind of easter egg where typing something in the app revealed something.
+After checking the code and history, there does not seem to be a real key-sequence handler in the current project.
+No Konami code, no `keydown` listener, no secret typed word hidden in a component.
+
+What did exist was funnier in a very frontend-project way.
+The landing page reacts to `/#premium` and `/#regular` URL fragments by scrolling to a plan, crossing out the old price, showing the discounted price, and highlighting the card.
+An older version of the ad component also read a value from localStorage to force which promotional ad appeared.
+
+So the "easter egg" was probably less "type a magic word" and more "know the weird URL or localStorage trick".
+That honestly fits the whole project perfectly.
+
+## Deployment
+
+The deployment story is simple but useful.
+The repo has a GitHub Actions workflow that installs dependencies with npm, builds the Angular app with `--base-href /StreamSphere/`, and publishes `.build/browser` to the `gh-pages` branch using `JamesIves/github-pages-deploy-action`.
+
+That gave the project a real public URL without adding infrastructure we did not need.
+For a frontend-only university project, GitHub Pages was the right level of seriousness.
+
+## Takeaway
+
+StreamSphere is a silly little class project, and I am not going to pretend otherwise.
+The premise was too basic for a fourth-semester assignment, the "backend" is local JSON, and the codebase carries all the scars of a team trying to assemble Angular under time pressure.
+
+But it still taught useful things.
+We practiced a real frontend framework, component boundaries, routing, guarded pages, mocked data, media playback, CI/CD, and the basic discipline of using Git instead of ZIP files.
+
+That makes it worth keeping in the portfolio as a snapshot of an early, chaotic, very educational group project.

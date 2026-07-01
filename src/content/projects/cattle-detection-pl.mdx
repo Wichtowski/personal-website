@@ -1,0 +1,85 @@
+---
+title: "Cattle Detection"
+description: "Pipeline detekcji krów i bawołów z Faster R-CNN, PyTorch Lightning, Albumentations i ewaluacją COCO, ukończony jako semi-project w trakcie przejścia w stronę AI Engineering."
+date: "2025-08-01"
+category: "ai"
+tags:
+  [
+    "Computer Vision",
+    "Object Detection",
+    "PyTorch",
+    "PyTorch Lightning",
+    "Faster R-CNN",
+    "Torchvision",
+    "Albumentations",
+    "Kaggle",
+    "COCO Metrics",
+  ]
+githubUrl: "https://github.com/Wichtowski/cattle_detect"
+status: "Ukończony"
+language: "pl"
+---
+
+## Opis projektu
+
+**Cattle Detection** był skupionym semi-project z computer vision ukończonym w trakcie mojego przejścia w stronę AI Engineering.
+Celem było wytrenowanie detektora obiektów, który potrafi znajdować bydło na zdjęciach i klasyfikować je jako krowy albo bawoły, a potem ocenić wynik normalnymi metrykami detekcji zamiast tylko patrzeć na kilka ładnych predykcji.
+
+Projekt żyje głównie w notebooku Kaggle i zawiera wytrenowany checkpoint PyTorch.
+Jest celowo kompaktowy, ale przechodzi przez cały cykl: przygotowanie datasetu, parsowanie etykiet, augmentację, transfer learning, trening, inferencję i ewaluację.
+
+## Zakres projektu
+
+Głównym modelem jest **Faster R-CNN z backbone'em ResNet50-FPN V2** z Torchvision.
+Końcowa głowica predykcyjna została podmieniona tak, żeby detektor pracował na trzech klasach: tło, krowa i bawół.
+
+Notebook zawiera:
+
+- parsowanie etykiet YOLO do bounding boxów Pascal VOC używanych przez modele detekcyjne Torchvision
+- mapowanie etykiet ze źródłowego datasetu na klasy cow i buffalo
+- podział 1,747 opisanych obrazów na zbiory train, validation i test
+- podwojenie zbioru treningowego przez augmentację w Albumentations
+- trening przez **PyTorch Lightning** z checkpointami, early stopping, mixed precision i gradient accumulation
+- inferencję na pojedynczym obrazie jako sanity check
+- ewaluację końcowego modelu przez COCO-style mAP, mAR, precision, recall, F1 i confusion matrix
+
+Wytrenowany checkpoint jest zapisany jako `cattle_detection_weights.pth`, więc projekt nie jest tylko szkicem w notebooku.
+Ma zapisany artefakt modelu, który można później wykorzystać do inferencji albo dalszego uporządkowania.
+
+## Setup treningowy
+
+Model był trenowany na Kaggle z GPU Tesla T4.
+Po podziale dataset miał 1,222 obrazy treningowe, 262 obrazy walidacyjne i 263 obrazy testowe.
+
+Ponieważ trening detekcji obiektów mocno obciąża pamięć GPU, setup używał batch size `4` z gradient accumulation `2`, co dawało efektywny batch size `8`.
+Obrazy były resize'owane do 512x512, a model trenował przez 30 epok z AdamW i schedulerem ReduceLROnPlateau.
+
+Augmentacja była ważna, bo dataset był niezbalansowany.
+W zbiorze treningowym było znacznie więcej instancji krów niż bawołów, więc pipeline augmentacji używał flipów, zmian jasności i kontrastu, przesunięć hue i saturation, blur, noise, zmian gamma, rotacji, skalowania i bezpiecznych cropów z bounding boxami, żeby model był mniej kruchy.
+
+## Wyniki
+
+Najlepszy checkpoint osiągnął validation loss `0.1601`.
+Na zbiorze testowym detektor osiągnął:
+
+- `0.7166` mAP przy IoU 0.50:0.95
+- `0.9102` mAP przy IoU 0.50
+- `0.8159` mAP przy IoU 0.75
+- `0.6920` per-class mAP dla krów
+- `0.7411` per-class mAP dla bawołów
+
+Dla dopasowanych detekcji powyżej progów IoU i confidence część klasyfikacyjna cow-vs-buffalo osiągnęła weighted F1 score `0.9844`.
+To przydatna liczba, ale mAP detekcji jest uczciwszą główną metryką, bo obejmuje też jakość lokalizacji i pominięte obiekty.
+
+## Kontekst
+
+Ten projekt był częścią mojego przejścia z ogólnej pracy software'owej w stronę AI Engineering.
+Celem było coś bardziej konkretnego niż tutorial: mały, ale kompletny workflow detekcji, w którym trzeba dotknąć praktycznych problemów computer vision, a nie tylko wywołać pretrained model.
+
+Najwięcej nauki było w pracy na styku elementów.
+W praktyce oznaczało to konwertowanie formatu etykiet, pilnowanie poprawności bounding boxów podczas augmentacji, dostosowanie pretrained detectora, zarządzanie pamięcią GPU, zapisywanie checkpointów i czytanie metryk tak, żeby odróżnić jakość klasyfikacji od jakości detekcji.
+
+## Podsumowanie
+
+Cattle Detection jest małym projektem, ale dobrze pokazuje typ AI Engineering, który ten semi-project miał przećwiczyć.
+Model jest ważny, ale tak samo ważne są pipeline danych, pętla treningowa, ewaluacja i dyscyplina mierzenia wyniku właściwymi metrykami.

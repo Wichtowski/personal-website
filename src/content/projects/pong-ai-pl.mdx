@@ -1,0 +1,68 @@
+---
+title: "Pong AI"
+description: "Mały projekt na zaliczenie przedmiotu Wstęp do Sztucznej Inteligencji, w którym użyliśmy NEAT i Pygame do trenowania paletek w Pongu przez kolejne generacje."
+date: "2023-06-24"
+category: "ai"
+tags: ["AI", "NEAT", "Pygame", "Python", "Sieci neuronowe", "Algorytmy ewolucyjne", "Game AI"]
+githubUrl: "https://github.com/Wichtowski/Pong-Ai"
+status: "Zarchiwizowany"
+language: "pl"
+---
+
+## Opis projektu
+
+**Pong AI** był projektem na zaliczenie przedmiotu Wstęp do Sztucznej Inteligencji.
+Zadanie polegało na wytrenowaniu modelu, który iteracyjnie będzie się udoskonalał i finalnie nauczy się grać w wybraną przez nas grę.
+
+Wybraliśmy Ponga częściowo ze względu na jego historię.
+To jedna z najwcześniejszych i najbardziej rozpoznawalnych gier komputerowych, a jej zasady są na tyle proste, że dało się skupić bardziej na części AI.
+
+Projekt jest małą implementacją w Pythonie opartą o **Pygame** i **NEAT**.
+Gra obsługuje dwie paletki, piłkę, punktację, kolizje i pętlę treningową, w której genomy grają przeciwko sobie przez kolejne generacje.
+
+## Jak to działa
+
+Projekt zawiera prostą implementację Ponga z osobnymi modułami dla piłki, paletek i pętli gry.
+Na tym jest dodany runner treningowy NEAT, który porównuje ze sobą pary genomów.
+
+Każda sieć neuronowa dostaje kompaktowy stan gry:
+
+- pozycję paletki
+- poziomą odległość od piłki
+- wysokość piłki
+
+Na podstawie tych wejść sieć decyduje, czy stać w miejscu, ruszyć się w górę, czy ruszyć się w dół.
+Niepoprawne ruchy paletki są karane, a fitness opiera się głównie na czasie przetrwania i liczbie udanych odbić.
+
+Repo zawiera też zapisane checkpointy i model `best.pickle` z treningu.
+Po treningu próbowaliśmy jeszcze pokonać ostatnią generację samodzielnie, co było chyba najzabawniejszą częścią projektu.
+
+## Dlaczego NEAT
+
+NEAT nie jest nowym ani modnym podejściem do AI.
+To starszy algorytm ewolucyjny, który rozwija topologię i wagi sieci neuronowych przez kolejne generacje.
+
+Właśnie dlatego pasował do tego zadania.
+Nie potrzebowaliśmy dużego setupu reinforcement learningu ani ciężkiego pipeline'u ML.
+Potrzebowaliśmy czegoś, co da się podpiąć pod pętlę gry bez robienia z tego overengineered projektu.
+
+Config NEAT został na początku wygenerowany z pomocą LLM-a, bo sami dopiero szukaliśmy praktycznego podejścia do trenowania.
+Potem potraktowaliśmy go jako punkt startowy i skupiliśmy się głównie na tym, żeby pętla treningowa działała.
+
+## Kontekst
+
+Na tym etapie studiów szczerze uważałem, że wymaganie od każdej grupy napisania własnej gry było overkillem.
+Wiele osób nie pisało jeszcze swobodnie poprawnego kodu, więc spodziewałem się, że sporo grup i tak weźmie część z grą z jakiegoś tutoriala na YouTube.
+
+Ja miałem łatwiej, bo miałem za sobą cztery lata technikum informatycznego, podobnie jak część moich znajomych.
+Dzięki temu sama implementacja gry nie była aż tak stresująca, ale część treningowa nadal była dla nas nowa.
+
+Z perspektywy czasu to bardzo wczesny projekt AI.
+Nie jest szczególnie zaawansowany, ale był dobrym pierwszym kontaktem z trenowaniem czegoś, co zmienia swoje zachowanie w czasie, zamiast tylko wykonywać ręcznie napisane reguły.
+
+## Podsumowanie
+
+Pong AI był małym projektem zaliczeniowym, który wyszedł zabawniej, niż się spodziewałem.
+Dla poziomu zajęć był trochę overkillem, trochę improwizacją i jednym z moich pierwszych praktycznych zadań AI.
+
+Najfajniejsze było proste: po treningu na ekranie faktycznie było coś, co potrafiło grać.

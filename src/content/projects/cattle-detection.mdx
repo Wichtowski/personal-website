@@ -1,0 +1,85 @@
+---
+title: "Cattle Detection"
+description: "A cow-vs-buffalo object detection pipeline with Faster R-CNN, PyTorch Lightning, Albumentations, and COCO-style evaluation, completed as a semi-project during the transition toward AI Engineering."
+date: "2025-08-01"
+category: "ai"
+tags:
+  [
+    "Computer Vision",
+    "Object Detection",
+    "PyTorch",
+    "PyTorch Lightning",
+    "Faster R-CNN",
+    "Torchvision",
+    "Albumentations",
+    "Kaggle",
+    "COCO Metrics",
+  ]
+githubUrl: "https://github.com/Wichtowski/cattle_detect"
+status: "Completed"
+language: "en"
+---
+
+## Overview
+
+**Cattle Detection** was a focused computer vision semi-project completed during my transition toward AI Engineering.
+The goal was to train an object detector that could identify and classify cattle in images as either cows or buffaloes, then evaluate the result with proper detection metrics instead of only checking a few nice-looking predictions.
+
+The project lives mostly in a Kaggle notebook and includes a trained PyTorch checkpoint.
+It is intentionally compact, but it covers the full loop: dataset preparation, label parsing, augmentation, transfer learning, training, inference, and evaluation.
+
+## Project Scope
+
+The core model is **Faster R-CNN with a ResNet50-FPN V2 backbone** from Torchvision.
+The final predictor head was replaced so the detector could work with three classes: background, cow, and buffalo.
+
+The notebook pipeline includes:
+
+- parsing YOLO labels into Pascal VOC bounding boxes for Torchvision detection models
+- mapping the source dataset labels into cow and buffalo classes
+- splitting 1,747 labeled images into train, validation, and test sets
+- doubling the training set with Albumentations-based augmentation
+- training through **PyTorch Lightning** with checkpoints, early stopping, mixed precision, and gradient accumulation
+- running single-image inference as a sanity check
+- evaluating the final model with COCO-style mAP, mAR, precision, recall, F1, and a confusion matrix
+
+The trained checkpoint is stored as `cattle_detection_weights.pth`, so the project is not only a notebook sketch.
+It has a saved model artifact that can be reused for inference or future cleanup work.
+
+## Training Setup
+
+The model was trained on Kaggle with a Tesla T4 GPU.
+The dataset used 1,222 training images, 262 validation images, and 263 test images after splitting.
+
+Because detection training is memory-heavy, the setup used a batch size of 4 with gradient accumulation of 2, giving an effective batch size of 8.
+The input images were resized to 512x512, and the model trained for 30 epochs with AdamW and a ReduceLROnPlateau scheduler.
+
+The augmentation pass was important because the dataset is imbalanced.
+The training label distribution had many more cow instances than buffalo instances, so the augmentation pipeline used flips, brightness and contrast changes, hue and saturation shifts, blur, noise, gamma changes, rotation, scaling, and safe bounding-box crops to make the model less brittle.
+
+## Results
+
+The best checkpoint reached a validation loss of `0.1601`.
+On the test set, the detector reached:
+
+- `0.7166` mAP at IoU 0.50:0.95
+- `0.9102` mAP at IoU 0.50
+- `0.8159` mAP at IoU 0.75
+- `0.6920` per-class mAP for cows
+- `0.7411` per-class mAP for buffaloes
+
+For matched detections above the IoU and confidence thresholds, the cow-vs-buffalo classification part reached a weighted F1 score of `0.9844`.
+That number is useful, but the detection mAP is the more honest headline metric because it includes localization quality and missed objects.
+
+## Context
+
+This project was part of my move from general software work into AI Engineering.
+The goal was something more concrete than a tutorial: a small but complete detection workflow that touched the messy parts of computer vision, not only a pretrained model call.
+
+The useful learning was in the glue work.
+That meant converting label formats, keeping bounding boxes valid through augmentation, adapting a pretrained detector, managing GPU memory, saving checkpoints, and reading evaluation metrics carefully enough to separate classification quality from detection quality.
+
+## Takeaway
+
+Cattle Detection is a small project, but it captures the shape of AI Engineering work this semi-project was meant to practice.
+The model matters, but so do the data pipeline, training loop, evaluation setup, and the discipline to measure the result with the right metrics.

@@ -1,0 +1,68 @@
+---
+title: "Pong AI"
+description: "A small university project for an Introduction to Artificial Intelligence class, where we used NEAT and Pygame to train Pong paddles over several generations."
+date: "2023-06-24"
+category: "ai"
+tags: ["AI", "NEAT", "Pygame", "Python", "Neural Networks", "Evolutionary Algorithms", "Game AI"]
+githubUrl: "https://github.com/Wichtowski/Pong-Ai"
+status: "Archived"
+language: "en"
+---
+
+## Overview
+
+**Pong AI** was a university project for an Introduction to Artificial Intelligence class.
+The assignment was to train a model that would improve iteratively and eventually learn to play a game of our choice.
+
+We chose Pong partly because of its history.
+It is one of the earliest and most recognizable computer games, and its rules are simple enough that the AI part could stay as the main focus.
+
+The project is a small Python implementation built around **Pygame** and **NEAT**.
+It has two paddles, a ball, scoring, collisions, and a training loop where genomes play against each other across generations.
+
+## What It Does
+
+The code contains a simple Pong implementation with separate modules for the ball, paddles, and game loop.
+On top of that, there is a NEAT training runner that evaluates pairs of genomes against each other.
+
+Each neural network receives a compact game state:
+
+- the paddle position
+- the horizontal distance to the ball
+- the ball height
+
+From those inputs, the network chooses whether to stay still, move up, or move down.
+Invalid paddle moves are penalized, and fitness is based mainly on survival time and successful hits.
+
+The repo includes saved checkpoints and a `best.pickle` model from training.
+After training, we also tried to beat the last generation ourselves, which was probably the most entertaining part of the project.
+
+## Why NEAT
+
+NEAT is not a modern or trendy AI approach.
+It is an older evolutionary algorithm for evolving neural network topologies and weights over generations.
+
+That made it a reasonable fit for this assignment.
+We did not need a large reinforcement learning setup or a heavy ML pipeline.
+We needed something that could be wired into a game loop without turning the whole project into overengineering.
+
+The NEAT config was initially generated with help from an LLM, because at that point we were still figuring out how to approach training in practice.
+After that, we used it as a starting point and mostly focused on making the training loop work.
+
+## Context
+
+At that stage of university, I honestly thought requiring every group to write its own game was overkill.
+Most groups were still learning how to write correct code comfortably, so I expected many people to copy the game part from a tutorial anyway.
+
+I had an easier time because I already had four years of technical school experience behind me, and some of my friends were in a similar place.
+That made the game implementation less intimidating, but the training part was still new to us.
+
+Looking back, this is a very early AI project.
+It is not especially advanced, but it was a useful first contact with training something that changes its behavior over time instead of just following hand-written rules.
+
+## Takeaway
+
+Pong AI was a small class project that ended up being more fun than it probably should have been.
+It was a bit overkill for the course level, a bit improvised, and one of my first practical AI tasks.
+
+The nicest part was simple: after training, there was actually something on screen that could play back.
