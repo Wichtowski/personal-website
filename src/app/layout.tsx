@@ -4,7 +4,6 @@ import { ThemeProvider } from "@components/ThemeProvider";
 import { LanguageProvider } from "@context/LanguageContext";
 import { Navbar } from "@components/layout/Navbar";
 import { Footer } from "@components/layout/Footer";
-import { SlideScrollHandler } from "@components/layout/SlideScrollHandler";
 import { AppLayout } from "@components/layout/AppLayout";
 import { getProjects, getArticles } from "@lib/mdx";
 import "./globals.css";
@@ -39,7 +38,6 @@ export default async function RootLayout({
       <body className="h-screen w-screen overflow-hidden relative bg-background text-foreground transition-colors duration-300">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <LanguageProvider>
-            <SlideScrollHandler />
             <Navbar />
             <Footer />
             <AppLayout projects={getProjects()} articles={getArticles()}>

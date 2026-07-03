@@ -2,9 +2,7 @@
 
 import { useLanguage } from "@context/LanguageContext";
 import { ArticleMetadata } from "@lib/mdx";
-import { matchesArticleTag, normalizeArticleTag } from "@lib/article-tags";
 import { motion } from "framer-motion";
-import Link from "next/link";
 import {
   BlogArticleStack,
   BlogSectionHeader,
@@ -14,24 +12,13 @@ import {
 } from "./";
 interface BlogSectionProps {
   articles: ArticleMetadata[];
-  activeTag?: string;
 }
 
-export function BlogSection({ articles, activeTag }: BlogSectionProps) {
+export function BlogSection({ articles }: BlogSectionProps) {
   const { language, t } = useLanguage();
-  const normalizedActiveTag = activeTag ? normalizeArticleTag(activeTag) : null;
 
-  // Filter articles by active client language
   const filteredArticles = articles.filter((article) => {
-    if (article.language !== language) {
-      return false;
-    }
-
-    if (!normalizedActiveTag) {
-      return true;
-    }
-
-    return article.tags.some((tag) => matchesArticleTag(tag, normalizedActiveTag));
+    return article.language === language;
   });
 
   return (
@@ -50,21 +37,6 @@ export function BlogSection({ articles, activeTag }: BlogSectionProps) {
       >
         <BlogSectionHeader title={t.blog.title} subtitle={t.blog.subtitle} />
 
-        {activeTag ? (
-          <div className="mb-6 flex flex-wrap items-center gap-3 text-sm">
-            <span className="font-mono text-muted-foreground">
-              Filter: <span className="text-foreground">#{activeTag}</span>
-            </span>
-            <Link
-              href="/articles"
-              className="rounded-full border border-border/40 bg-background/80 px-3 py-1 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:border-primary/20 hover:text-foreground"
-            >
-              Clear filter
-            </Link>
-          </div>
-        ) : null}
-
-        {/* Article Stack */}
         {filteredArticles.length > 0 ? (
           <BlogArticleStack
             articles={filteredArticles}
@@ -74,9 +46,7 @@ export function BlogSection({ articles, activeTag }: BlogSectionProps) {
           />
         ) : (
           <div className="p-12 text-center border border-dashed border-border/60 rounded-2xl max-w-sm mx-auto">
-            <p className="text-sm text-muted-foreground font-mono">
-              {activeTag ? `No articles found for #${activeTag}.` : t.blog.noArticles}
-            </p>
+            <p className="text-sm text-muted-foreground font-mono">{t.blog.noArticles}</p>
           </div>
         )}
       </motion.div>

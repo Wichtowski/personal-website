@@ -3,6 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { FaSpotify } from "react-icons/fa";
+import { useTheme } from "next-themes";
 import { useLanguage } from "@context/LanguageContext";
 import type { LastFmNowPlaying } from "@lib/lastfm";
 import { CatsModal } from "./CatsModal";
@@ -43,6 +44,7 @@ function isLastFmNowPlaying(value: unknown): value is LastFmNowPlaying {
 
 export function HeroSpotifyNowPlaying({ nowPlaying }: HeroSpotifyNowPlayingProps) {
   const { t } = useLanguage();
+  const { resolvedTheme } = useTheme();
   const [isCatsModalOpen, setIsCatsModalOpen] = React.useState(false);
   const [currentNowPlaying, setCurrentNowPlaying] = React.useState<LastFmNowPlaying>(
     nowPlaying ?? createIdleNowPlaying(),
@@ -104,10 +106,17 @@ export function HeroSpotifyNowPlaying({ nowPlaying }: HeroSpotifyNowPlayingProps
     ? `${t.hero.listeningTo} ${safeNowPlaying.track}`
     : `${t.hero.listeningTo} ${t.hero.idleTrack}`;
   const subtitle = isLive ? (safeNowPlaying.artist ?? t.hero.lastFmLabel) : t.hero.idleArtist;
+  const isDarkTheme = resolvedTheme === "dark";
 
-  const cardClassName = isLive
-    ? "group inline-flex min-w-[18rem] items-center gap-4 rounded-2xl border border-emerald-400/35 bg-emerald-400/12 px-5 py-4 text-sm text-emerald-950 shadow-[0_0_0_1px_rgba(16,185,129,0.08),0_10px_30px_rgba(16,185,129,0.12)] backdrop-blur-md dark:text-emerald-50"
-    : "group inline-flex min-w-[18rem] items-center gap-4 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-5 py-4 text-sm text-emerald-900 shadow-[0_0_0_1px_rgba(16,185,129,0.06),0_10px_30px_rgba(16,185,129,0.10)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-400/45 hover:bg-emerald-400/14 hover:text-emerald-950 dark:text-emerald-50";
+  const cardClassName = isDarkTheme
+    ? isLive
+      ? "group inline-flex min-w-[18rem] items-center gap-4 rounded-2xl border border-emerald-400/35 bg-emerald-400/12 px-5 py-4 text-sm text-emerald-50 shadow-[0_0_0_1px_rgba(16,185,129,0.08),0_10px_30px_rgba(16,185,129,0.12)] backdrop-blur-md"
+      : "group inline-flex min-w-[18rem] items-center gap-4 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-5 py-4 text-sm text-emerald-50 shadow-[0_0_0_1px_rgba(16,185,129,0.06),0_10px_30px_rgba(16,185,129,0.10)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-400/45 hover:bg-emerald-400/14"
+    : isLive
+      ? "group inline-flex min-w-[18rem] items-center gap-4 rounded-2xl border border-emerald-500/35 bg-[#f7fffb] px-5 py-4 text-sm text-zinc-950 shadow-[0_0_0_1px_rgba(16,185,129,0.10),0_14px_34px_rgba(24,24,27,0.10)] backdrop-blur-md"
+      : "group inline-flex min-w-[18rem] items-center gap-4 rounded-2xl border border-emerald-500/35 bg-[#f7fffb] px-5 py-4 text-sm text-zinc-950 shadow-[0_0_0_1px_rgba(16,185,129,0.08),0_14px_34px_rgba(24,24,27,0.08)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-600/45 hover:bg-emerald-50";
+  const iconClassName = isDarkTheme ? "shrink-0 text-emerald-100" : "shrink-0 text-emerald-700";
+  const subtitleClassName = isDarkTheme ? "text-emerald-200/80" : "text-emerald-800/80";
 
   return (
     <div className="w-full flex flex-col items-center gap-4">
@@ -125,7 +134,7 @@ export function HeroSpotifyNowPlaying({ nowPlaying }: HeroSpotifyNowPlayingProps
               repeat: Infinity,
               ease: "linear",
             }}
-            className="shrink-0 text-emerald-600 dark:text-emerald-100"
+            className={iconClassName}
           >
             <FaSpotify size={30} />
           </motion.span>
@@ -133,7 +142,9 @@ export function HeroSpotifyNowPlaying({ nowPlaying }: HeroSpotifyNowPlayingProps
           <span className="flex min-w-0 flex-col items-start gap-0.5">
             <span className="truncate font-mono text-base font-semibold sm:text-lg">{title}</span>
             {subtitle ? (
-              <span className="truncate font-mono text-[11px] uppercase tracking-[0.24em] text-emerald-700/80 dark:text-emerald-200/80">
+              <span
+                className={`truncate font-mono text-[11px] uppercase tracking-[0.24em] ${subtitleClassName}`}
+              >
                 {subtitle}
               </span>
             ) : null}
@@ -147,16 +158,16 @@ export function HeroSpotifyNowPlaying({ nowPlaying }: HeroSpotifyNowPlayingProps
           aria-haspopup="dialog"
           aria-expanded={isCatsModalOpen}
         >
-          <motion.span className="shrink-0 text-emerald-700 transition-colors duration-300 group-hover:text-emerald-600 dark:text-emerald-200">
+          <motion.span className={iconClassName}>
             <FaSpotify size={24} />
           </motion.span>
 
           <span className="flex min-w-0 flex-col items-start gap-0.5">
-            <span className="truncate font-mono text-xs text-emerald-950 sm:text-sm dark:text-emerald-50">
-              {title}
-            </span>
+            <span className="truncate font-mono text-xs sm:text-sm">{title}</span>
             {subtitle ? (
-              <span className="truncate font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-700/75 dark:text-emerald-200/75">
+              <span
+                className={`truncate font-mono text-[10px] uppercase tracking-[0.2em] ${subtitleClassName}`}
+              >
                 {subtitle}
               </span>
             ) : null}

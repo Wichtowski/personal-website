@@ -1,4 +1,4 @@
-export function normalizeArticleTag(value: string) {
+export function normalizeContentTag(value: string) {
   return value
     .trim()
     .toLowerCase()
@@ -7,6 +7,9 @@ export function normalizeArticleTag(value: string) {
     .replace(/^-+|-+$/g, "");
 }
 
-export function matchesArticleTag(articleTag: string, filterTag: string) {
-  return normalizeArticleTag(articleTag) === normalizeArticleTag(filterTag);
+export function matchesContentTag(contentTag: string, filterTag: string) {
+  return normalizeContentTag(contentTag) === normalizeContentTag(filterTag);
 }
+
+export const normalizeArticleTag = normalizeContentTag;
+export const matchesArticleTag = matchesContentTag;
