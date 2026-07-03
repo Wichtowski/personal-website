@@ -73,7 +73,7 @@ export function PortfolioSection({ projects }: PortfolioSectionProps) {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div className="max-w-xl">
             <h2 className="flex flex-row items-center gap-2 text-3xl md:text-4xl font-extrabold text-foreground mb-3 tracking-tight">
-              <Folder size={36} className="text-primary animate-pulse shrink-0" />
+              <Folder size={56} className="text-primary shrink-0 mr-2" />
               {t.portfolio.title}
             </h2>
             <p className="text-sm text-muted-foreground">{t.portfolio.subtitle}</p>

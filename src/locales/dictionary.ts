@@ -25,6 +25,7 @@ export interface TranslationDict {
   techStack: {
     eyebrow: string;
     heading: string;
+    selectionHint: string;
     groups: Array<{
       key:
         | "ai-ml"
@@ -150,6 +151,7 @@ export const dictionaries: Record<Language, TranslationDict> = {
     techStack: {
       eyebrow: "tech stack",
       heading: "Tools I actually use",
+      selectionHint: "Select technologies, then use Explore to see matching projects and articles.",
       groups: [
         {
           key: "ai-ml",
@@ -273,7 +275,7 @@ export const dictionaries: Record<Language, TranslationDict> = {
       ai: "AI & ML",
       dev: "Software Eng",
       qa: "QA & Testing",
-      viewProject: "Read Case Study",
+      viewProject: "View Project",
       backToProjects: "Back to Projects",
     },
     blog: {
@@ -336,6 +338,8 @@ export const dictionaries: Record<Language, TranslationDict> = {
     techStack: {
       eyebrow: "Wybrany stack",
       heading: "Narzędzia, których używam",
+      selectionHint:
+        "Wybierz technologie, potem użyj Explore, żeby zobaczyć pasujące projekty i artykuły.",
       groups: [
         {
           key: "ai-ml",
@@ -454,7 +458,7 @@ export const dictionaries: Record<Language, TranslationDict> = {
       ai: "Sztuczna Inteligencja",
       dev: "Oprogramowanie",
       qa: "QA i Testy",
-      viewProject: "Przeczytaj case study",
+      viewProject: "Zobacz projekt",
       backToProjects: "← Powrót do projektów",
     },
     blog: {

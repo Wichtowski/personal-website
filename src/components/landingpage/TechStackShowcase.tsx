@@ -1,7 +1,9 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@context/LanguageContext";
 import type { TranslationDict } from "@locales/dictionary";
@@ -13,6 +15,7 @@ export function TechStackShowcase() {
   const { t } = useLanguage();
   const techStack = t.techStack;
   const { resolvedTheme } = useTheme();
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const isDarkTheme = resolvedTheme === "dark";
   const groupsByKey = new Map(techStack.groups.map((group) => [group.key, group]));
   const categoriesByKey = new Map(techStack.categories.map((category) => [category.key, category]));
@@ -43,6 +46,21 @@ export function TechStackShowcase() {
   }).filter((group): group is OrderedGroup => Boolean(group));
   const regularGroups = orderedGroups.filter((group) => group.sections.length > 1);
   const compactGroups = orderedGroups.filter((group) => group.sections.length === 1);
+  const selectedItemSet = useMemo(() => new Set(selectedItems), [selectedItems]);
+  const exploreHref = useMemo(
+    () => ({
+      pathname: "/explore",
+      query: { tags: selectedItems.join(",") },
+    }),
+    [selectedItems],
+  );
+  const toggleSelectedItem = (label: string) => {
+    setSelectedItems((currentItems) =>
+      currentItems.includes(label)
+        ? currentItems.filter((item) => item !== label)
+        : [...currentItems, label],
+    );
+  };
 
   return (
     <section className="w-full max-w-6xl mx-auto px-4 sm:px-6">
@@ -93,6 +111,14 @@ export function TechStackShowcase() {
             >
               {techStack.heading}
             </h2>
+            <p
+              className={cn(
+                "mt-3 max-w-xl text-sm leading-relaxed",
+                isDarkTheme ? "text-white/60" : "text-slate-600",
+              )}
+            >
+              {techStack.selectionHint}
+            </p>
           </div>
         </div>
 
@@ -225,36 +251,41 @@ export function TechStackShowcase() {
                           </div>
 
                           <div className="flex flex-1 flex-wrap content-start gap-1.5">
-                            {items.map((item, itemIndex) => (
-                              <Link
-                                key={item.label}
-                                href={{ pathname: "/articles", query: { tag: item.label } }}
-                                onClick={() => setNavDirection(1)}
-                                className={cn(
-                                  "group/item inline-flex max-w-full items-center gap-1.5 rounded-full border px-2.5 py-1 text-[13px] font-mono transition-all duration-300 whitespace-nowrap shadow-sm",
-                                  isDarkTheme
-                                    ? "border-white/10 bg-white/5 text-white/80 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/10 hover:text-white"
-                                    : "border-slate-200 bg-white/80 text-slate-700 hover:-translate-y-0.5 hover:border-primary/25 hover:bg-primary/8 hover:text-slate-950",
-                                  itemIndex === 0 && isFeatured
-                                    ? isDarkTheme
-                                      ? "bg-violet-500/15 border-violet-400/25 text-white"
-                                      : "bg-violet-500/10 border-violet-400/20 text-slate-950"
-                                    : "",
-                                )}
-                              >
-                                <span
+                            {items.map((item) => {
+                              const isSelected = selectedItemSet.has(item.label);
+
+                              return (
+                                <motion.button
+                                  key={item.label}
+                                  type="button"
+                                  aria-pressed={isSelected}
+                                  onClick={() => toggleSelectedItem(item.label)}
                                   className={cn(
-                                    "flex h-[1.375rem] w-[1.375rem] items-center justify-center rounded-[0.4rem]",
+                                    "group/item inline-flex max-w-full items-center gap-1.5 rounded-full border px-2.5 py-1 text-[13px] font-mono transition-all duration-300 whitespace-nowrap shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+                                    isDarkTheme
+                                      ? "border-white/10 bg-white/5 text-white/80 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/10 hover:text-white"
+                                      : "border-slate-200 bg-white/80 text-slate-700 hover:-translate-y-0.5 hover:border-primary/25 hover:bg-primary/8 hover:text-slate-950",
+                                    isSelected
+                                      ? isDarkTheme
+                                        ? "border-primary/60 bg-primary/30 text-white shadow-lg shadow-primary/20 ring-1 ring-primary/25"
+                                        : "border-primary/60 bg-primary/20 text-slate-950 shadow-lg shadow-primary/20 ring-1 ring-primary/25"
+                                      : "",
                                   )}
                                 >
-                                  <item.icon
-                                    size={item.iconSize ?? 18}
-                                    className={cn("shrink-0", item.iconClassName)}
-                                  />
-                                </span>
-                                <span>{item.label}</span>
-                              </Link>
-                            ))}
+                                  <span
+                                    className={cn(
+                                      "flex h-[1.375rem] w-[1.375rem] items-center justify-center rounded-[0.4rem]",
+                                    )}
+                                  >
+                                    <item.icon
+                                      size={item.iconSize ?? 18}
+                                      className={cn("shrink-0", item.iconClassName)}
+                                    />
+                                  </span>
+                                  <span>{item.label}</span>
+                                </motion.button>
+                              );
+                            })}
                           </div>
 
                           {isFeatured ? (
@@ -374,36 +405,41 @@ export function TechStackShowcase() {
                           </div>
 
                           <div className="flex flex-1 flex-wrap content-start gap-1.5">
-                            {items.map((item, itemIndex) => (
-                              <Link
-                                key={item.label}
-                                href={{ pathname: "/articles", query: { tag: item.label } }}
-                                onClick={() => setNavDirection(1)}
-                                className={cn(
-                                  "group/item inline-flex max-w-full items-center gap-1.5 rounded-full border px-2.5 py-1 text-[13px] font-mono transition-all duration-300 whitespace-nowrap shadow-sm",
-                                  isDarkTheme
-                                    ? "border-white/10 bg-white/5 text-white/80 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/10 hover:text-white"
-                                    : "border-slate-200 bg-white/80 text-slate-700 hover:-translate-y-0.5 hover:border-primary/25 hover:bg-primary/8 hover:text-slate-950",
-                                  itemIndex === 0 && isFeatured
-                                    ? isDarkTheme
-                                      ? "bg-violet-500/15 border-violet-400/25 text-white"
-                                      : "bg-violet-500/10 border-violet-400/20 text-slate-950"
-                                    : "",
-                                )}
-                              >
-                                <span
+                            {items.map((item) => {
+                              const isSelected = selectedItemSet.has(item.label);
+
+                              return (
+                                <motion.button
+                                  key={item.label}
+                                  type="button"
+                                  aria-pressed={isSelected}
+                                  onClick={() => toggleSelectedItem(item.label)}
                                   className={cn(
-                                    "flex h-[1.375rem] w-[1.375rem] items-center justify-center rounded-[0.4rem]",
+                                    "group/item inline-flex max-w-full items-center gap-1.5 rounded-full border px-2.5 py-1 text-[13px] font-mono transition-all duration-300 whitespace-nowrap shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+                                    isDarkTheme
+                                      ? "border-white/10 bg-white/5 text-white/80 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/10 hover:text-white"
+                                      : "border-slate-200 bg-white/80 text-slate-700 hover:-translate-y-0.5 hover:border-primary/25 hover:bg-primary/8 hover:text-slate-950",
+                                    isSelected
+                                      ? isDarkTheme
+                                        ? "border-primary/60 bg-primary/30 text-white shadow-lg shadow-primary/20 ring-1 ring-primary/25"
+                                        : "border-primary/60 bg-primary/20 text-slate-950 shadow-lg shadow-primary/20 ring-1 ring-primary/25"
+                                      : "",
                                   )}
                                 >
-                                  <item.icon
-                                    size={item.iconSize ?? 18}
-                                    className={cn("shrink-0", item.iconClassName)}
-                                  />
-                                </span>
-                                <span>{item.label}</span>
-                              </Link>
-                            ))}
+                                  <span
+                                    className={cn(
+                                      "flex h-[1.375rem] w-[1.375rem] items-center justify-center rounded-[0.4rem]",
+                                    )}
+                                  >
+                                    <item.icon
+                                      size={item.iconSize ?? 18}
+                                      className={cn("shrink-0", item.iconClassName)}
+                                    />
+                                  </span>
+                                  <span>{item.label}</span>
+                                </motion.button>
+                              );
+                            })}
                           </div>
 
                           {isFeatured ? (
@@ -426,6 +462,29 @@ export function TechStackShowcase() {
           })}
         </div>
       </div>
+
+      {selectedItems.length > 0 ? (
+        <motion.div
+          initial={{ opacity: 0, x: "calc(100% + 2rem)" }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ type: "spring", stiffness: 170, damping: 24, mass: 0.9 }}
+          className="fixed bottom-24 right-6 z-50 md:bottom-28 md:right-8"
+        >
+          <Link
+            href={exploreHref}
+            onClick={() => setNavDirection(1)}
+            className={cn(
+              "inline-flex items-center gap-2.5 rounded-full border px-6 py-3.5 font-mono text-sm font-bold uppercase tracking-[0.2em] shadow-lg backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+              isDarkTheme
+                ? "border-white/15 bg-[#07070a]/90 text-white shadow-black/30 hover:border-white/25 hover:bg-[#101014]/95"
+                : "border-primary/20 bg-white/90 text-slate-950 shadow-slate-900/10 hover:border-primary/35 hover:bg-white",
+            )}
+          >
+            <span>Explore</span>
+            <ArrowRight size={16} />
+          </Link>
+        </motion.div>
+      ) : null}
     </section>
   );
 }

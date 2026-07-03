@@ -151,7 +151,7 @@ export const TECH_STACK_SECTIONS: readonly TechStackSection[] = [
       darkAccentClassName: "from-sky-500/20 via-cyan-500/10 to-transparent",
     },
     items: [
-      { label: "YOLO", icon: SiYolo, iconClassName: "text-[#FFCB05]" },
+      { label: "YOLO", icon: SiYolo, iconClassName: "text-[#042AFF]" },
       { label: "OpenCV", icon: SiOpencv, iconClassName: "text-[#5C3EE8]" },
       { label: "Faster R-CNN", icon: Boxes, iconClassName: "text-sky-400" },
       { label: "RCNN", icon: SearchCheck, iconClassName: "text-cyan-400" },

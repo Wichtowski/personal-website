@@ -9,14 +9,16 @@ import { getStatusConfig } from "@lib/status";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ from?: string; tags?: string }>;
 }
 
 export async function generateStaticParams() {
   return getProjectSlugs().map((slug) => ({ slug }));
 }
 
-export default async function ProjectPage({ params }: PageProps) {
+export default async function ProjectPage({ params, searchParams }: PageProps) {
   const resolvedParams = await params;
+  const { from, tags } = await searchParams;
   const project = getProjectBySlug(resolvedParams.slug);
 
   if (!project) {
@@ -26,17 +28,25 @@ export default async function ProjectPage({ params }: PageProps) {
   const { metadata, Component } = project;
   const t = dictionaries[(metadata.language as Language) ?? "en"];
   const statusConfig = getStatusConfig(metadata.status, metadata.language);
+  const backHref =
+    from === "explore" && tags
+      ? {
+          pathname: "/explore",
+          query: { tags },
+        }
+      : "/portfolio";
+  const backLabel = from === "explore" && tags ? "Back to Explore" : t.portfolio.backToProjects;
 
   return (
     <main className="h-full overflow-y-auto no-scrollbar py-24 bg-background">
       <div className="max-w-4xl mx-auto px-6">
         {/* Back Button */}
         <Link
-          href="/portfolio"
+          href={backHref}
           className="inline-flex items-center gap-2 text-sm font-mono font-bold text-muted-foreground hover:text-primary transition-colors mb-12 focus:outline-none"
         >
           <ArrowLeft size={16} />
-          {t.portfolio.backToProjects}
+          {backLabel}
         </Link>
 
         {/* Article Header */}

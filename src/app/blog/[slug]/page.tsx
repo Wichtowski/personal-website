@@ -7,14 +7,16 @@ import { dictionaries, Language } from "@locales/dictionary";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ from?: string; tags?: string }>;
 }
 
 export async function generateStaticParams() {
   return getArticleSlugs().map((slug) => ({ slug }));
 }
 
-export default async function ArticlePage({ params }: PageProps) {
+export default async function ArticlePage({ params, searchParams }: PageProps) {
   const resolvedParams = await params;
+  const { from, tags } = await searchParams;
   const article = getArticleBySlug(resolvedParams.slug);
 
   if (!article) {
@@ -23,17 +25,25 @@ export default async function ArticlePage({ params }: PageProps) {
 
   const { metadata, Component } = article;
   const t = dictionaries[(metadata.language as Language) ?? "en"];
+  const backHref =
+    from === "explore" && tags
+      ? {
+          pathname: "/explore",
+          query: { tags },
+        }
+      : "/articles";
+  const backLabel = from === "explore" && tags ? "Back to Explore" : t.blog.backToArticles;
 
   return (
     <main className="h-full overflow-y-auto no-scrollbar py-24 bg-background">
       <div className="max-w-4xl mx-auto px-6">
         {/* Back Button */}
         <Link
-          href="/articles"
+          href={backHref}
           className="inline-flex items-center gap-2 text-sm font-mono font-bold text-muted-foreground hover:text-primary transition-colors mb-12 focus:outline-none"
         >
           <ArrowLeft size={16} />
-          {t.blog.backToArticles}
+          {backLabel}
         </Link>
 
         {/* Article Header */}

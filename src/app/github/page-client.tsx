@@ -174,7 +174,7 @@ export default function GithubPageClient({ initialData }: GithubPageClientProps)
       >
         <div className="text-left md:text-center max-w-3xl md:mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-4 tracking-tight flex items-center justify-start md:justify-center gap-3">
-            <Activity size={36} className="text-primary animate-pulse shrink-0" />
+            <Activity size={56} className="text-primary shrink-0 mr-2" />
             {t.github.title}
           </h2>
 
