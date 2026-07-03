@@ -1,0 +1,109 @@
+---
+title: "Dice Detector"
+description: "A computer vision project for reading physical tabletop RPG dice from a camera, managing multi-stage rolls, correcting uncertain detections, and sending confirmed results into Foundry VTT."
+date: "2026-07-03"
+category: "ai"
+tags:
+  [
+    "Computer Vision",
+    "OpenCV",
+    "FastAPI",
+    "WebSockets",
+    "Pydantic",
+    "React",
+    "TypeScript",
+    "Blender",
+    "Synthetic Data",
+    "Foundry VTT",
+    "Tabletop RPG",
+  ]
+githubUrl: "https://github.com/Wichtowski/dice_detector"
+status: "On Hold"
+language: "en"
+---
+
+## Overview
+
+**Dice Detector** is an experiment around a very specific tabletop problem: reading real physical dice from a camera and turning them into usable digital rolls.
+The goal was not just to classify a single die in a clean image.
+I wanted a local tool that could watch a dice tray, detect common RPG dice, handle uncertain readings, support formulas such as `2d20 + 2d4`, and pass confirmed results into **Foundry VTT**.
+
+The project combines a Python backend, a React annotation interface, synthetic data generation in Blender, and a small Foundry companion module.
+It sits somewhere between computer vision research prototype and local tabletop utility.
+
+## What I Built
+
+The backend is a **FastAPI** application built around typed Pydantic models for dice, roll sessions, modifiers, and application configuration.
+It exposes REST endpoints for configuration, modifier presets, roll lifecycle actions, manual rolls, and health/status checks.
+It also exposes a WebSocket endpoint for real-time session updates.
+
+The roll model supports:
+
+- D4, D6, D8, D10, D12, D20, and D100 dice types
+- parsed roll formulas with static bonuses
+- multi-stage collection when the formula needs more dice than are physically available
+- accepted and rejected dice per stage
+- manual correction for low-confidence or ambiguous detections
+- confirmation before a roll result is finalized
+
+That roll-session layer was useful because it separated the tabletop workflow from the vision work.
+Even if the detector was not reliable enough yet, the application still had a clear model for collecting, correcting, and confirming a roll.
+
+## Annotation Tooling
+
+I also built a **React and TypeScript annotator UI** for creating training data.
+The interface supports bounding boxes, dice type and value metadata, ambiguity flags, verification mode, image navigation, cropping, scaling, upload, and batch annotation flows.
+
+The backend annotator API serves images, stores annotation JSON, tracks whether images are annotated or verified, and can organize batch folders by dice type.
+That made the dataset work less painful than editing labels by hand, especially for dice where orientation, ambiguous values, and small face differences matter.
+
+This part became one of the more practical pieces of the project.
+Dice recognition is only partly a model problem.
+The annoying part is getting enough clean, consistent examples with boxes, values, and edge-case metadata.
+
+## Synthetic Data
+
+The repository also contains a Blender-based synthetic data pipeline.
+It uses a dice scene, texture assets, generation configs, and scripts for rendering labeled dice images.
+The generator can run through Blender in background mode, resume around gaps in existing output, split work across multiple workers, and optionally create annotated preview images.
+
+I added helper scripts for checking generated data gaps and converting annotations into YOLO label format.
+The idea was to bootstrap a dataset before relying only on manually captured camera images.
+
+Synthetic dice data is attractive because it gives control over lighting, positions, dice types, and camera angles.
+It is also risky because the model can learn synthetic artifacts instead of the real visual mess of a physical desk, shadows, glossy dice, glare, and imperfect camera focus.
+That gap is one of the reasons the project is paused instead of presented as a finished detector.
+
+## Foundry Integration
+
+The project includes a small **Foundry VTT module** and local integration surface for getting confirmed roll results into a game session.
+The intended flow was:
+
+- capture or manually submit dice results locally
+- confirm uncertain values when needed
+- format the roll outcome
+- send it into Foundry as part of the tabletop session
+
+That integration mattered because the project was never meant to be a standalone computer vision demo.
+The interesting product idea was a physical-to-digital bridge: roll real dice, keep the tactile table experience, but still update the virtual tabletop cleanly.
+
+## Current State
+
+Dice Detector is on hold.
+The repo has a solid skeleton for the local API, roll-session domain model, annotation workflow, Foundry module, and synthetic dataset generation, but the actual end-to-end vision reliability still needs more work before it deserves to be treated as complete.
+
+The main unfinished areas are the hardest ones:
+
+- robust camera detection across real lighting conditions
+- reliable value recognition for differently shaped dice
+- D4 orientation and 6/9 ambiguity handling
+- enough real-world labeled data to validate the model honestly
+- a smoother user-facing loop between camera capture, correction, confirmation, and Foundry output
+
+I like the project because it is messy in the right way.
+It forces the software to deal with physical objects, inconsistent camera input, tabletop workflows, and user correction instead of pretending computer vision happens in a clean notebook.
+
+## Takeaway
+
+Dice Detector is a useful snapshot of the kind of AI tooling I find interesting: not just model training, but the full product loop around it.
+The valuable work is in the boundary between data collection, annotation UX, domain modeling, local APIs, and the final workflow where a person can correct the system when reality is less clean than the model expects.

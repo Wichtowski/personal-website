@@ -1,0 +1,119 @@
+---
+title: "Dice Detector"
+description: "Projekt computer vision do odczytywania fizycznych kości do tabletop RPG z kamery, obsługi wieloetapowych rzutów, poprawiania niepewnych detekcji i wysyłania potwierdzonych wyników do Foundry VTT."
+date: "2026-07-03"
+category: "ai"
+tags:
+  [
+    "Computer Vision",
+    "OpenCV",
+    "FastAPI",
+    "WebSockets",
+    "Pydantic",
+    "React",
+    "TypeScript",
+    "Blender",
+    "Dane syntetyczne",
+    "Foundry VTT",
+    "Tabletop RPG",
+  ]
+githubUrl: "https://github.com/Wichtowski/dice_detector"
+status: "Prototype"
+language: "pl"
+---
+
+## Przegląd
+
+**Dice Detector** to eksperyment dotyczący bardzo konkretnego problemu związanego z grami tabletop: odczytywania prawdziwych, fizycznych kości z kamery i zamieniania ich wyników na użyteczne rzuty cyfrowe.
+
+Celem nie było tylko sklasyfikowanie jednej kości na czystym zdjęciu. Chciałem stworzyć lokalne narzędzie, które mogłoby obserwować tackę na kości, wykrywać popularne kości RPG, obsługiwać niepewne odczyty, wspierać formuły takie jak `2d20 + 2d4` i przekazywać potwierdzone wyniki do **Foundry VTT**.
+
+Projekt łączy backend w Pythonie, interfejs do anotacji w React, generowanie danych syntetycznych w Blenderze oraz mały moduł pomocniczy do Foundry. Jest czymś pomiędzy prototypem badawczym z zakresu computer vision a lokalnym narzędziem użytkowym do sesji tabletop.
+
+## Co zbudowałem
+
+Backend to aplikacja oparta o **FastAPI**, zbudowana wokół typowanych modeli Pydantic dla kości, sesji rzutów, modyfikatorów i konfiguracji aplikacji.
+
+Udostępnia endpointy REST do konfiguracji, presetów modyfikatorów, akcji związanych z cyklem życia rzutu, rzutów manualnych oraz sprawdzania stanu i zdrowia aplikacji. Oprócz tego posiada endpoint WebSocket do aktualizacji sesji w czasie rzeczywistym.
+
+Model rzutu obsługuje:
+
+- kości typu D4, D6, D8, D10, D12, D20 i D100
+- parsowanie formuł rzutów ze stałymi bonusami
+- wieloetapowe zbieranie wyników, gdy formuła wymaga większej liczby kości niż jest fizycznie dostępna
+- zaakceptowane i odrzucone kości na każdym etapie
+- ręczną korektę detekcji o niskiej pewności lub niejednoznacznym wyniku
+- potwierdzenie przed finalizacją wyniku rzutu
+
+Ta warstwa sesji rzutów okazała się przydatna, ponieważ oddzielała workflow tabletop od samej pracy nad detekcją obrazu.
+
+Nawet jeśli sam detektor wymaga dalszego dopracowania, aplikacja ma jasny model zbierania, poprawiania i potwierdzania rzutu.
+
+## Narzędzie do anotacji
+
+Zbudowałem również interfejs do anotacji w **React i TypeScript**, przeznaczony do tworzenia danych treningowych.
+
+Interfejs obsługuje bounding boxy, metadane dotyczące typu i wartości kości, oznaczanie niejednoznaczności, tryb weryfikacji, nawigację między obrazami, kadrowanie, skalowanie, upload oraz przepływy do anotacji wsadowej.
+
+Backendowe API annotatora serwuje obrazy, zapisuje anotacje w formacie JSON, śledzi, czy obrazy zostały opisane lub zweryfikowane, i potrafi organizować foldery wsadowe według typu kości.
+
+Dzięki temu praca nad datasetem była mniej uciążliwa niż ręczne edytowanie etykiet, szczególnie w przypadku kości, gdzie orientacja, niejednoznaczne wartości i małe różnice na ściankach mają znaczenie.
+
+Ta część stała się jednym z bardziej praktycznych elementów projektu.
+
+Rozpoznawanie kości tylko częściowo jest problemem modelu. Najbardziej irytującą częścią jest zebranie wystarczającej liczby czystych, spójnych przykładów z bounding boxami, wartościami i metadanymi dotyczącymi przypadków brzegowych.
+
+## Dane syntetyczne
+
+Repozytorium zawiera również pipeline do generowania danych syntetycznych oparty o Blendera.
+
+Wykorzystuje on scenę z kośćmi, assety tekstur, konfiguracje generowania oraz skrypty do renderowania oznaczonych obrazów kości.
+
+Generator może działać przez Blendera w trybie background, wznawiać pracę w miejscach, gdzie istnieją luki w wygenerowanych danych, dzielić zadania między wielu workerów i opcjonalnie tworzyć obrazy podglądowe z naniesionymi anotacjami.
+
+Dodałem też skrypty pomocnicze do sprawdzania luk w wygenerowanych danych oraz konwertowania anotacji do formatu etykiet YOLO.
+
+Pomysł polegał na tym, żeby zbudować początkowy dataset, zanim oprę się wyłącznie na ręcznie nagranych obrazach z kamery.
+
+Syntetyczne dane kości są atrakcyjne, ponieważ dają kontrolę nad oświetleniem, pozycjami, typami kości i kątami kamery.
+
+Są jednak również ryzykowne, ponieważ model może nauczyć się artefaktów syntetycznych zamiast prawdziwego wizualnego bałaganu fizycznego biurka: cieni, błyszczących kości, odblasków i nieidealnego focusu kamery.
+
+Ta luka między danymi syntetycznymi a rzeczywistymi jest jednym z głównych wyzwań w projekcie.
+
+## Integracja z Foundry
+
+Projekt zawiera mały moduł do **Foundry VTT** oraz lokalną warstwę integracyjną służącą do przekazywania potwierdzonych wyników rzutów do sesji gry.
+
+Docelowy przepływ wyglądał następująco:
+
+- lokalne przechwycenie lub ręczne podanie wyników kości
+- potwierdzenie niepewnych wartości, jeśli jest to potrzebne
+- sformatowanie wyniku rzutu
+- wysłanie go do Foundry jako części sesji tabletop
+
+Ta integracja była ważna, ponieważ projekt nigdy nie miał być samodzielnym demo computer vision.
+
+Ciekawym pomysłem produktowym był most między światem fizycznym i cyfrowym: rzucasz prawdziwymi kośćmi, zachowujesz dotykowe doświadczenie gry przy stole, ale jednocześnie czysto aktualizujesz wynik w wirtualnym tabletopie.
+
+## Obecny stan
+
+Repozytorium ma solidny szkielet lokalnego API, model domenowy sesji rzutów, workflow anotacji, moduł Foundry oraz generator syntetycznego datasetu.
+
+Najważniejsze obszary wymagające dalszego dopracowania to:
+
+- solidna detekcja z kamery w różnych rzeczywistych warunkach oświetleniowych
+- niezawodne rozpoznawanie wartości dla kości o różnych kształtach
+- obsługa orientacji D4 oraz niejednoznaczności 6/9
+- wystarczająca ilość oznaczonych danych rzeczywistych, żeby uczciwie zwalidować model
+- płynniejsza pętla użytkownika między obrazem z kamery, korektą, potwierdzeniem i wysłaniem wyniku do Foundry
+
+Lubię ten projekt, ponieważ jest „brudny” w dobrym sensie.
+
+Zmusza oprogramowanie do radzenia sobie z fizycznymi obiektami, niespójnym obrazem z kamery, workflow tabletop i korektą po stronie użytkownika, zamiast udawać, że computer vision zawsze dzieje się w czystym notebooku.
+
+## Wnioski
+
+Dice Detector jest dobrym przykładem typu narzędzi AI, które mnie interesują: nie tylko samo trenowanie modelu, ale cały produktowy workflow wokół niego.
+
+Największa wartość znajduje się na granicy zbierania danych, UX anotacji, modelowania domeny, lokalnych API i końcowego procesu, w którym człowiek może poprawić system wtedy, gdy rzeczywistość okazuje się mniej czysta niż oczekuje tego model.
