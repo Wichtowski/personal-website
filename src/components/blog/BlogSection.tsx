@@ -10,6 +10,7 @@ import {
   itemVariants,
   slideDirectionVariants,
 } from "./";
+import { Footer } from "@components/layout/Footer";
 interface BlogSectionProps {
   articles: ArticleMetadata[];
 }
@@ -24,7 +25,7 @@ export function BlogSection({ articles }: BlogSectionProps) {
   return (
     <section
       id="articles"
-      className="w-screen h-full overflow-y-auto no-scrollbar flex flex-col bg-background/50 border-r border-border/40 relative pt-6 pb-20 md:py-32"
+      className="w-screen h-full overflow-y-auto no-scrollbar flex flex-col bg-background/50 border-r border-border/40 relative pt-6 pb-4 md:pt-32"
     >
       <div className="absolute inset-0 bg-radial-gradient from-primary/3 via-transparent to-transparent -z-10" />
 
@@ -50,6 +51,7 @@ export function BlogSection({ articles }: BlogSectionProps) {
           </div>
         )}
       </motion.div>
+      <Footer />
     </section>
   );
 }

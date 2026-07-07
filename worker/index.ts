@@ -32,6 +32,7 @@ interface Env {
   ASSETS: Fetcher;
   LASTFM_API_KEY?: string;
   LASTFM_USERNAME?: string;
+  PERSONAL_WEBSITE_KV: KVNamespace;
   IMAGES: {
     input(stream: ReadableStream): {
       transform(options: Record<string, unknown>): {
@@ -129,6 +130,170 @@ export default {
         console.error(error);
 
         return jsonLastFmResponse(createFallbackLastFmNowPlaying(), "BYPASS", 502);
+      }
+    }
+
+    // Endorsements GET
+    if (url.pathname === "/api/endorsements" && request.method === "GET") {
+      const targetId = url.searchParams.get("targetId");
+      if (!targetId) {
+        return Response.json({ error: "Missing targetId" }, { status: 400 });
+      }
+      try {
+        const countStr = await env.PERSONAL_WEBSITE_KV.get(`endorsements:${targetId}`);
+        const count = countStr ? parseInt(countStr, 10) : 0;
+        return Response.json({ count });
+      } catch (error) {
+        console.error("Worker KV Endorsements GET error:", error);
+        return Response.json({ error: "KV read error" }, { status: 500 });
+      }
+    }
+
+    // Endorsements POST
+    if (url.pathname === "/api/endorsements" && request.method === "POST") {
+      try {
+        const body = (await request.json()) as { targetId?: string; action?: string };
+        const { targetId, action } = body;
+        if (!targetId) {
+          return Response.json({ error: "Missing targetId" }, { status: 400 });
+        }
+        if (action !== "endorse" && action !== "unendorse") {
+          return Response.json({ error: "Invalid action" }, { status: 400 });
+        }
+        const key = `endorsements:${targetId}`;
+        const countStr = await env.PERSONAL_WEBSITE_KV.get(key);
+        const count = countStr ? parseInt(countStr, 10) : 0;
+
+        let newCount = count;
+        if (action === "endorse") {
+          newCount = count + 1;
+        } else if (action === "unendorse") {
+          newCount = Math.max(0, count - 1);
+        }
+
+        await env.PERSONAL_WEBSITE_KV.put(key, String(newCount));
+        return Response.json({ count: newCount });
+      } catch (error) {
+        console.error("Worker KV Endorsements POST error:", error);
+        return Response.json({ error: "KV write error" }, { status: 500 });
+      }
+    }
+
+    // Comments GET
+    if (url.pathname === "/api/comments" && request.method === "GET") {
+      const targetId = url.searchParams.get("targetId");
+      if (!targetId) {
+        return Response.json({ error: "Missing targetId" }, { status: 400 });
+      }
+      try {
+        const commentsStr = await env.PERSONAL_WEBSITE_KV.get(`comments:${targetId}`);
+        const rawComments = commentsStr
+          ? (JSON.parse(commentsStr) as Array<{
+              id: string;
+              email: string;
+              username?: string;
+              body: string;
+              createdAt: string;
+            }>)
+          : [];
+        const sanitizedComments = rawComments.map((c) => {
+          const hasUsername = c.username && c.username.trim().length > 0;
+          return {
+            id: c.id,
+            displayName: hasUsername && c.username ? c.username.trim() : c.email.trim(),
+            body: c.body,
+            createdAt: c.createdAt,
+          };
+        });
+        return Response.json({ comments: sanitizedComments });
+      } catch (error) {
+        console.error("Worker KV Comments GET error:", error);
+        return Response.json({ error: "KV read error" }, { status: 500 });
+      }
+    }
+
+    // Comments POST
+    if (url.pathname === "/api/comments" && request.method === "POST") {
+      try {
+        const body = (await request.json()) as {
+          targetId?: string;
+          email?: string;
+          username?: string;
+          comment?: string;
+        };
+        const { targetId, email, username, comment } = body;
+        if (!targetId) {
+          return Response.json({ error: "Missing targetId" }, { status: 400 });
+        }
+        if (!email || typeof email !== "string" || !email.includes("@")) {
+          return Response.json({ error: "Invalid email address" }, { status: 400 });
+        }
+        if (!comment || typeof comment !== "string" || comment.trim().length === 0) {
+          return Response.json({ error: "Comment body cannot be empty" }, { status: 400 });
+        }
+
+        const ipHeader = request.headers.get("cf-connecting-ip") || "local";
+        const ip = ipHeader.split(",")[0].trim();
+
+        // Rate limiting: check if this email or IP has commented in the last 20 minutes
+        const trimmedEmail = email.toLowerCase().trim();
+        const emailKey = `ratelimit:comment:email:${trimmedEmail}`;
+        const ipKey = `ratelimit:comment:ip:${ip}`;
+
+        const [emailLimit, ipLimit] = await Promise.all([
+          env.PERSONAL_WEBSITE_KV.get(emailKey),
+          env.PERSONAL_WEBSITE_KV.get(ipKey),
+        ]);
+
+        if (emailLimit || ipLimit) {
+          return Response.json(
+            { error: "You can only submit one comment every 20 minutes" },
+            { status: 429 },
+          );
+        }
+
+        const key = `comments:${targetId}`;
+        const commentsStr = await env.PERSONAL_WEBSITE_KV.get(key);
+        const rawComments = commentsStr
+          ? (JSON.parse(commentsStr) as Array<{
+              id: string;
+              email: string;
+              username?: string;
+              body: string;
+              createdAt: string;
+            }>)
+          : [];
+
+        const newComment = {
+          id: crypto.randomUUID(),
+          email: email.trim(),
+          username: username ? username.trim() : "",
+          body: comment.trim(),
+          createdAt: new Date().toISOString(),
+        };
+
+        rawComments.push(newComment);
+        await env.PERSONAL_WEBSITE_KV.put(key, JSON.stringify(rawComments));
+
+        // Persist rate limit for 20 minutes (1200 seconds)
+        const LIMIT_TTL = 20 * 60;
+        await Promise.all([
+          env.PERSONAL_WEBSITE_KV.put(emailKey, "1", { expirationTtl: LIMIT_TTL }),
+          env.PERSONAL_WEBSITE_KV.put(ipKey, "1", { expirationTtl: LIMIT_TTL }),
+        ]);
+
+        return Response.json({
+          success: true,
+          comment: {
+            id: newComment.id,
+            displayName: newComment.username || newComment.email,
+            body: newComment.body,
+            createdAt: newComment.createdAt,
+          },
+        });
+      } catch (error) {
+        console.error("Worker KV Comments POST error:", error);
+        return Response.json({ error: "KV write error" }, { status: 500 });
       }
     }
 

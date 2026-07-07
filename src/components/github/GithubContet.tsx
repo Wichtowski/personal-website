@@ -14,6 +14,7 @@ import {
   GithubErrorState,
   GithubStatsGrid,
 } from "@components/github";
+import { Footer } from "@components/layout/Footer";
 
 type GithubPulseData = {
   generatedAt: string;
@@ -22,7 +23,7 @@ type GithubPulseData = {
   workStats: GitHubPulseStats | null;
 };
 
-interface GithubPageClientProps {
+interface GithubContentProps {
   initialData?: GithubPulseData | null;
 }
 
@@ -38,7 +39,7 @@ function isValidGithubPulseCache(value: unknown) {
   return Date.now() - cachedAtMs < GITHUB_PULSE_CACHE_TTL_MS;
 }
 
-export default function GithubPageClient({ initialData }: GithubPageClientProps) {
+export default function GithubContent({ initialData }: GithubContentProps) {
   const { language, t } = useLanguage();
   const slideOffset = getNavDirection() * 50;
 
@@ -161,7 +162,7 @@ export default function GithubPageClient({ initialData }: GithubPageClientProps)
   return (
     <section
       id="github"
-      className="w-screen h-screen overflow-y-auto no-scrollbar flex items-start justify-center bg-background/50 border-r border-border/40 relative pt-6 pb-36 md:py-32"
+      className="w-screen h-screen overflow-y-auto no-scrollbar flex flex-col items-start justify-center bg-background/50 border-r border-border/40 relative pt-6 pb-4 md:pt-32"
     >
       <div className="absolute inset-0 bg-radial-gradient from-primary/5 via-transparent to-transparent -z-10" />
 
@@ -219,6 +220,7 @@ export default function GithubPageClient({ initialData }: GithubPageClientProps)
           </div>
         )}
       </motion.div>
+      <Footer />
     </section>
   );
 }

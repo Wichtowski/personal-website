@@ -1,3 +1,5 @@
+import { env } from "@lib/env";
+
 export interface GitHubStats {
   username: string;
   name: string;
@@ -68,6 +70,41 @@ export async function fetchGitHubStats(username: string): Promise<GitHubStats | 
     };
   } catch (err) {
     console.warn(`Failed to fetch GitHub stats for ${username}.`, err);
+    return null;
+  }
+}
+
+export interface GitHubRepoDetails {
+  stars: number;
+}
+
+export async function fetchRepoDetails(githubUrl: string): Promise<GitHubRepoDetails | null> {
+  const match = githubUrl.match(/https?:\/\/github\.com\/([^\/]+)\/([^\/]+)/i);
+  if (!match) return null;
+  const [, owner, repo] = match;
+
+  try {
+    const headers: Record<string, string> = {
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+      "User-Agent": "oskar-wichtowski-portfolio",
+    };
+    if (env.GITHUB_TOKEN) {
+      headers["Authorization"] = `Bearer ${env.GITHUB_TOKEN}`;
+    }
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+      headers,
+    });
+    if (!res.ok) {
+      console.warn(`Failed to fetch repo details for ${owner}/${repo}: status ${res.status}`);
+      return null;
+    }
+    const data = (await res.json()) as { stargazers_count?: number };
+    return {
+      stars: data.stargazers_count ?? 0,
+    };
+  } catch (err) {
+    console.warn(`Error compiling stats for githubUrl ${githubUrl}:`, err);
     return null;
   }
 }

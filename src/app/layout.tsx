@@ -1,9 +1,9 @@
+import { ReactNode } from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@components/ThemeProvider";
 import { LanguageProvider } from "@context/LanguageContext";
 import { Navbar } from "@components/layout/Navbar";
-import { Footer } from "@components/layout/Footer";
 import { AppLayout } from "@components/layout/AppLayout";
 import { getProjects, getArticles } from "@lib/mdx";
 import "./globals.css";
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
     <html
@@ -39,7 +39,6 @@ export default async function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <LanguageProvider>
             <Navbar />
-            <Footer />
             <AppLayout projects={getProjects()} articles={getArticles()}>
               {children}
             </AppLayout>

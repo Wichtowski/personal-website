@@ -32,8 +32,14 @@
     }
   },
   "vars": {
-    "LASTFM_API_KEY": "50004b4cea67510ae9d95ea846887175",
-    "LASTFM_USERNAME": "oshkyy",
-    "LASTFM_SHARED_SECRET": "058dc0e82d2ade2d51bb5d162762f12d"
-  }
+    "LASTFM_API_KEY": "",
+    "LASTFM_USERNAME": "",
+    "LASTFM_SHARED_SECRET": ""
+  },
+  "kv_namespaces": [
+    {
+      "binding": "PERSONAL_WEBSITE_KV",
+      "id": ""
+    }
+  ]
 }

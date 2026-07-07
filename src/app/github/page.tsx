@@ -1,5 +1,5 @@
+import GithubContent from "@components/github/GithubContet";
 import { buildGitHubPulse } from "@lib/github-pulse";
-import GithubPageClient from "./page-client";
 
 export default async function GithubPage() {
   let initialData = null;
@@ -9,5 +9,5 @@ export default async function GithubPage() {
     console.error("Failed to build GitHub pulse on server:", error);
   }
 
-  return <GithubPageClient initialData={initialData} />;
+  return <GithubContent initialData={initialData} />;
 }

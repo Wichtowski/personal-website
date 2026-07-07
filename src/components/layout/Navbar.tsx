@@ -9,14 +9,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@lib/cn";
 import { ROUTES, setNavDirection } from "@lib/navigation";
 
-const ROUTE_TO_SECTION: Record<string, string> = {
-  "/": "home",
-  "/github": "github",
-  "/portfolio": "portfolio",
-  "/articles": "articles",
-  "/contact": "contact",
-};
-
 export function Navbar() {
   const { setTheme } = useTheme();
   const { language, toggleLanguage, t } = useLanguage();
@@ -44,7 +36,16 @@ export function Navbar() {
     };
   }, []);
 
-  const activeSection = ROUTE_TO_SECTION[pathname] ?? "home";
+  let activeSection = "home";
+  if (pathname.startsWith("/github")) {
+    activeSection = "github";
+  } else if (pathname.startsWith("/portfolio")) {
+    activeSection = "portfolio";
+  } else if (pathname.startsWith("/articles") || pathname.startsWith("/blog")) {
+    activeSection = "articles";
+  } else if (pathname.startsWith("/contact")) {
+    activeSection = "contact";
+  }
   const scrolled = pathname !== "/";
   const isDarkTheme = themeMode === "dark";
 

@@ -3,9 +3,11 @@
 import { useLanguage } from "@context/LanguageContext";
 import { Mail, MapPin, Briefcase, Download } from "lucide-react";
 import { motion, Variants } from "framer-motion";
+import { SpotifyNowPlayingProps } from "@lib/lastfm";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { getNavDirection } from "@lib/navigation";
 import { MdOutlineConnectWithoutContact } from "react-icons/md";
+import { SpotifyNowPlaying } from "@components/landingpage/hero/SpotifyNowPlaying";
 
 const email = "oskar.wichtowski3@gmail.com";
 
@@ -33,7 +35,9 @@ const socials = [
   },
 ];
 
-export function ContactSection() {
+type ContactSectionProps = SpotifyNowPlayingProps;
+
+export function ContactSection({ nowPlaying }: ContactSectionProps) {
   const { t } = useLanguage();
 
   const handleDownloadCV = () => {
@@ -156,6 +160,7 @@ export function ContactSection() {
           </div>
         </div>
 
+        <SpotifyNowPlaying nowPlaying={nowPlaying} />
         {/* Copyright */}
         <p className="text-center text-xs font-mono text-muted-foreground/60">
           &copy; {new Date().getFullYear()} Oskar Wichtowski. All rights reserved.

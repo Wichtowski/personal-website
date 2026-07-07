@@ -4,8 +4,8 @@ import React from "react";
 import { motion } from "framer-motion";
 import { ROUTES } from "@lib/navigation";
 import { ProjectMetadata, ArticleMetadata } from "@lib/mdx";
-import { Hero } from "@components/landingpage/hero/Hero";
-import GithubPageClient from "@app/github/page-client";
+import { LandingPage } from "@components/landingpage/LandingPage";
+import GithubPageContent from "@components/github/GithubContet";
 import { PortfolioSection } from "@components/portfolio/PortfolioSection";
 import { BlogSection } from "@components/blog/BlogSection";
 import { ContactSection } from "@components/contact/ContactSection";
@@ -20,7 +20,7 @@ interface MainSliderProps {
 export function MainSlider({ projects, articles, activePathname, children }: MainSliderProps) {
   const activeIndex = ROUTES.indexOf(activePathname);
   const index = activeIndex === -1 ? 0 : activeIndex;
-  const homeSlide = activePathname === "/" && children ? children : <Hero />;
+  const homeSlide = activePathname === "/" && children ? children : <LandingPage />;
   const articlesSlide =
     activePathname === "/articles" && children ? children : <BlogSection articles={articles} />;
 
@@ -34,7 +34,7 @@ export function MainSlider({ projects, articles, activePathname, children }: Mai
       >
         <div className="w-screen h-full shrink-0">{homeSlide}</div>
         <div className="w-screen h-full shrink-0">
-          <GithubPageClient initialData={null} />
+          <GithubPageContent initialData={null} />
         </div>
         <div className="w-screen h-full shrink-0">
           <PortfolioSection projects={projects} />

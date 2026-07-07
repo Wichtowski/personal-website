@@ -9,6 +9,10 @@ export interface LastFmNowPlaying {
   updatedAt: string;
 }
 
+export interface SpotifyNowPlayingProps {
+  nowPlaying?: LastFmNowPlaying;
+}
+
 type LastFmRecentTracksResponse = {
   recenttracks?: {
     track?: LastFmTrack[] | LastFmTrack;

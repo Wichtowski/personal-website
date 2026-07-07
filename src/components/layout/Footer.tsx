@@ -50,8 +50,8 @@ export function Footer() {
   if (isNotFoundPage) return null;
 
   return (
-    <footer className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/30 bg-background/80 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+    <footer className="w-full border-t border-border/30 bg-background/80 pt-4 mt-auto">
+      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
         <span className="text-xs font-mono text-muted-foreground">
           &copy; {new Date().getFullYear()} Oskar Wichtowski. All rights reserved.
         </span>

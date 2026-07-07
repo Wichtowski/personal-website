@@ -5,12 +5,8 @@ import { motion } from "framer-motion";
 import { FaSpotify } from "react-icons/fa";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@context/LanguageContext";
-import type { LastFmNowPlaying } from "@lib/lastfm";
+import type { LastFmNowPlaying, SpotifyNowPlayingProps } from "@lib/lastfm";
 import { CatsModal } from "./CatsModal";
-
-interface HeroSpotifyNowPlayingProps {
-  nowPlaying?: LastFmNowPlaying;
-}
 
 const LASTFM_REFRESH_INTERVAL_MS = 30_000;
 
@@ -42,7 +38,7 @@ function isLastFmNowPlaying(value: unknown): value is LastFmNowPlaying {
   );
 }
 
-export function HeroSpotifyNowPlaying({ nowPlaying }: HeroSpotifyNowPlayingProps) {
+export function SpotifyNowPlaying({ nowPlaying }: SpotifyNowPlayingProps) {
   const { t } = useLanguage();
   const { resolvedTheme } = useTheme();
   const [isCatsModalOpen, setIsCatsModalOpen] = React.useState(false);

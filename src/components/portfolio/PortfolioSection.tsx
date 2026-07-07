@@ -7,6 +7,7 @@ import { Folder, ArrowUpRight, Cpu, Code2, ShieldAlert } from "lucide-react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import Link from "next/link";
 import { getStatusConfig } from "@lib/status";
+import { Footer } from "@components/layout/Footer";
 
 interface PortfolioSectionProps {
   projects: ProjectMetadata[];
@@ -60,7 +61,7 @@ export function PortfolioSection({ projects }: PortfolioSectionProps) {
   return (
     <section
       id="portfolio"
-      className="w-screen h-full overflow-y-auto no-scrollbar flex flex-col bg-background border-r border-border/40 relative pt-6 pb-20 md:py-32"
+      className="w-screen h-full overflow-y-auto no-scrollbar flex flex-col bg-background border-r border-border/40 relative pt-6 pb-4 md:pt-32"
     >
       <motion.div
         variants={slideDirectionVariants}
@@ -204,6 +205,7 @@ export function PortfolioSection({ projects }: PortfolioSectionProps) {
           </div>
         )}
       </motion.div>
+      <Footer />
     </section>
   );
 }
