@@ -11,11 +11,11 @@ interface KVNamespace {
 interface RequestWithEnv {
   context?: {
     env?: {
-      PERSONAL_WEBSITE_KV?: KVNamespace;
+      PERSONAL_WEBSITE_KV_ID?: KVNamespace;
     };
   };
   env?: {
-    PERSONAL_WEBSITE_KV?: KVNamespace;
+    PERSONAL_WEBSITE_KV_ID?: KVNamespace;
   };
 }
 
@@ -30,12 +30,12 @@ interface RawComment {
 function getKV(request?: RequestWithEnv | NextRequest | unknown) {
   const reqWithEnv = request as RequestWithEnv | undefined;
   const cloudflareEnv = reqWithEnv?.context?.env || reqWithEnv?.env;
-  if (cloudflareEnv?.PERSONAL_WEBSITE_KV) {
-    return cloudflareEnv.PERSONAL_WEBSITE_KV;
+  if (cloudflareEnv?.PERSONAL_WEBSITE_KV_ID) {
+    return cloudflareEnv.PERSONAL_WEBSITE_KV_ID;
   }
 
   const procEnv = (typeof process !== "undefined" ? process.env : {}) as Record<string, unknown>;
-  const kvInProc = procEnv.PERSONAL_WEBSITE_KV;
+  const kvInProc = procEnv.PERSONAL_WEBSITE_KV_ID;
   if (kvInProc) {
     return kvInProc as KVNamespace;
   }
@@ -44,7 +44,7 @@ function getKV(request?: RequestWithEnv | NextRequest | unknown) {
     string,
     unknown
   >;
-  const kvInGlob = globalObj.PERSONAL_WEBSITE_KV;
+  const kvInGlob = globalObj.PERSONAL_WEBSITE_KV_ID;
   if (kvInGlob) {
     return kvInGlob as KVNamespace;
   }

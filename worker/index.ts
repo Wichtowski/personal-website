@@ -32,7 +32,7 @@ interface Env {
   ASSETS: Fetcher;
   LASTFM_API_KEY?: string;
   LASTFM_USERNAME?: string;
-  PERSONAL_WEBSITE_KV: KVNamespace;
+  PERSONAL_WEBSITE_KV_ID: KVNamespace;
   IMAGES: {
     input(stream: ReadableStream): {
       transform(options: Record<string, unknown>): {
@@ -140,7 +140,7 @@ export default {
         return Response.json({ error: "Missing targetId" }, { status: 400 });
       }
       try {
-        const countStr = await env.PERSONAL_WEBSITE_KV.get(`endorsements:${targetId}`);
+        const countStr = await env.PERSONAL_WEBSITE_KV_ID.get(`endorsements:${targetId}`);
         const count = countStr ? parseInt(countStr, 10) : 0;
         return Response.json({ count });
       } catch (error) {
@@ -161,7 +161,7 @@ export default {
           return Response.json({ error: "Invalid action" }, { status: 400 });
         }
         const key = `endorsements:${targetId}`;
-        const countStr = await env.PERSONAL_WEBSITE_KV.get(key);
+        const countStr = await env.PERSONAL_WEBSITE_KV_ID.get(key);
         const count = countStr ? parseInt(countStr, 10) : 0;
 
         let newCount = count;
@@ -171,7 +171,7 @@ export default {
           newCount = Math.max(0, count - 1);
         }
 
-        await env.PERSONAL_WEBSITE_KV.put(key, String(newCount));
+        await env.PERSONAL_WEBSITE_KV_ID.put(key, String(newCount));
         return Response.json({ count: newCount });
       } catch (error) {
         console.error("Worker KV Endorsements POST error:", error);
@@ -186,7 +186,7 @@ export default {
         return Response.json({ error: "Missing targetId" }, { status: 400 });
       }
       try {
-        const commentsStr = await env.PERSONAL_WEBSITE_KV.get(`comments:${targetId}`);
+        const commentsStr = await env.PERSONAL_WEBSITE_KV_ID.get(`comments:${targetId}`);
         const rawComments = commentsStr
           ? (JSON.parse(commentsStr) as Array<{
               id: string;
@@ -241,8 +241,8 @@ export default {
         const ipKey = `ratelimit:comment:ip:${ip}`;
 
         const [emailLimit, ipLimit] = await Promise.all([
-          env.PERSONAL_WEBSITE_KV.get(emailKey),
-          env.PERSONAL_WEBSITE_KV.get(ipKey),
+          env.PERSONAL_WEBSITE_KV_ID.get(emailKey),
+          env.PERSONAL_WEBSITE_KV_ID.get(ipKey),
         ]);
 
         if (emailLimit || ipLimit) {
@@ -253,7 +253,7 @@ export default {
         }
 
         const key = `comments:${targetId}`;
-        const commentsStr = await env.PERSONAL_WEBSITE_KV.get(key);
+        const commentsStr = await env.PERSONAL_WEBSITE_KV_ID.get(key);
         const rawComments = commentsStr
           ? (JSON.parse(commentsStr) as Array<{
               id: string;
@@ -273,13 +273,13 @@ export default {
         };
 
         rawComments.push(newComment);
-        await env.PERSONAL_WEBSITE_KV.put(key, JSON.stringify(rawComments));
+        await env.PERSONAL_WEBSITE_KV_ID.put(key, JSON.stringify(rawComments));
 
         // Persist rate limit for 20 minutes (1200 seconds)
         const LIMIT_TTL = 20 * 60;
         await Promise.all([
-          env.PERSONAL_WEBSITE_KV.put(emailKey, "1", { expirationTtl: LIMIT_TTL }),
-          env.PERSONAL_WEBSITE_KV.put(ipKey, "1", { expirationTtl: LIMIT_TTL }),
+          env.PERSONAL_WEBSITE_KV_ID.put(emailKey, "1", { expirationTtl: LIMIT_TTL }),
+          env.PERSONAL_WEBSITE_KV_ID.put(ipKey, "1", { expirationTtl: LIMIT_TTL }),
         ]);
 
         return Response.json({

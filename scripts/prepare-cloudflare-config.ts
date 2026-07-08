@@ -88,7 +88,7 @@ function injectVars(config: WranglerConfig, mode: Mode): void {
 }
 
 function configureKvNamespaces(config: WranglerConfig, mode: Mode): void {
-  const kvNamespaceId = process.env.CLOUDFLARE_KV_NAMESPACE_ID;
+  const kvNamespaceId = process.env.PERSONAL_WEBSITE_KV_ID;
 
   for (const namespace of config.kv_namespaces ?? []) {
     if (kvNamespaceId) {
@@ -96,7 +96,7 @@ function configureKvNamespaces(config: WranglerConfig, mode: Mode): void {
       // In local mode a real id lets us optionally read the live namespace.
       if (mode === "local") namespace.remote = true;
     } else if (mode === "deploy") {
-      throw new Error("CLOUDFLARE_KV_NAMESPACE_ID is required for deploy.");
+      throw new Error("PERSONAL_WEBSITE_KV_ID is required for deploy.");
     } else {
       // Local simulated KV (Miniflare). Any non-empty id string is accepted.
       namespace.id = "local";

@@ -38,7 +38,7 @@
   },
   "kv_namespaces": [
     {
-      "binding": "PERSONAL_WEBSITE_KV",
+      "binding": "PERSONAL_WEBSITE_KV_ID",
       "id": ""
     }
   ]
