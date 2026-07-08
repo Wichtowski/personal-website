@@ -6,7 +6,6 @@ import { dictionaries, Language } from "@locales/dictionary";
 import { TableOfContents } from "@components/layout/TableOfContents";
 import { StickyBackButton } from "@components/layout/StickyBackButton";
 import { EndorsementButton, CommentsSection } from "@components/engagement";
-import { Footer } from "@components/layout/Footer";
 import { SITE_URL, AUTHOR_NAME } from "@lib/site";
 
 interface PageProps {
@@ -160,7 +159,6 @@ export default async function ArticlePage({ params, searchParams }: PageProps) {
         {/* Sidebar: Sticky Table of Contents */}
         <TableOfContents label={t.blog.onThisPage} />
       </div>
-      <Footer />
     </main>
   );
 }

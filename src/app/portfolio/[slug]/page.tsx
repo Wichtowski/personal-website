@@ -8,7 +8,6 @@ import { getStatusConfig } from "@lib/status";
 import { TableOfContents } from "@components/layout/TableOfContents";
 import { StickyBackButton } from "@components/layout/StickyBackButton";
 import { fetchRepoDetails } from "@lib/github";
-import { Footer } from "@components/layout/Footer";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -199,7 +198,6 @@ export default async function ProjectPage({ params, searchParams }: PageProps) {
         {/* Sidebar: Sticky Table of Contents */}
         <TableOfContents label={t.portfolio.onThisPage} />
       </div>
-      <Footer />
     </main>
   );
 }
