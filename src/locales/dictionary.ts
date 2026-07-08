@@ -403,6 +403,12 @@ export const dictionaries: Record<Language, TranslationDict> = {
       ],
       categories: [
         {
+          key: "llms",
+          group: "ai-ml",
+          title: "LLM-y",
+          icon: "sparkles",
+        },
+        {
           key: "computer-vision",
           group: "ai-ml",
           title: "Widzenie komputerowe",

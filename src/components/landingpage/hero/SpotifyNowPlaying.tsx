@@ -115,7 +115,7 @@ export function SpotifyNowPlaying({ nowPlaying }: SpotifyNowPlayingProps) {
   const subtitleClassName = isDarkTheme ? "text-emerald-200/80" : "text-emerald-800/80";
 
   return (
-    <div className="w-full flex flex-col items-center gap-4">
+    <div className="w-full flex flex-col items-center gap-4 mb-4">
       {isLive ? (
         <motion.a
           href="https://open.spotify.com/user/11144475049"
