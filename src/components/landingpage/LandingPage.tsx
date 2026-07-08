@@ -12,14 +12,6 @@ interface LandingPageProps {
 }
 
 export function LandingPage({ nowPlaying }: LandingPageProps) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setTimeout(() => setMounted(true), 0);
-  }, []);
-
-  if (!mounted) return null;
-
   return (
     <section
       id="home"

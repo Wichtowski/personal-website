@@ -1,11 +1,13 @@
-import { getArticleSlugs, getArticleBySlug } from "@lib/mdx";
+import { getArticleSlugs, getArticleBySlug, getArticleLanguageAlternates } from "@lib/mdx";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { Calendar, Clock, Tag } from "lucide-react";
 import { dictionaries, Language } from "@locales/dictionary";
 import { TableOfContents } from "@components/layout/TableOfContents";
 import { StickyBackButton } from "@components/layout/StickyBackButton";
 import { EndorsementButton, CommentsSection } from "@components/engagement";
 import { Footer } from "@components/layout/Footer";
+import { SITE_URL, AUTHOR_NAME } from "@lib/site";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -14,6 +16,45 @@ interface PageProps {
 
 export async function generateStaticParams() {
   return getArticleSlugs().map((slug) => ({ slug }));
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const article = getArticleBySlug(slug);
+
+  if (!article) {
+    return { title: "Article not found" };
+  }
+
+  const { metadata } = article;
+  const canonical = `/blog/${slug}`;
+  const alternateSlugs = getArticleLanguageAlternates(slug);
+  const languages: Record<string, string> = {};
+  if (alternateSlugs.en) languages["en"] = `/blog/${alternateSlugs.en}`;
+  if (alternateSlugs.pl) languages["pl"] = `/blog/${alternateSlugs.pl}`;
+
+  return {
+    title: metadata.title,
+    description: metadata.description,
+    alternates: {
+      canonical,
+      languages: Object.keys(languages).length > 0 ? languages : undefined,
+    },
+    openGraph: {
+      type: "article",
+      title: metadata.title,
+      description: metadata.description,
+      url: canonical,
+      publishedTime: metadata.date,
+      authors: [AUTHOR_NAME],
+      tags: metadata.tags,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: metadata.title,
+      description: metadata.description,
+    },
+  };
 }
 
 export default async function ArticlePage({ params, searchParams }: PageProps) {
@@ -27,6 +68,21 @@ export default async function ArticlePage({ params, searchParams }: PageProps) {
 
   const { metadata, Component } = article;
   const t = dictionaries[(metadata.language as Language) ?? "en"];
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: metadata.title,
+    description: metadata.description,
+    datePublished: metadata.date,
+    inLanguage: metadata.language,
+    keywords: metadata.tags,
+    url: `${SITE_URL}/blog/${resolvedParams.slug}`,
+    author: {
+      "@type": "Person",
+      name: AUTHOR_NAME,
+      url: SITE_URL,
+    },
+  };
   const backHref =
     from === "explore" && tags
       ? {
@@ -38,6 +94,10 @@ export default async function ArticlePage({ params, searchParams }: PageProps) {
 
   return (
     <main className="min-h-full bg-background flex flex-col justify-between w-full pt-24 pb-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
       <div className="max-w-6xl w-full mx-auto px-6 lg:grid lg:grid-cols-[1fr_250px] lg:gap-12 lg:items-start flex-1 mb-16">
         {/* Main Content */}
         <div className="max-w-4xl w-full">

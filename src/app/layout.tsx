@@ -6,6 +6,7 @@ import { LanguageProvider } from "@context/LanguageContext";
 import { Navbar } from "@components/layout/Navbar";
 import { AppLayout } from "@components/layout/AppLayout";
 import { getProjects, getArticles } from "@lib/mdx";
+import { SITE_URL, SITE_NAME, SITE_TITLE, SITE_DESCRIPTION } from "@lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -19,9 +20,27 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Oskar Wichtowski | AI Engineer & Software Developer",
-  description:
-    "Portfolio of Oskar Wichtowski - AI Engineer, Fullstack Software Developer, and Quality Assurance Specialist. Crafting intelligent systems and bulletproof test pipelines.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_TITLE,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
+  alternates: {
+    canonical: "/",
+  },
 };
 
 export default async function RootLayout({

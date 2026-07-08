@@ -1,5 +1,6 @@
-import { getProjectSlugs, getProjectBySlug } from "@lib/mdx";
+import { getProjectSlugs, getProjectBySlug, getProjectLanguageAlternates } from "@lib/mdx";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { Globe, Calendar, Tag, Star, AlertCircle } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
 import { dictionaries, Language } from "@locales/dictionary";
@@ -16,6 +17,43 @@ interface PageProps {
 
 export async function generateStaticParams() {
   return getProjectSlugs().map((slug) => ({ slug }));
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const project = getProjectBySlug(slug);
+
+  if (!project) {
+    return { title: "Project not found" };
+  }
+
+  const { metadata } = project;
+  const canonical = `/portfolio/${slug}`;
+  const alternateSlugs = getProjectLanguageAlternates(slug);
+  const languages: Record<string, string> = {};
+  if (alternateSlugs.en) languages["en"] = `/portfolio/${alternateSlugs.en}`;
+  if (alternateSlugs.pl) languages["pl"] = `/portfolio/${alternateSlugs.pl}`;
+
+  return {
+    title: metadata.title,
+    description: metadata.description,
+    alternates: {
+      canonical,
+      languages: Object.keys(languages).length > 0 ? languages : undefined,
+    },
+    openGraph: {
+      type: "article",
+      title: metadata.title,
+      description: metadata.description,
+      url: canonical,
+      tags: metadata.tags,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: metadata.title,
+      description: metadata.description,
+    },
+  };
 }
 
 export default async function ProjectPage({ params, searchParams }: PageProps) {

@@ -52,7 +52,9 @@ export default function GithubContent({ initialData }: GithubContentProps) {
   const [workStats, setWorkStats] = useState<GitHubPulseStats | null>(
     initialData?.workStats ?? null,
   );
-  const loading = false;
+  const [loading, setLoading] = useState<boolean>(() => {
+    return !initialData;
+  });
   const [error, setError] = useState<string | null>(null);
 
   const applyPulseData = useCallback((data: GithubPulseData) => {
@@ -77,6 +79,7 @@ export default function GithubContent({ initialData }: GithubContentProps) {
 
   const loadData = useCallback(async () => {
     setError(null);
+    setLoading(true);
 
     try {
       const res = await fetch("/api/github/pulse");
@@ -88,9 +91,11 @@ export default function GithubContent({ initialData }: GithubContentProps) {
       const data = (await res.json()) as GithubPulseData;
       applyPulseData(data);
       persistPulseData(data);
+      setLoading(false);
     } catch (err) {
       console.error(err);
       setError(t.github.error);
+      setLoading(false);
     }
   }, [applyPulseData, persistPulseData, t.github.error]);
 
@@ -106,6 +111,7 @@ export default function GithubContent({ initialData }: GithubContentProps) {
           timeoutId = window.setTimeout(() => {
             if (active && parsed.data) {
               applyPulseData(parsed.data);
+              setLoading(false);
             }
           }, 0);
 
