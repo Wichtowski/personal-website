@@ -1,0 +1,183 @@
+---
+title: "Testowanie usług AI na dużą skalę z Playwrightem — praktyczny przewodnik"
+description: "Jak zbudowaliśmy warstwową strategię testów integracyjnych dla wielousługowej platformy AI, wykorzystując testy API w Playwright, dane testowe oparte na kontraktach z S3, metryki ewaluacyjne z procentowymi progami błędów oraz workflow weryfikacji indeksowania wsadowego od piątku do poniedziałku."
+date: "2026-07-01"
+readTime: "12 min"
+tags:
+  ["Testing", "AI", "Playwright", "Integration Testing", "CI/CD", "Evaluation Metrics", "Quality"]
+language: "pl"
+---
+
+Kiedy jesteś zespołem znajdującym się na końcu łańcucha usług, każda zmiana po stronie usług wyżej w tym łańcuchu ostatecznie trafia do Ciebie.
+
+Budowaliśmy i utrzymywaliśmy platformę usług opartych na AI — OCR, wykrywanie obiektów, sprawdzanie pisowni, analiza tonu, pipeline’y sprawdzające poprawność naukową i wiele innych. Każda usługa miała własny kontrakt, własne tryby awarii i własny zespół. Na początku breaking changes pojawiały się bez ostrzeżenia: zmieniona nazwa pola, przesunięty format bounding boxów, cicho zmodyfikowany kształt odpowiedzi. Gdy użytkownicy zgłaszali błędne wyniki, analiza prawie zawsze zaczynała się od nas — ostatniej usługi w łańcuchu — niezależnie od tego, gdzie faktycznie leżała przyczyna.
+
+To musiało się skończyć. Potrzebowaliśmy strategii testowania, która chroniłaby nas przed dryfem usług upstreamowych, pozwalała sprawdzać, czy wyniki AI pozostają w akceptowalnych granicach jakości, i skalowała się na dziesiątki usług bez topienia zespołu w utrzymaniu testów. Tak ją zbudowaliśmy.
+
+## Dlaczego Playwright do testów API
+
+Pierwszą decyzją — i jedną z najlepszych — był wybór Playwrighta jako frameworka do testów API.
+
+Większość osób kojarzy Playwrighta z automatyzacją przeglądarki. Jego możliwości testowania API są często pomijane, a szkoda, bo świetnie nadają się do testów integracyjnych usług backendowych. Oto dlaczego tak dobrze się u nas sprawdził:
+
+**Wbudowany klient HTTP bez zbędnego boilerplate’u.** Kontekst `request` w Playwright daje natywny, asynchroniczny klient HTTP, który obsługuje nagłówki, autoryzację i serializację JSON praktycznie od razu. Bez konfiguracji Axiosa, bez własnych wrapperów, bez polyfilli dla fetch. Definiujesz `baseURL` i domyślne nagłówki raz w konfiguracji, a każdy test je dziedziczy.
+
+**Równoległe wykonywanie, które faktycznie działa.** Playwright uruchamia testy w pełni równolegle na konfigurowalnych workerach. Gdy masz setki przypadków testowych uderzających w różne usługi AI, ta równoległość ma znaczenie. W CI uruchamialiśmy cztery workery i mogliśmy skalować to dalej przez sharding na wiele kontenerów — coś, co Playwright natywnie wspiera flagą `--shard`.
+
+**Projekty do logicznego rozdzielenia testów.** System projektów w Playwright pozwolił nam zdefiniować całkowicie osobne zestawy testów — walidację contentu, synchroniczne indeksowanie, wsadowy OCR — każdy z własnym wzorcem dopasowania testów, timeoutem, logiką teardownu i polityką retry. Jeden plik konfiguracyjny, wiele niezależnych pipeline’ów testowych.
+
+**Retry, trace’y i raportowanie wbudowane w narzędzie.** Usługi AI z natury są niedeterministyczne. Model wizyjny może sklasyfikować graniczny obraz inaczej w dwóch kolejnych uruchomieniach. Mechanizm retry w Playwright dał nam odporność na przejściowe błędy, a trace’y przy pierwszym retry dostarczały dokładnych danych request/response potrzebnych do debugowania. Reporter JSON zasilał nasz własny pipeline analityczny, a blob reporter umożliwiał scalanie raportów HTML z wielu shardów.
+
+**Natywne wsparcie TypeScriptu.** Cały zestaw testów był napisany w TypeScripcie od góry do dołu. Kontrakty były schematami Zod, konfiguracje były typowanymi obiektami, a metryki ewaluacyjne — silnie typowanymi funkcjami. Natywne wsparcie TypeScriptu w Playwright oznaczało brak problemów z transpile’owaniem i pełne wsparcie IDE dla każdego autora testów.
+
+Szczerze mówiąc, możliwości testowania API w Playwright dały nam więcej niż większość dedykowanych frameworków do testów API. A fakt, że wszystko jest dostarczane jako jeden, dobrze utrzymywany pakiet ze świetną dokumentacją, sprawił, że łatwo było przekonać do tego resztę zespołu.
+
+## Faza 1: Testy kontraktowe — koniec z przerzucaniem winy
+
+Pierwsza implementacja była niewielka i została przygotowana przez AI engineera z zespołu. Sprawdzała podstawowe kształty odpowiedzi, co było dobrym początkiem. Wymagała jednak dużego przepisania — struktura testów nie była przygotowana pod skalowanie, logika asercji była krucha, a zarządzanie danymi całkowicie lokalne.
+
+Spędziłem wiele godzin na reverse-engineeringu pipeline’ów: zrozumieniu, jak odpowiada każda usługa, jak wyglądają oczekiwane kontrakty, które pola są opcjonalne i gdzie usługi upstreamowe miały tendencję do cichego rozjeżdżania się z kontraktem. Ta inwestycja była bolesna, ale konieczna. Nie da się pisać sensownych testów integracyjnych dla systemu, którego się głęboko nie rozumie.
+
+### Ważna decyzja: dane testowe w S3
+
+Jedną z najbardziej wpływowych decyzji było pobieranie danych testowych z S3 zamiast trzymania ich w repozytorium.
+
+Każda usługa miała katalog z przypadkami testowymi: `request.json` zawierający payload wejściowy, `expected-response.json` zawierający zweryfikowaną prawdę referencyjną oraz opcjonalnie pliki obrazów lub inne assety. Dane znajdowały się w dedykowanym buckecie S3 i były synchronizowane na początku każdego uruchomienia CI.
+
+Ta decyzja miała kilka konsekwencji, które okazały się kluczowe:
+
+**AI developerzy byli właścicielami danych testowych.** Kontrakt był prosty: jeśli naprawiasz błąd albo dodajesz funkcję, dodajesz lub aktualizujesz odpowiadający przypadek testowy w S3. Poprawny bug oznaczał fix, a fix oznaczał nowy test case. Nie zawsze działało to idealnie, ale przesunęło strukturę odpowiedzialności we właściwą stronę. Z czasem zestaw testów rósł organicznie wraz z rozwojem usług.
+
+**Dane testowe były odłączone od zmian w kodzie.** Aktualizacja oczekiwanych odpowiedzi nie wymagała pull requesta. Data scientiści i AI engineerzy mogli dostosowywać ground truth bez dotykania repozytorium testów, co znacząco zmniejszyło tarcie.
+
+**Duże assety nie trafiały do Gita.** Niektóre usługi operowały na obrazach — makietach projektów, figurach naukowych, skanach dokumentów. Takie pliki często miały po kilka megabajtów. Trzymanie ich w S3 utrzymywało repozytorium lekkie i przyspieszało checkout w CI.
+
+Runner testów dynamicznie odkrywał przypadki testowe, skanując pobrane katalogi. Jeśli folder test case’a zawierał `expected-response.json`, był to przypadek walidacji contentu. Jeśli zawierał obrazy, runner wiedział, że trzeba je zakodować do base64 albo wysłać do tymczasowego bucketu S3 przed wysłaniem requesta. Nie było potrzeby ręcznej rejestracji testów — wrzucasz folder i dostajesz test.
+
+### Walidacja kontraktów z Zod
+
+Każda odpowiedź usługi była walidowana względem schematu Zod, zanim uruchomiono jakiekolwiek asercje dotyczące contentu. To była pierwsza linia obrony.
+
+Jeśli zespół upstreamowy zmienił kształt odpowiedzi — zmienił nazwę pola, typ albo dodał wymagane pole — walidacja schematu natychmiast kończyła się błędem z czytelnym komunikatem. Koniec z niejasnymi błędami asercji głęboko w logice ewaluacyjnej. Kontrakt był jawny, wersjonowany w kodzie i egzekwowany przy każdym uruchomieniu.
+
+Utrzymywaliśmy schematy dla każdej usługi: współczynniki kontrastu, bounding boxy wykrywania obiektów, korekty pisowni, etykiety analizy emocji, wyniki dopasowywania fontów, weryfikację twierdzeń i wiele innych. Każdy schemat był pojedynczym źródłem prawdy dotyczącym tego, co dana usługa powinna zwracać.
+
+## Faza 2: Walidacja contentu — mierzalna jakość AI
+
+Testy kontraktowe mówiły nam, czy odpowiedź ma poprawną strukturę. Nie mówiły jednak, jak poprawna jest jej zawartość. W przypadku usług AI ta różnica jest wszystkim.
+
+Kolejnym krokiem było zbudowanie warstwy walidacji contentu z realnymi metrykami ewaluacyjnymi — precision, recall, F1 score oraz miarami domenowymi, takimi jak Intersection over Union dla bounding boxów. W tym miejscu strategia testowania zaczęła dostarczać wiedzę operacyjną, a nie tylko sygnał pass/fail.
+
+### Procentowe progi błędów
+
+Kluczowa idea polegała na tym, że każda usługa miała zdefiniowany próg jakości. Zamiast wymagać dokładnej równości między oczekiwaną a faktyczną odpowiedzią — co jest nierealistyczne dla niedeterministycznych modeli AI — obliczaliśmy metryki ewaluacyjne i sprawdzaliśmy, czy przekraczają minimalny akceptowalny poziom.
+
+Na przykład usługa wykrywania obiektów mogła wymagać precision ≥ 0,85 i recall ≥ 0,80. Usługa analizy kontrastu mogła dopuszczać względną tolerancję przewidywanych wartości. Klasyfikator tonu języka mógł wymagać F1 score powyżej 0,90.
+
+Te progi zmieniły wyniki testów w dashboard jakości. Gdy usługa się pogarszała, nie widzieliśmy tylko czerwonego testu — widzieliśmy, o ile się pogorszyła. Spadek precision z 0,92 do 0,88 oznaczał zupełnie inną sytuację niż spadek z 0,92 do 0,40. Pierwszy mógł być akceptowalną wariacją modelu; drugi był regresją wymagającą natychmiastowej reakcji.
+
+### Metryki ewaluacyjne per usługa
+
+Każda usługa miała własną funkcję obliczającą metryki. Nie były to generyczne porównania — były dopasowane do konkretnego formatu wyjścia i semantyki danej usługi.
+
+- **Usługi bounding boxów** — wykrywanie obiektów, wykrywanie jednolitych obszarów, wykrywanie fal — używały dopasowania opartego na IoU między przewidzianymi i oczekiwanymi regionami, z konfigurowalnymi progami nakładania dla klasyfikacji true positive.
+- **Usługi klasyfikacyjne** — analiza emocji, ton języka, wykrywanie sekcji śmieciowych — obliczały standardowe precision/recall/F1 dla etykiet kategorycznych.
+- **Usługi numeryczne** — współczynniki kontrastu — używały porównań z tolerancją względną, licząc predykcje mieszczące się w akceptowalnym zakresie jako true positive.
+- **Usługi tekstowe** — sprawdzanie pisowni, weryfikacja twierdzeń — używały wyspecjalizowanych metryk dopasowania stringów i odległości Levenshteina.
+- **Złożone usługi detekcyjne** — sekcje referencji, złożone twierdzenia — mapowały przewidziane struktury do oczekiwanych referencji i obliczały metryki na poziomie kategorii.
+
+Każda funkcja metryczna zwracała standardową strukturę — true positives, false positives, false negatives i sumy — która zasilała wspólne obliczenia precision/recall/F1. Ta jednolitość sprawiała, że każda usługa, niezależnie od domeny, produkowała porównywalne sygnały jakości.
+
+### Własne raportowanie i podsumowania usług
+
+Surowe raporty JSON z Playwrighta były przydatne, ale niewystarczające dla widoczności operacyjnej, której potrzebowaliśmy. Zbudowaliśmy własny pipeline raportowania, który przetwarzał wyniki testów na podsumowania per usługa.
+
+Po każdym uruchomieniu CI skrypt post-processingowy parsował raport JSON z Playwrighta, grupował wyniki według nazwy usługi wyciągniętej z adnotacji testów i generował podsumowanie pokazujące liczbę testów passed/failed/flaky/skipped dla każdej usługi. Te podsumowania były scalane między shardami i wysyłane jako artefakty.
+
+Osobny raport customowy przechowywał szczegółowe metryki ewaluacyjne — F1 score, precision, recall — dla każdego przypadku testowego. Te dane pozwalały nam śledzić trendy jakości w czasie i identyfikować usługi, które powoli się pogarszały, zanim przekroczyły próg błędu.
+
+Efektem był system, w którym każdego dnia roboczego o 08:00 zespół otrzymywał jasny sygnał: które usługi są zdrowe, które uległy degradacji, a które złamały kontrakt. Błędy uruchamiały powiadomienia na Slacku z wystarczającym kontekstem, żeby od razu zacząć debugowanie.
+
+## Faza 3: Testowanie pipeline’ów asynchronicznych
+
+Nie każda usługa AI zwraca wynik w pojedynczym cyklu request-response. Niektóre z naszych najważniejszych usług — szczególnie pipeline indeksowania artykułów naukowych — były w pełni asynchroniczne. Wysyłasz dokument, a wynik pojawia się w object storage po minutach albo godzinach, po przejściu przez OCR, chunking, enrichment i embedding.
+
+Testowanie takich pipeline’ów wymagało innego podejścia.
+
+### Wzorzec wrappera sync-to-async
+
+Zbudowaliśmy warstwę wrapperów, która ujednoliciła interfejs testowania usług synchronicznych i asynchronicznych. Wrapper synchroniczny wykonywał request POST i od razu walidował odpowiedź. Wrapper asynchroniczny wykonywał request POST, a następnie odpytywał o wynik z użyciem strategii retry z konfigurowalnymi interwałami, współczynnikami backoffu i maksymalną liczbą prób.
+
+Te same dane `expected-response`, te same metryki ewaluacyjne i ta sama logika asercji działały dla obu trybów. Funkcja pomocnicza normalizowała asynchroniczne wrappery odpowiedzi — które zwracały wynik zagnieżdżony w obiekcie — do płaskiego formatu używanego przez usługi synchroniczne, dzięki czemu dane testowe mogły być współdzielone między trybami.
+
+Oznaczało to, że gdy usługa migrowała z wykonania synchronicznego na asynchroniczne — co zdarzało się kilka razy przy optymalizacji kosztów i przepustowości — przypadki testowe nie musiały być przepisywane. Zmieniała się tylko konfiguracja.
+
+### Testy pipeline’u indeksowania
+
+Testy indeksowania uruchamiały pełny pipeline przetwarzania dokumentu: wysłanie dokumentu, oczekiwanie na przejście przez OCR, chunking, enrichment figur i embedding, a następnie walidację końcowego outputu.
+
+Te testy były sterowane konfiguracją. Każda konfiguracja testu określała tryb pipeline’u — pełny pipeline, tylko chunki tekstowe, tylko chunki tabel, tylko chunki figur, wyłączony chunking, pominięty embedding — co pozwalało testować pojedyncze etapy w izolacji albo cały przepływ end-to-end.
+
+Zestaw testów indeksowania miał własną politykę timeoutów — do 20 minut na test — zero retry, żeby nie maskować prawdziwych awarii pipeline’u, oraz dedykowany teardown czyszczący dokumenty testowe z vector store i state store po każdym uruchomieniu.
+
+## Faza 4: Testowanie wsadowego OCR — problem od piątku do poniedziałku
+
+A potem było indeksowanie wsadowe. No cóż.
+
+Tryb wsadowego OCR wysyła dokumenty do zewnętrznego providera jako zadania backgroundowe. Te zadania są kosztowo efektywne przy dużej skali, ale ich ukończenie zajmuje czas — czasem godziny, czasem dłużej. Nie da się odpytywać o wyniki w pipeline CI z timeoutem 60 minut.
+
+Próbowaliśmy kilku podejść. Dłuższe timeouty. Szybsze pollingowanie. Mniejsze dokumenty testowe. Żadne nie działało niezawodnie. Czas przetwarzania batchy był z natury nieprzewidywalny, a próba wciśnięcia go w synchroniczny test była walką z niewłaściwym problemem.
+
+### Rozwiązanie: podział testu na różne dni
+
+Ostatecznie wybraliśmy podejście dwufazowe, które zaakceptowało asynchroniczną naturę problemu zamiast z nią walczyć.
+
+**Piątek: Submit.** Zaplanowany workflow uruchamia się w każdy piątek rano. Wysyła dokumenty testowe do pipeline’u wsadowego OCR i kończy działanie. Bez sprawdzania wyników, bez pollingu, bez czekania. Faza submit tylko wysyła requesty i zapisuje trace ID. Timeout jest hojny — 10 minut na przypadek testowy — ale musi pokryć tylko wysłanie, nie całe przetwarzanie.
+
+**Poniedziałek: Check.** Drugi zaplanowany workflow uruchamia się w każdy poniedziałek rano. Wyszukuje dokumenty wysłane w piątek, sprawdza, czy zadania batchowe zostały ukończone, pobiera wyniki i uruchamia pełną walidację contentu. Jeśli zadanie batchowe po trzech dniach nadal ma status processing, test natychmiast kończy się błędem — wtedy coś naprawdę jest nie tak.
+
+Faza check używa minimalnej konfiguracji retry: jedna próba, krótki timeout, bez backoffu. Batch powinien być już zakończony. Jeśli nie jest, retry nic nie pomoże.
+
+To było jedno z tych rozwiązań, które na początku brzmiało lekko absurdalnie — „po prostu przetestujmy to w poniedziałek” — ale było właściwą decyzją inżynieryjną. Dało pipeline’owi batchowemu realistyczne warunki, uniknęło flaky timeoutów i wyłapywało prawdziwe regresje. Poniedziałkowy check stał się cotygodniowym pulsem zdrowia batch processingu dla zespołu.
+
+### Teardown i cleanup
+
+Zarówno testy indeksowania, jak i wsadowego OCR miały dedykowane kroki teardown uruchamiane po fazie check. Skrypty czyszczące usuwały dokumenty testowe z bazy wektorowej i state store, dzięki czemu dane testowe nigdy nie zanieczyszczały produkcyjnego indeksu.
+
+Project-level teardown w Playwright sprawił, że implementacja była czysta: projekt testowy deklarował projekt teardown, a Playwright gwarantował jego uruchomienie po zakończeniu głównych testów, niezależnie od tego, czy zakończyły się sukcesem, czy błędem.
+
+## Architektura testowania w praktyce
+
+Po złożeniu wszystkiego w całość infrastruktura testowa wyglądała w codziennej pracy tak:
+
+**W każdy dzień roboczy o 08:00** uruchamiał się workflow Integration Guardian. Pobierał dane testowe z S3, wykonywał testy walidacji contentu dla wszystkich usług równolegle — z shardingiem na dwa kontenery — generował podsumowania per usługa i customowe raporty ewaluacyjne, scalał blob reporty w przeglądalny raport HTML i powiadamiał zespół na Slacku, jeśli coś się nie udało.
+
+**W każdy piątek o 08:00** workflow submit dla batchy wysyłał dokumenty testowe do pipeline’u wsadowego OCR.
+
+**W każdy poniedziałek o 08:00** workflow check dla batchy weryfikował, czy piątkowe zgłoszenia zostały poprawnie przetworzone.
+
+**Przy każdej zmianie kodu** dotyczącej plików związanych z indeksowaniem zestaw testów indeksowania uruchamiał się jako część workflow guardian, wyzwalany detekcją zmian w ścieżkach plików.
+
+Cały zestaw można było też uruchomić ręcznie z poziomu GitHub Actions UI, z wyborem środowiska — integration albo security.
+
+## Wnioski
+
+**Playwright jest niedocenianym narzędziem do testów API.** Połączenie równoległego wykonywania, organizacji opartej na projektach, polityk retry, przechwytywania trace’ów, shardingu i natywnego wsparcia TypeScriptu sprawiło, że był bardziej funkcjonalny niż większość dedykowanych frameworków do testów API. Jeśli testujesz usługi HTTP i nie używasz Playwrighta, prawdopodobnie pracujesz ciężej, niż musisz.
+
+**Oddaj własność danych testowych osobom najbliżej modeli.** Zasada „poprawny bug = fix = nowy test case” nie zawsze była realizowana perfekcyjnie, ale działała wystarczająco dobrze. Zestaw testów stale rósł, a osoby najlepiej rozumiejące modele AI definiowały, jak powinien wyglądać poprawny wynik.
+
+**Metryki ewaluacyjne są lepsze niż binarne asercje dla usług AI.** Sygnał pass/fail nie wystarcza, gdy usługa jest niedeterministyczna. Precision, recall i F1 score dały nam ciągły sygnał jakości, który ujawniał regresje, zanim stały się awariami.
+
+**Akceptuj asynchroniczne testowanie, gdy system jest asynchroniczny.** Próba narzucenia synchronicznego modelu testowania pipeline’owi batch processingu tworzyła tylko flaky testy i marnowała minuty CI. Podział submit i check na różne dni był nieintuicyjny, ale poprawny.
+
+**Zainwestuj w raportowanie wcześnie.** Customowe podsumowania usług i raporty ewaluacyjne były wartościowsze niż surowe wyniki testów. Zamieniały ścianę zielonych i czerwonych statusów w dashboard operacyjny, który mógł czytać cały zespół.
+
+## Podsumowanie
+
+Testowanie usług AI nie różni się fundamentalnie od testowania jakiegokolwiek innego software’u — nadal obowiązują te same zasady izolacji, powtarzalności i jasnych asercji. Różni się natomiast model tolerancji. Wyniki AI są probabilistyczne, kontrakty zmieniają się częściej niż w tradycyjnych API, a niektóre pipeline’y przetwarzania potrzebują godzin na ukończenie.
+
+Strategia testowania, którą zbudowaliśmy, uznała te realia zamiast udawać, że nie istnieją. Procentowe progi jakości zastąpiły dokładną równość. Dane testowe w S3 zastąpiły hardcodowane fixture’y. Workflow od piątku do poniedziałku zastąpił niemożliwe gimnastykowanie się timeoutami.
+
+Żaden z tych pomysłów nie jest rewolucyjny. Ale razem dały małemu zespołowi wiarygodną, mierzalną pewność w platformie ponad tuzina usług AI działających w produkcyjnej skali. To właśnie ta pewność pozwoliła szybko iterować bez ciągłego gaszenia regresji.
+
+I w końcu przestaliśmy dostawać po głowie za breaking changes z usług upstreamowych.

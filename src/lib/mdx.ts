@@ -113,3 +113,27 @@ export function getProjects(locale?: "en" | "pl"): ProjectMetadata[] {
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   return locale ? projects.filter((p) => p.language === locale) : projects;
 }
+
+// Localized content is paired by slug convention: English uses the bare slug and
+// Polish appends a `-pl` suffix (e.g. `serverless-rant` / `serverless-rant-pl`).
+type LanguageAlternates = { en?: string; pl?: string };
+
+const buildLanguageAlternates = (slugs: string[], slug: string): LanguageAlternates => {
+  const known = new Set(slugs);
+  const isPolish = slug.endsWith("-pl");
+  const enSlug = isPolish ? slug.slice(0, -"-pl".length) : slug;
+  const plSlug = `${enSlug}-pl`;
+
+  const alternates: LanguageAlternates = {};
+  if (known.has(enSlug)) alternates.en = enSlug;
+  if (known.has(plSlug)) alternates.pl = plSlug;
+  return alternates;
+};
+
+export function getArticleLanguageAlternates(slug: string): LanguageAlternates {
+  return buildLanguageAlternates(getArticleSlugs(), slug);
+}
+
+export function getProjectLanguageAlternates(slug: string): LanguageAlternates {
+  return buildLanguageAlternates(getProjectSlugs(), slug);
+}

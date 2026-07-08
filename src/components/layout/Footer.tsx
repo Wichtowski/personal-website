@@ -4,8 +4,18 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Mail } from "lucide-react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
+import { FaBarsStaggered } from "react-icons/fa6";
 
-const socials = [
+interface SocialLink {
+  name: string;
+  url: string;
+  icon: React.ComponentType<{ size?: number }>;
+  color: string;
+  type?: string;
+  rel?: string;
+}
+
+const socials: SocialLink[] = [
   {
     name: "GitHub",
     url: "https://github.com/Wichtowski",
@@ -23,6 +33,14 @@ const socials = [
     url: "mailto:oskar.wichtowski3@gmail.com",
     icon: Mail,
     color: "hover:text-green-500 hover:border-green-500/40",
+  },
+  {
+    name: "RSS",
+    url: "/rss.xml",
+    icon: FaBarsStaggered,
+    color: "hover:text-orange-500 hover:border-orange-500/40",
+    type: "application/rss+xml",
+    rel: "alternate",
   },
 ];
 
@@ -63,8 +81,9 @@ export function Footer() {
                 key={s.name}
                 href={s.url}
                 target="_blank"
-                rel="noopener noreferrer"
+                rel={s.rel ?? "noopener noreferrer"}
                 title={s.name}
+                type={s.type ?? undefined}
                 className={`p-3 rounded-xl border border-border/40 bg-background text-muted-foreground transition-all duration-300 ${s.color}`}
               >
                 <Icon size={18} />

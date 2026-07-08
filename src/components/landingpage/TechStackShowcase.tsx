@@ -4,8 +4,8 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import { useTheme } from "next-themes";
 import { useLanguage } from "@context/LanguageContext";
+import { useThemeMode } from "@hooks/useThemeMode";
 import type { TranslationDict } from "@locales/dictionary";
 import { setNavDirection } from "@lib/navigation";
 import { cn } from "@lib/cn";
@@ -14,9 +14,10 @@ import { TECH_STACK_GROUPS, TECH_STACK_SECTIONS } from "@lib/tech-stack";
 export function TechStackShowcase() {
   const { t } = useLanguage();
   const techStack = t.techStack;
-  const { resolvedTheme } = useTheme();
+  const themeMode = useThemeMode("dark");
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const isDarkTheme = resolvedTheme === "dark";
+  const isDarkTheme = themeMode === "dark";
+
   const groupsByKey = new Map(techStack.groups.map((group) => [group.key, group]));
   const categoriesByKey = new Map(techStack.categories.map((category) => [category.key, category]));
   type LocalizedGroup = TranslationDict["techStack"]["groups"][number];

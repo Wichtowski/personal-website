@@ -32,6 +32,11 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env
+.env.local
+
+# generated cloudflare configs (contain injected secrets - never commit)
+wrangler.local.json
+wrangler.deploy.json
 
 # vercel
 .vercel

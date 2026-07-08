@@ -5,8 +5,7 @@ import { useLanguage } from "@context/LanguageContext";
 import type { GitHubPulseActivity, GitHubPulseStats } from "@lib/github-pulse";
 import { GITHUB_PULSE_CACHE_KEY, GITHUB_PULSE_CACHE_TTL_MS } from "@lib/github-pulse";
 import { Activity } from "lucide-react";
-import { motion, type Variants } from "framer-motion";
-import { getNavDirection } from "@lib/navigation";
+import { motion } from "framer-motion";
 import {
   RecentGithubActivity,
   GithubAccountsPanel,
@@ -41,7 +40,6 @@ function isValidGithubPulseCache(value: unknown) {
 
 export default function GithubContent({ initialData }: GithubContentProps) {
   const { language, t } = useLanguage();
-  const slideOffset = getNavDirection() * 50;
 
   const [mainStats, setMainStats] = useState<GitHubPulseStats | null>(
     initialData?.mainStats ?? null,
@@ -151,20 +149,6 @@ export default function GithubContent({ initialData }: GithubContentProps) {
     };
   }, [applyPulseData, initialData, persistPulseData, loadData]);
 
-  const slideDirectionVariants: Variants = {
-    hidden: {
-      opacity: 0,
-      scale: 0.95,
-      x: slideOffset,
-    },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      x: 0,
-      transition: { duration: 0.5, type: "spring", stiffness: 60 },
-    },
-  };
-
   return (
     <section
       id="github"
@@ -173,9 +157,9 @@ export default function GithubContent({ initialData }: GithubContentProps) {
       <div className="absolute inset-0 bg-radial-gradient from-primary/5 via-transparent to-transparent -z-10" />
 
       <motion.div
-        variants={slideDirectionVariants}
-        initial="hidden"
-        whileInView="visible"
+        initial={{ opacity: 0, y: 18 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
         viewport={{ once: true, amount: 0.15 }}
         className="max-w-7xl mx-auto px-6 w-full"
       >

@@ -3,8 +3,8 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { FaSpotify } from "react-icons/fa";
-import { useTheme } from "next-themes";
 import { useLanguage } from "@context/LanguageContext";
+import { useThemeMode } from "@hooks/useThemeMode";
 import type { LastFmNowPlaying, SpotifyNowPlayingProps } from "@lib/lastfm";
 import { CatsModal } from "./CatsModal";
 
@@ -40,7 +40,7 @@ function isLastFmNowPlaying(value: unknown): value is LastFmNowPlaying {
 
 export function SpotifyNowPlaying({ nowPlaying }: SpotifyNowPlayingProps) {
   const { t } = useLanguage();
-  const { resolvedTheme } = useTheme();
+  const themeMode = useThemeMode("dark");
   const [isCatsModalOpen, setIsCatsModalOpen] = React.useState(false);
   const [currentNowPlaying, setCurrentNowPlaying] = React.useState<LastFmNowPlaying>(
     nowPlaying ?? createIdleNowPlaying(),
@@ -102,7 +102,7 @@ export function SpotifyNowPlaying({ nowPlaying }: SpotifyNowPlayingProps) {
     ? `${t.hero.listeningTo} ${safeNowPlaying.track}`
     : `${t.hero.listeningTo} ${t.hero.idleTrack}`;
   const subtitle = isLive ? (safeNowPlaying.artist ?? t.hero.lastFmLabel) : t.hero.idleArtist;
-  const isDarkTheme = resolvedTheme === "dark";
+  const isDarkTheme = themeMode === "dark";
 
   const cardClassName = isDarkTheme
     ? isLive

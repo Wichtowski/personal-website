@@ -156,7 +156,7 @@ export const dictionaries: Record<Language, TranslationDict> = {
     hero: {
       greeting: "Hi, I'm",
       role: "AI Engineer / Software Engineer / QA Specialist",
-      bio: "An versatile tech professional blending Artificial Intelligence capabilities with robust software engineering and rigid Quality Assurance standards. I design intelligent agents, craft modern web experiences, and build production-ready test suites.",
+      bio: "A versatile tech professional blending Artificial Intelligence capabilities with robust software engineering and rigid Quality Assurance standards. I design intelligent agents, craft modern web experiences, and build production-ready test suites.",
       ctaPrimary: "View Projects",
       ctaSecondary: "Get in Touch",
       statusActive: "Available for freelance & full-time roles",

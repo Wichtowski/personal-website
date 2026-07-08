@@ -1,40 +1,22 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@context/LanguageContext";
 import { useRouter, usePathname } from "next/navigation";
 import { Sun, Moon, Menu, X, Terminal, Languages } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useThemeMode } from "@hooks/useThemeMode";
 import { cn } from "@lib/cn";
-import { ROUTES, setNavDirection } from "@lib/navigation";
+import { getRouteDirection, setNavDirection } from "@lib/navigation";
 
 export function Navbar() {
   const { setTheme } = useTheme();
+  const themeMode = useThemeMode("dark");
   const { language, toggleLanguage, t } = useLanguage();
   const router = useRouter();
   const pathname = usePathname() ?? "/";
-  const [themeMode, setThemeMode] = useState<"light" | "dark" | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const syncThemeMode = () => {
-      setThemeMode(document.documentElement.classList.contains("dark") ? "dark" : "light");
-    };
-
-    const timeout = setTimeout(syncThemeMode, 0);
-    const observer = new MutationObserver(syncThemeMode);
-
-    observer.observe(document.documentElement, {
-      attributeFilter: ["class"],
-      attributes: true,
-    });
-
-    return () => {
-      clearTimeout(timeout);
-      observer.disconnect();
-    };
-  }, []);
 
   let activeSection = "home";
   if (pathname.startsWith("/github")) {
@@ -49,7 +31,13 @@ export function Navbar() {
   const scrolled = pathname !== "/";
   const isDarkTheme = themeMode === "dark";
 
-  const toggleTheme = () => setTheme(isDarkTheme ? "light" : "dark");
+  const toggleTheme = () => {
+    if (!themeMode) {
+      return;
+    }
+
+    setTheme(isDarkTheme ? "light" : "dark");
+  };
 
   const navItems = [
     { label: t.nav.home, id: "home" },
@@ -70,9 +58,7 @@ export function Navbar() {
   const handleScrollTo = (id: string) => {
     setMobileMenuOpen(false);
     const target = SECTION_TO_ROUTE[id] ?? "/";
-    const currentIdx = ROUTES.indexOf(pathname);
-    const nextIdx = ROUTES.indexOf(target);
-    setNavDirection(nextIdx >= currentIdx ? -1 : 1);
+    setNavDirection(getRouteDirection(pathname, target));
     router.push(target);
   };
 
@@ -80,7 +66,6 @@ export function Navbar() {
     <header
       className={cn(
         "fixed top-0 left-0 right-0 z-50 py-4 transition-all duration-300 border-b backdrop-blur-md shadow-lg",
-        themeMode === null && "pointer-events-none opacity-0",
         isDarkTheme
           ? cn(
               "bg-black/75 text-white/90 border-white/10 shadow-black/20",

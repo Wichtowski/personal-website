@@ -22,6 +22,7 @@ export default defineConfig({
     { enforce: "pre", ...mdx({ remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter] }) },
     vinext(),
     cloudflare({
+      configPath: process.env.WRANGLER_CONFIG_PATH || undefined,
       viteEnvironment: {
         name: "rsc",
         childEnvironments: ["ssr"],

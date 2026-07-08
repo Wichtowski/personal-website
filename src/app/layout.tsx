@@ -5,7 +5,6 @@ import { ThemeProvider } from "@components/ThemeProvider";
 import { LanguageProvider } from "@context/LanguageContext";
 import { Navbar } from "@components/layout/Navbar";
 import { AppLayout } from "@components/layout/AppLayout";
-import { getProjects, getArticles } from "@lib/mdx";
 import { SITE_URL, SITE_NAME, SITE_TITLE, SITE_DESCRIPTION } from "@lib/site";
 import "./globals.css";
 
@@ -58,9 +57,7 @@ export default async function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <LanguageProvider>
             <Navbar />
-            <AppLayout projects={getProjects()} articles={getArticles()}>
-              {children}
-            </AppLayout>
+            <AppLayout>{children}</AppLayout>
           </LanguageProvider>
         </ThemeProvider>
       </body>

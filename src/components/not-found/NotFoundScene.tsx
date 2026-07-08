@@ -5,13 +5,13 @@ import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { useLanguage } from "@context/LanguageContext";
+import { useThemeMode } from "@hooks/useThemeMode";
 import { DICE, TICKER_SEPARATOR } from "../dice/consts";
-import { ThemeMode } from "../dice/types";
 import { DiceStage } from "../dice/DiceStage";
 import { useThemeColors } from "../dice/diceThemeColors";
 
 export function NotFoundScene() {
-  const [mode, setMode] = useState<ThemeMode | null>(null);
+  const mode = useThemeMode();
   const [diceTotal, setDiceTotal] = useState<number | null>(null);
   const [diceSettled, setDiceSettled] = useState(false);
   const [diceValues, setDiceValues] = useState<number[] | null>(null);
@@ -19,25 +19,9 @@ export function NotFoundScene() {
   const { t } = useLanguage();
 
   useEffect(() => {
-    const syncMode = () => {
-      setMode(document.documentElement.classList.contains("dark") ? "dark" : "light");
-    };
-    const syncFooterVisibility = () => {
-      document.body.classList.add("not-found-page");
-    };
-
-    const timeout = setTimeout(syncMode, 0);
-    syncFooterVisibility();
-    const observer = new MutationObserver(syncMode);
-
-    observer.observe(document.documentElement, {
-      attributeFilter: ["class"],
-      attributes: true,
-    });
+    document.body.classList.add("not-found-page");
 
     return () => {
-      clearTimeout(timeout);
-      observer.disconnect();
       document.body.classList.remove("not-found-page");
     };
   }, []);

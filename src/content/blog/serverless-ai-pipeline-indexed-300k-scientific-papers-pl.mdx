@@ -9,8 +9,6 @@ language: "pl"
 
 ---
 
-# Jak zaindeksowaliśmy ponad 300 000 prac naukowych za pomocą serverless AI pipeline
-
 Indexing 300 000 prac naukowych brzmi jak problem skali. W praktyce bardzo szybko okazało się, że był to przede wszystkim problem reliability, kontroli kosztów i spójności danych.
 
 Każda praca musiała przejść drogę od surowego PDF assetu do czystego markdowna, sensownie podzielonych chunks, wzbogaconych tabel i figurek, vector embeddings, a na końcu do searchable index. Najtrudniejsze nie było samo jednorazowe przetworzenie dokumentów — trudne było zbudowanie systemu, który da się bezpiecznie retry’ować, tanio re-runować i obserwować, kiedy tysiące dokumentów jednocześnie przechodzą przez pipeline.
