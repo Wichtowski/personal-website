@@ -9,3 +9,15 @@
 
 /favicon.ico
   Cache-Control: public, max-age=86400
+
+/*.png
+  Cache-Control: public, max-age=604800
+
+/*.webp
+  Cache-Control: public, max-age=604800
+
+/*.avif
+  Cache-Control: public, max-age=604800
+
+/*.pdf
+  Cache-Control: public, max-age=86400

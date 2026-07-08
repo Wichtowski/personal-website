@@ -1,0 +1,58 @@
+# Oskar Wichtowski — AI Engineer and Fullstack Developer
+
+Oskar Wichtowski builds AI-powered applications, LLM integrations, ecommerce automations, and full-stack web products. He focuses on practical software: turning early ideas and PoCs into working systems with clean architecture, useful UX, and production-minded engineering.
+
+## Summary
+
+Oskar works across AI engineering, backend development, frontend development, automation, and product prototyping. His current focus includes ecommerce integrations, Shopify-related workflows, LLM-powered services, recommendation engine prototypes, and AI-assisted automation.
+
+## What he builds
+
+- AI-powered web applications
+- LLM integrations and workflow automation
+- Ecommerce and Shopify integrations
+- Recommendation engine PoCs
+- Full-stack applications with modern frontend and backend stacks
+- Developer tools, dashboards, and internal automation
+- Systems that move from rough idea to usable product
+
+## Engineering style
+
+Oskar prefers practical, maintainable engineering over overcomplicated abstractions. He cares about clean project structure, good developer experience, useful automation, testing, performance, and security. He often audits projects for architecture issues, routing mistakes, Docker setup, CI/CD workflows, and production readiness.
+
+## Technical areas
+
+- TypeScript
+- React
+- Next.js
+- Backend APIs
+- Python
+- AI/LLM integrations
+- Automation workflows
+- Docker
+- CI/CD
+- Web performance
+- SEO
+- Ecommerce integrations
+
+## Selected interests
+
+- AI products
+- LLM-powered applications
+- Trading-related systems and market automation
+- Developer tooling
+- Full-stack product engineering
+- Practical automation
+
+## Important pages
+
+- Home: https://oskarwichtowski.com/
+- Portfolio: https://oskarwichtowski.com/portfolio
+- Articles: https://oskarwichtowski.com/articles
+- GitHub activity: https://oskarwichtowski.com/github
+- Contact: https://oskarwichtowski.com/contact
+
+## Contact
+
+For hiring, collaboration, freelance projects, or technical discussion:
+https://oskarwichtowski.com/contact
