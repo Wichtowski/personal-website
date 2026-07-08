@@ -88,17 +88,31 @@ function injectVars(config: WranglerConfig, mode: Mode): void {
 }
 
 function configureKvNamespaces(config: WranglerConfig, mode: Mode): void {
-  const kvNamespaceId = process.env.PERSONAL_WEBSITE_KV_ID;
-
   for (const namespace of config.kv_namespaces ?? []) {
+    const envVarName =
+      namespace.binding === "VINEXT_KV_CACHE" ? "VINEXT_KV_CACHE_ID" : "PERSONAL_WEBSITE_KV_ID";
+    const kvNamespaceId =
+      namespace.binding === "VINEXT_KV_CACHE"
+        ? (process.env.VINEXT_KV_CACHE_ID ?? process.env.PERSONAL_WEBSITE_KV_ID)
+        : process.env.PERSONAL_WEBSITE_KV_ID;
+
     if (kvNamespaceId) {
       namespace.id = kvNamespaceId;
-      // In local mode a real id lets us optionally read the live namespace.
+      if (
+        mode === "deploy" &&
+        namespace.binding === "VINEXT_KV_CACHE" &&
+        !process.env.VINEXT_KV_CACHE_ID
+      ) {
+        console.warn(
+          "  [prepare] VINEXT_KV_CACHE_ID is not set - using PERSONAL_WEBSITE_KV_ID for Vinext cache.",
+        );
+      }
+      // In local mode a real id lets us optionally read the live namespace
       if (mode === "local") namespace.remote = true;
     } else if (mode === "deploy") {
-      throw new Error("PERSONAL_WEBSITE_KV_ID is required for deploy.");
+      throw new Error(`${envVarName} is required for deploy.`);
     } else {
-      // Local simulated KV (Miniflare). Any non-empty id string is accepted.
+      // Local simulated KV (Miniflare) accepts any non-empty id string
       namespace.id = "local";
       delete namespace.remote;
     }

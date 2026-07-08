@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import vinext from "vinext";
+import { kvDataAdapter } from "@vinext/cloudflare/cache/kv-data-adapter";
 import { cloudflare } from "@cloudflare/vite-plugin";
 import mdx from "@mdx-js/rollup";
 import remarkFrontmatter from "remark-frontmatter";
@@ -20,7 +21,11 @@ export default defineConfig({
   },
   plugins: [
     { enforce: "pre", ...mdx({ remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter] }) },
-    vinext(),
+    vinext({
+      cache: {
+        data: kvDataAdapter({ appPrefix: "personal-website" }),
+      },
+    }),
     cloudflare({
       configPath: process.env.WRANGLER_CONFIG_PATH || undefined,
       viteEnvironment: {

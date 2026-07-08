@@ -40,6 +40,10 @@
     {
       "binding": "PERSONAL_WEBSITE_KV_ID",
       "id": ""
+    },
+    {
+      "binding": "VINEXT_KV_CACHE",
+      "id": ""
     }
   ]
 }
