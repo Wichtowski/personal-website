@@ -152,23 +152,53 @@ export default {
     // Endorsements POST
     if (url.pathname === "/api/endorsements" && request.method === "POST") {
       try {
-        const body = (await request.json()) as { targetId?: string; action?: string };
-        const { targetId, action } = body;
+        const body = (await request.json()) as {
+          targetId?: string;
+          action?: string;
+          email?: string;
+        };
+        const { targetId, action, email } = body;
         if (!targetId) {
           return Response.json({ error: "Missing targetId" }, { status: 400 });
         }
         if (action !== "endorse" && action !== "unendorse") {
           return Response.json({ error: "Invalid action" }, { status: 400 });
         }
+
+        const trimmedEmail = (email || "").toLowerCase().trim();
+        const isValidEmail = trimmedEmail.includes("@") && trimmedEmail.length > 3;
+
+        if (action === "endorse" && !isValidEmail) {
+          return Response.json({ error: "Invalid email" }, { status: 400 });
+        }
+
         const key = `endorsements:${targetId}`;
         const countStr = await env.PERSONAL_WEBSITE_KV_ID.get(key);
         const count = countStr ? parseInt(countStr, 10) : 0;
 
         let newCount = count;
+        const endorseKey = `endorse:${targetId}:${trimmedEmail}`;
+
         if (action === "endorse") {
+          // Check if this email has already endorsed this content
+          const alreadyEndorsed = await env.PERSONAL_WEBSITE_KV_ID.get(endorseKey);
+          if (alreadyEndorsed === "1") {
+            return Response.json({ error: "already_endorsed", count }, { status: 400 });
+          }
+
           newCount = count + 1;
+          await env.PERSONAL_WEBSITE_KV_ID.put(endorseKey, "1");
         } else if (action === "unendorse") {
-          newCount = Math.max(0, count - 1);
+          if (isValidEmail) {
+            // Only decrement and clean key if previously endorsed
+            const alreadyEndorsed = await env.PERSONAL_WEBSITE_KV_ID.get(endorseKey);
+            if (alreadyEndorsed === "1") {
+              newCount = Math.max(0, count - 1);
+              await env.PERSONAL_WEBSITE_KV_ID.delete(endorseKey);
+            }
+          } else {
+            newCount = Math.max(0, count - 1);
+          }
         }
 
         await env.PERSONAL_WEBSITE_KV_ID.put(key, String(newCount));

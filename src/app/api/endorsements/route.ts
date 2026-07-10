@@ -7,6 +7,7 @@ let mockStore: Map<string, string> | null = null;
 interface KVNamespace {
   get(key: string, type?: "text" | "json" | "arrayBuffer" | "stream"): Promise<string | null>;
   put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>;
+  delete(key: string): Promise<void>;
 }
 
 interface RequestWithEnv {
@@ -80,7 +81,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { targetId, action } = body;
+    const { targetId, action, email } = body;
 
     if (!targetId) {
       return Response.json({ error: "Missing targetId" }, { status: 400 });
@@ -89,16 +90,41 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: "Invalid action" }, { status: 400 });
     }
 
+    const trimmedEmail = (email || "").toLowerCase().trim();
+    const isValidEmail = trimmedEmail.includes("@") && trimmedEmail.length > 3;
+
+    if (action === "endorse" && !isValidEmail) {
+      return Response.json({ error: "Invalid email" }, { status: 400 });
+    }
+
     const kv = getKV(request);
     const key = `endorsements:${targetId}`;
     const countStr = await kv.get(key);
     const count = countStr ? parseInt(countStr, 10) : 0;
 
     let newCount = count;
+    const endorseKey = `endorse:${targetId}:${trimmedEmail}`;
+
     if (action === "endorse") {
+      // Check if this email has already endorsed this content
+      const alreadyEndorsed = await kv.get(endorseKey);
+      if (alreadyEndorsed === "1") {
+        return Response.json({ error: "already_endorsed", count }, { status: 400 });
+      }
+
       newCount = count + 1;
+      await kv.put(endorseKey, "1");
     } else if (action === "unendorse") {
-      newCount = Math.max(0, count - 1);
+      if (isValidEmail) {
+        // Only decrement and clean key if previously endorsed
+        const alreadyEndorsed = await kv.get(endorseKey);
+        if (alreadyEndorsed === "1") {
+          newCount = Math.max(0, count - 1);
+          await kv.delete(endorseKey);
+        }
+      } else {
+        newCount = Math.max(0, count - 1);
+      }
     }
 
     await kv.put(key, String(newCount));

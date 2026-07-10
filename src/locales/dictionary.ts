@@ -107,6 +107,11 @@ export interface TranslationDict {
     endorseBtn: string;
     endorsedBtn: string;
     endorseCount: string;
+    endorseEmailPlaceholder: string;
+    endorseEmailLabel: string;
+    endorseEmailHint: string;
+    endorseEmailError: string;
+    endorseEmailAlreadyUsed: string;
     commentsSectionTitle: string;
     commentBtn: string;
     commenting: string;
@@ -313,6 +318,11 @@ export const dictionaries: Record<Language, TranslationDict> = {
       endorseBtn: "Endorse",
       endorsedBtn: "Endorsed",
       endorseCount: "endorsements",
+      endorseEmailPlaceholder: "your@email.com",
+      endorseEmailLabel: "Enter your email to endorse",
+      endorseEmailHint: "Email is required to prevent spam and is never displayed",
+      endorseEmailError: "Please enter a valid email",
+      endorseEmailAlreadyUsed: "This email has already endorsed this content",
       commentsSectionTitle: "Comments",
       commentBtn: "Post Comment",
       commenting: "Posting...",
@@ -522,6 +532,12 @@ export const dictionaries: Record<Language, TranslationDict> = {
       endorseBtn: "Rekomenduj",
       endorsedBtn: "Rekomendowano",
       endorseCount: "rekomendacji",
+      endorseEmailPlaceholder: "twoj@email.com",
+      endorseEmailLabel: "Wpisz email, aby polecić",
+      endorseEmailHint:
+        "Email jest wymagany do ochrony przed spamem i nigdy nie jest pokazywany publicznie",
+      endorseEmailError: "Podaj prawidłowy email",
+      endorseEmailAlreadyUsed: "Ten email został już użyty do polecenia tego wpisu",
       commentsSectionTitle: "Komentarze",
       commentBtn: "Dodaj komentarz",
       commenting: "Wysyłanie...",
