@@ -8,6 +8,9 @@ import remarkMdxFrontmatter from "remark-mdx-frontmatter";
 import { fileURLToPath } from "node:url";
 
 export default defineConfig({
+  optimizeDeps: {
+    exclude: ["lucide-react"],
+  },
   resolve: {
     alias: {
       "@app": fileURLToPath(new URL("./src/app", import.meta.url)),

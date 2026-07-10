@@ -1,6 +1,11 @@
 export const ROUTES = ["/", "/github", "/portfolio", "/articles", "/contact"];
+export const PAGE_FADE_OUT_EVENT = "personal-website:page-fade-out";
+export const PAGE_FADE_DURATION_MS = 400;
 
 let _direction = 1;
+let _transitionKind: RouteTransitionKind = "slide";
+
+export type RouteTransitionKind = "slide" | "fade";
 
 export function getRouteIndex(pathname: string): number {
   if (pathname === "/") {
@@ -39,8 +44,23 @@ export function getRouteDirection(fromPathname: string, toPathname: string): num
 
 export function setNavDirection(d: number) {
   _direction = d;
+  _transitionKind = "slide";
 }
 
 export function getNavDirection(): number {
   return _direction;
+}
+
+export function setNavTransitionKind(kind: RouteTransitionKind) {
+  _transitionKind = kind;
+}
+
+export function consumeNavTransitionKind(): RouteTransitionKind {
+  const kind = _transitionKind;
+  _transitionKind = "slide";
+  return kind;
+}
+
+export function requestPageFadeOut() {
+  window.dispatchEvent(new Event(PAGE_FADE_OUT_EVENT));
 }

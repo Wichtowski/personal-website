@@ -381,7 +381,7 @@ export const dictionaries: Record<Language, TranslationDict> = {
       lastPlayed: "Ostatnio słuchane",
       nothingPlaying: "Nic nie gra",
       lastFmLabel: "Last.fm",
-      idleTrack: "mruczenia mojego kota",
+      idleTrack: "mruczenia moich kotów",
       idleArtist: "Sezamek & Florka",
     },
     techStack: {
@@ -514,7 +514,7 @@ export const dictionaries: Record<Language, TranslationDict> = {
       dev: "Oprogramowanie",
       qa: "QA i Testy",
       viewProject: "Zobacz projekt",
-      backToProjects: "← Powrót do projektów",
+      backToProjects: "Powrót do projektów",
       onThisPage: "Na tej stronie",
     },
     blog: {
@@ -523,7 +523,7 @@ export const dictionaries: Record<Language, TranslationDict> = {
         "Moje refleksje na temat sztucznej inteligencji, wzorców projektowych i rygorystycznych metodologii testowania.",
       readTime: "min czytania",
       published: "Opublikowano",
-      backToArticles: "← Powrót do artykułów",
+      backToArticles: "Powrót do artykułów",
       noArticles: "Brak opublikowanych artykułów. Zajrzyj tu wkrótce!",
       onThisPage: "Na tej stronie",
     },

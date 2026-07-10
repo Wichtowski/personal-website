@@ -28,7 +28,7 @@ export function getStatusConfig(status?: string, language?: string): StatusConfi
       className: "border-emerald-500/30 text-emerald-500 bg-emerald-500/10",
     };
   }
-  if (s === "inprogress" || s === "wtoku" || s === "tok" || s === "wparku") {
+  if (s === "inprogress" || s === "wtoku" || s === "wtrakcie" || s === "tok" || s === "wparku") {
     return {
       label: language === "pl" ? "W toku" : "In Progress",
       icon: CircleDot,

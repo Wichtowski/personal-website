@@ -8,12 +8,18 @@ import { Sun, Moon, Menu, X, Terminal, Languages } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useThemeMode } from "@hooks/useThemeMode";
 import { cn } from "@lib/cn";
-import { getRouteDirection, setNavDirection } from "@lib/navigation";
+import {
+  getRouteDirection,
+  PAGE_FADE_DURATION_MS,
+  requestPageFadeOut,
+  setNavDirection,
+  setNavTransitionKind,
+} from "@lib/navigation";
 
 export function Navbar() {
   const { setTheme } = useTheme();
   const themeMode = useThemeMode("dark");
-  const { language, toggleLanguage, t } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const router = useRouter();
   const pathname = usePathname() ?? "/";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -37,6 +43,38 @@ export function Navbar() {
     }
 
     setTheme(isDarkTheme ? "light" : "dark");
+  };
+
+  const getLocalizedPageHref = (targetLanguage: typeof language) => {
+    const alternateLink = document.querySelector<HTMLLinkElement>(
+      `link[rel="alternate"][hreflang="${targetLanguage}"]`,
+    );
+    const href = alternateLink?.getAttribute("href");
+
+    if (!href) {
+      return null;
+    }
+
+    const url = new URL(href, window.location.origin);
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      return null;
+    }
+
+    return `${url.pathname}${url.search}${url.hash}`;
+  };
+
+  const handleLanguageToggle = () => {
+    const nextLanguage = language === "en" ? "pl" : "en";
+    const localizedHref = getLocalizedPageHref(nextLanguage);
+
+    setMobileMenuOpen(false);
+    setLanguage(nextLanguage);
+
+    if (localizedHref && localizedHref !== pathname) {
+      setNavTransitionKind("fade");
+      requestPageFadeOut();
+      window.setTimeout(() => router.push(localizedHref), PAGE_FADE_DURATION_MS);
+    }
   };
 
   const navItems = [
@@ -139,7 +177,7 @@ export function Navbar() {
         <div className="hidden md:flex items-center gap-3">
           {/* Language Selector */}
           <button
-            onClick={toggleLanguage}
+            onClick={handleLanguageToggle}
             className={cn(
               "p-2 rounded-lg transition-all duration-300 flex items-center gap-1.5 focus:outline-none text-xs font-mono font-medium",
               isDarkTheme
@@ -225,7 +263,7 @@ export function Navbar() {
                 )}
               >
                 <button
-                  onClick={toggleLanguage}
+                  onClick={handleLanguageToggle}
                   className={cn(
                     "p-2 rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 focus:outline-none transition-all",
                     isDarkTheme

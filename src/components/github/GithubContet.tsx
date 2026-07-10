@@ -3,7 +3,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useLanguage } from "@context/LanguageContext";
 import type { GitHubPulseActivity, GitHubPulseStats } from "@lib/github-pulse";
-import { GITHUB_PULSE_CACHE_KEY, GITHUB_PULSE_CACHE_TTL_MS } from "@lib/github-pulse";
+import {
+  GITHUB_PULSE_CACHE_KEY,
+  GITHUB_PULSE_CACHE_TTL_MS,
+  GITHUB_PULSE_LEGACY_CACHE_KEYS,
+} from "@lib/github-pulse";
 import { Activity } from "lucide-react";
 import { motion } from "framer-motion";
 import {
@@ -26,16 +30,44 @@ interface GithubContentProps {
   initialData?: GithubPulseData | null;
 }
 
-function isValidGithubPulseCache(value: unknown) {
-  if (!value || typeof value !== "object") return false;
+type GithubPulseCacheEntry = {
+  cachedAt: string;
+  data: GithubPulseData;
+};
+
+function parseGithubPulseCache(value: unknown): GithubPulseCacheEntry | null {
+  if (!value || typeof value !== "object") return null;
 
   const data = value as { cachedAt?: string; data?: GithubPulseData };
-  if (!data.cachedAt || !data.data) return false;
+  if (!data.cachedAt || !data.data) return null;
 
   const cachedAtMs = Date.parse(data.cachedAt);
-  if (Number.isNaN(cachedAtMs)) return false;
+  if (Number.isNaN(cachedAtMs)) return null;
 
-  return Date.now() - cachedAtMs < GITHUB_PULSE_CACHE_TTL_MS;
+  return {
+    cachedAt: data.cachedAt,
+    data: data.data,
+  };
+}
+
+function isFreshGithubPulseCache(cache: GithubPulseCacheEntry) {
+  return Date.now() - Date.parse(cache.cachedAt) < GITHUB_PULSE_CACHE_TTL_MS;
+}
+
+function readGithubPulseCache(): GithubPulseCacheEntry | null {
+  for (const key of [GITHUB_PULSE_CACHE_KEY, ...GITHUB_PULSE_LEGACY_CACHE_KEYS]) {
+    try {
+      const rawCache = localStorage.getItem(key);
+      if (!rawCache) continue;
+
+      const parsed = parseGithubPulseCache(JSON.parse(rawCache));
+      if (parsed) return parsed;
+    } catch {
+      continue;
+    }
+  }
+
+  return null;
 }
 
 export default function GithubContent({ initialData }: GithubContentProps) {
@@ -75,49 +107,60 @@ export default function GithubContent({ initialData }: GithubContentProps) {
     }
   }, []);
 
-  const loadData = useCallback(async () => {
-    setError(null);
-    setLoading(true);
-
-    try {
-      const res = await fetch("/api/github/pulse");
-
-      if (!res.ok) {
-        throw new Error(`Failed to fetch GitHub pulse: ${res.status}`);
+  const loadData = useCallback(
+    async (options?: { keepExistingData?: boolean }) => {
+      setError(null);
+      if (!options?.keepExistingData) {
+        setLoading(true);
       }
 
-      const data = (await res.json()) as GithubPulseData;
-      applyPulseData(data);
-      persistPulseData(data);
-      setLoading(false);
-    } catch (err) {
-      console.error(err);
-      setError(t.github.error);
-      setLoading(false);
-    }
-  }, [applyPulseData, persistPulseData, t.github.error]);
+      try {
+        const res = await fetch("/api/github/pulse");
+
+        if (!res.ok) {
+          throw new Error(`Failed to fetch GitHub pulse: ${res.status}`);
+        }
+
+        const data = (await res.json()) as GithubPulseData;
+        applyPulseData(data);
+        persistPulseData(data);
+        setLoading(false);
+      } catch (err) {
+        const cached = readGithubPulseCache();
+        if (cached) {
+          applyPulseData(cached.data);
+        } else {
+          console.error(err);
+          setError(t.github.error);
+        }
+        setLoading(false);
+      }
+    },
+    [applyPulseData, persistPulseData, t.github.error],
+  );
 
   useEffect(() => {
     let active = true;
     let timeoutId: number | undefined;
 
     try {
-      const rawCache = localStorage.getItem(GITHUB_PULSE_CACHE_KEY);
-      if (rawCache) {
-        const parsed = JSON.parse(rawCache) as { cachedAt?: string; data?: GithubPulseData };
-        if (isValidGithubPulseCache(parsed)) {
-          timeoutId = window.setTimeout(() => {
-            if (active && parsed.data) {
-              applyPulseData(parsed.data);
-              setLoading(false);
-            }
-          }, 0);
+      const cached = readGithubPulseCache();
+      if (cached) {
+        timeoutId = window.setTimeout(() => {
+          if (!active) return;
 
-          return () => {
-            active = false;
-            if (timeoutId) window.clearTimeout(timeoutId);
-          };
-        }
+          applyPulseData(cached.data);
+          setLoading(false);
+
+          if (!isFreshGithubPulseCache(cached)) {
+            void loadData({ keepExistingData: true });
+          }
+        }, 0);
+
+        return () => {
+          active = false;
+          if (timeoutId) window.clearTimeout(timeoutId);
+        };
       }
 
       if (initialData) {

@@ -152,7 +152,8 @@ async function fetchRecentRepoActivities(
   return activities;
 }
 
-export const GITHUB_PULSE_CACHE_KEY = "github-pulse-cache";
+export const GITHUB_PULSE_CACHE_KEY = "github-pulse-cache-v1";
+export const GITHUB_PULSE_LEGACY_CACHE_KEYS = ["github-pulse-cache"];
 export const GITHUB_PULSE_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 
 type GitHubPulseResult = {

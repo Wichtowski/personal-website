@@ -78,11 +78,28 @@ export interface GitHubRepoDetails {
   stars: number;
 }
 
+const repoDetailsCache = new Map<string, Promise<GitHubRepoDetails | null>>();
+
 export async function fetchRepoDetails(githubUrl: string): Promise<GitHubRepoDetails | null> {
   const match = githubUrl.match(/https?:\/\/github\.com\/([^\/]+)\/([^\/]+)/i);
   if (!match) return null;
   const [, owner, repo] = match;
+  const cacheKey = `${owner}/${repo}`.toLowerCase();
 
+  const cached = repoDetailsCache.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  const request = fetchRepoDetailsFromGitHub(owner, repo);
+  repoDetailsCache.set(cacheKey, request);
+  return request;
+}
+
+async function fetchRepoDetailsFromGitHub(
+  owner: string,
+  repo: string,
+): Promise<GitHubRepoDetails | null> {
   try {
     const headers: Record<string, string> = {
       Accept: "application/vnd.github+json",
@@ -96,7 +113,9 @@ export async function fetchRepoDetails(githubUrl: string): Promise<GitHubRepoDet
       headers,
     });
     if (!res.ok) {
-      console.warn(`Failed to fetch repo details for ${owner}/${repo}: status ${res.status}`);
+      if (res.status !== 403 && res.status !== 404) {
+        console.warn(`Failed to fetch repo details for ${owner}/${repo}: status ${res.status}`);
+      }
       return null;
     }
     const data = (await res.json()) as { stargazers_count?: number };
@@ -104,7 +123,7 @@ export async function fetchRepoDetails(githubUrl: string): Promise<GitHubRepoDet
       stars: data.stargazers_count ?? 0,
     };
   } catch (err) {
-    console.warn(`Error compiling stats for githubUrl ${githubUrl}:`, err);
+    console.warn(`Error compiling stats for ${owner}/${repo}:`, err);
     return null;
   }
 }
