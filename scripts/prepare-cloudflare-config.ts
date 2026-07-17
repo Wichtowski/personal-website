@@ -96,25 +96,27 @@ function configureKvNamespaces(config: WranglerConfig, mode: Mode): void {
         ? (process.env.VINEXT_KV_CACHE_ID ?? process.env.PERSONAL_WEBSITE_KV_ID)
         : process.env.PERSONAL_WEBSITE_KV_ID;
 
-    if (kvNamespaceId) {
+    // Local dev uses Miniflare's simulated KV by default so requests don't
+    // round-trip to remote Cloudflare KV (which makes `vinext dev` very slow).
+    // Opt into the live namespace explicitly with USE_REMOTE_KV=1.
+    const useRemoteKvLocal = process.env.USE_REMOTE_KV === "1";
+
+    if (mode === "deploy" && kvNamespaceId) {
       namespace.id = kvNamespaceId;
-      if (
-        mode === "deploy" &&
-        namespace.binding === "VINEXT_KV_CACHE" &&
-        !process.env.VINEXT_KV_CACHE_ID
-      ) {
+      if (namespace.binding === "VINEXT_KV_CACHE" && !process.env.VINEXT_KV_CACHE_ID) {
         console.warn(
           "  [prepare] VINEXT_KV_CACHE_ID is not set - using PERSONAL_WEBSITE_KV_ID for Vinext cache.",
         );
       }
-      // In local mode a real id lets us optionally read the live namespace
-      if (mode === "local") namespace.remote = true;
-    } else if (mode === "deploy") {
-      throw new Error(`${envVarName} is required for deploy.`);
-    } else {
+    } else if (mode === "local" && useRemoteKvLocal && kvNamespaceId) {
+      namespace.id = kvNamespaceId;
+      namespace.remote = true;
+    } else if (mode === "local") {
       // Local simulated KV (Miniflare) accepts any non-empty id string
       namespace.id = "local";
       delete namespace.remote;
+    } else if (mode === "deploy") {
+      throw new Error(`${envVarName} is required for deploy.`);
     }
   }
 }

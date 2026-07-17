@@ -10,6 +10,9 @@ import { fileURLToPath } from "node:url";
 export default defineConfig({
   optimizeDeps: {
     exclude: ["lucide-react"],
+    // Pre-bundle heavy deps up front so the first request isn't stalled by
+    // on-demand optimization (and avoid mid-session re-optimize reloads).
+    include: ["framer-motion", "three", "@react-three/fiber", "@react-three/rapier"],
   },
   resolve: {
     alias: {

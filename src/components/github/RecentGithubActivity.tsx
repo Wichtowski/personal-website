@@ -60,9 +60,14 @@ export function RecentGithubActivity({
             >
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div className="min-w-0">
-                  <h3 className="text-base md:text-lg font-bold font-mono text-foreground truncate">
+                  <a
+                    href={activity.repoUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-base md:text-lg font-bold font-mono text-foreground truncate hover:text-primary hover:underline block"
+                  >
                     {getRepoDisplayName(activity.repoName)}
-                  </h3>
+                  </a>
 
                   <span className="text-[10px] font-mono text-muted-foreground">
                     {formatEventType(activity.type)}

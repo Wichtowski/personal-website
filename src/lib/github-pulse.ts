@@ -21,7 +21,16 @@ export interface GitHubPulseActivity {
 }
 
 interface GitHubRepo {
+  name: string;
+  pushed_at: string | null;
   stargazers_count?: number;
+}
+
+interface GitHubCommitListItem {
+  sha: string;
+  commit: {
+    message: string;
+  };
 }
 
 interface GitHubEvent {
@@ -129,24 +138,78 @@ async function fetchGitHubStats(username: string): Promise<GitHubPulseStats> {
   };
 }
 
+async function fetchRepoCommitActivities(
+  username: string,
+  limit: number,
+  excludeRepos: Set<string>,
+): Promise<GitHubPulseActivity[]> {
+  const repos = await githubFetch<GitHubRepo[]>(
+    `/users/${username}/repos?per_page=100&sort=pushed&direction=desc&type=owner`,
+  );
+
+  const activities: GitHubPulseActivity[] = [];
+
+  for (const repo of repos) {
+    const repoName = `${username}/${repo.name}`;
+    if (excludeRepos.has(repoName) || !repo.pushed_at) continue;
+
+    const commits = await githubFetch<GitHubCommitListItem[]>(
+      `/repos/${repoName}/commits?per_page=1`,
+    ).catch(() => null);
+
+    const latestCommit = commits?.[0];
+    if (!latestCommit) continue;
+
+    activities.push({
+      repoName,
+      repoUrl: `https://github.com/${repoName}`,
+      commitMessage: latestCommit.commit.message.split("\n")[0] || "Active development",
+      commitSha: latestCommit.sha,
+      pushedAt: repo.pushed_at,
+      type: "PushEvent",
+    });
+
+    if (activities.length >= limit) break;
+  }
+
+  return activities;
+}
+
 async function fetchRecentRepoActivities(
   username: string,
   limit = 3,
+  maxPages = 3,
 ): Promise<GitHubPulseActivity[]> {
-  const events = await githubFetch<GitHubEvent[]>(`/users/${username}/events/public?per_page=30`);
   const supportedTypes = new Set(["PushEvent", "PullRequestEvent", "IssuesEvent", "CreateEvent"]);
 
   const seenRepos = new Set<string>();
   const activities: GitHubPulseActivity[] = [];
 
-  for (const event of events) {
-    if (!supportedTypes.has(event.type)) continue;
-    if (seenRepos.has(event.repo.name)) continue;
+  for (let page = 1; page <= maxPages; page++) {
+    const events = await githubFetch<GitHubEvent[]>(
+      `/users/${username}/events/public?per_page=30&page=${page}`,
+    );
 
-    seenRepos.add(event.repo.name);
-    activities.push(await formatGitHubEvent(event));
+    for (const event of events) {
+      if (!supportedTypes.has(event.type)) continue;
+      if (seenRepos.has(event.repo.name)) continue;
 
-    if (activities.length >= limit) break;
+      seenRepos.add(event.repo.name);
+      activities.push(await formatGitHubEvent(event));
+
+      if (activities.length >= limit) return activities;
+    }
+
+    if (events.length < 30) break;
+  }
+
+  if (activities.length < limit) {
+    const fallbackActivities = await fetchRepoCommitActivities(
+      username,
+      limit - activities.length,
+      seenRepos,
+    );
+    activities.push(...fallbackActivities);
   }
 
   return activities;
@@ -210,6 +273,7 @@ async function formatGitHubEvent(event: GitHubEvent): Promise<GitHubPulseActivit
     commitMessage = `${event.payload?.action ?? "Updated"} issue: ${
       event.payload?.issue?.title ?? ""
     }`;
+    commitSha = `#${event.payload?.number ?? ""}`;
   }
 
   if (event.type === "CreateEvent") {
