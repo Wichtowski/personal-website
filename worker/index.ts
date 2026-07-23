@@ -30,6 +30,7 @@ const imageConfig: ImageConfig = {
 
 interface Env {
   ASSETS: Fetcher;
+  GITHUB_TOKEN?: string;
   LASTFM_API_KEY?: string;
   LASTFM_USERNAME?: string;
   PERSONAL_WEBSITE_KV_ID: KVNamespace;
@@ -102,7 +103,7 @@ export default {
       const CACHE_SECONDS = 60 * 30;
       const STALE_SECONDS = 60 * 60 * 24;
       try {
-        const data = await buildGitHubPulse();
+        const data = await buildGitHubPulse({ githubToken: env.GITHUB_TOKEN });
         return Response.json(data, {
           headers: {
             "Cache-Control": `public, max-age=60, s-maxage=${CACHE_SECONDS}, stale-while-revalidate=${STALE_SECONDS}`,

@@ -71,13 +71,14 @@ interface GitHubCommitResponse {
 const MAIN_USERNAME = "Wichtowski";
 const WORK_USERNAME = "oskar-wichtowski-wttech";
 
-async function githubFetch<T>(path: string): Promise<T> {
+async function githubFetch<T>(path: string, token?: string): Promise<T> {
+  const authToken = token ?? env.GITHUB_TOKEN;
   const res = await fetch(`https://api.github.com${path}`, {
     headers: {
       Accept: "application/vnd.github+json",
       "X-GitHub-Api-Version": "2022-11-28",
       "User-Agent": "oskar-wichtowski-portfolio",
-      ...(env.GITHUB_TOKEN ? { Authorization: `Bearer ${env.GITHUB_TOKEN}` } : {}),
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
     },
     cache: "no-store",
   });
@@ -98,7 +99,7 @@ function parseRepoFullName(repoName: string) {
   return { owner, repo };
 }
 
-async function fetchCommitDetails(repoName: string, ref: string) {
+async function fetchCommitDetails(repoName: string, ref: string, token?: string) {
   const repo = parseRepoFullName(repoName);
   if (!repo || !ref) {
     return null;
@@ -106,6 +107,7 @@ async function fetchCommitDetails(repoName: string, ref: string) {
 
   const commit = await githubFetch<GitHubCommitResponse>(
     `/repos/${repo.owner}/${repo.repo}/commits/${encodeURIComponent(ref)}`,
+    token,
   );
 
   return {
@@ -114,7 +116,7 @@ async function fetchCommitDetails(repoName: string, ref: string) {
   };
 }
 
-async function fetchGitHubStats(username: string): Promise<GitHubPulseStats> {
+async function fetchGitHubStats(username: string, token?: string): Promise<GitHubPulseStats> {
   const profile = await githubFetch<{
     login: string;
     name?: string;
@@ -122,9 +124,12 @@ async function fetchGitHubStats(username: string): Promise<GitHubPulseStats> {
     public_repos?: number;
     followers?: number;
     following?: number;
-  }>(`/users/${username}`);
+  }>(`/users/${username}`, token);
 
-  const repos = await githubFetch<GitHubRepo[]>(`/users/${username}/repos?per_page=100&type=owner`);
+  const repos = await githubFetch<GitHubRepo[]>(
+    `/users/${username}/repos?per_page=100&type=owner`,
+    token,
+  );
   const stars = repos.reduce((acc, repo) => acc + (repo.stargazers_count ?? 0), 0);
 
   return {
@@ -142,9 +147,11 @@ async function fetchRepoCommitActivities(
   username: string,
   limit: number,
   excludeRepos: Set<string>,
+  token?: string,
 ): Promise<GitHubPulseActivity[]> {
   const repos = await githubFetch<GitHubRepo[]>(
     `/users/${username}/repos?per_page=100&sort=pushed&direction=desc&type=owner`,
+    token,
   );
 
   const activities: GitHubPulseActivity[] = [];
@@ -155,6 +162,7 @@ async function fetchRepoCommitActivities(
 
     const commits = await githubFetch<GitHubCommitListItem[]>(
       `/repos/${repoName}/commits?per_page=1`,
+      token,
     ).catch(() => null);
 
     const latestCommit = commits?.[0];
@@ -179,6 +187,7 @@ async function fetchRecentRepoActivities(
   username: string,
   limit = 3,
   maxPages = 3,
+  token?: string,
 ): Promise<GitHubPulseActivity[]> {
   const supportedTypes = new Set(["PushEvent", "PullRequestEvent", "IssuesEvent", "CreateEvent"]);
 
@@ -188,6 +197,7 @@ async function fetchRecentRepoActivities(
   for (let page = 1; page <= maxPages; page++) {
     const events = await githubFetch<GitHubEvent[]>(
       `/users/${username}/events/public?per_page=30&page=${page}`,
+      token,
     );
 
     for (const event of events) {
@@ -195,7 +205,7 @@ async function fetchRecentRepoActivities(
       if (seenRepos.has(event.repo.name)) continue;
 
       seenRepos.add(event.repo.name);
-      activities.push(await formatGitHubEvent(event));
+      activities.push(await formatGitHubEvent(event, token));
 
       if (activities.length >= limit) return activities;
     }
@@ -208,6 +218,7 @@ async function fetchRecentRepoActivities(
       username,
       limit - activities.length,
       seenRepos,
+      token,
     );
     activities.push(...fallbackActivities);
   }
@@ -217,7 +228,7 @@ async function fetchRecentRepoActivities(
 
 export const GITHUB_PULSE_CACHE_KEY = "github-pulse-cache-v1";
 export const GITHUB_PULSE_LEGACY_CACHE_KEYS = ["github-pulse-cache"];
-export const GITHUB_PULSE_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+export const GITHUB_PULSE_CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6h
 
 type GitHubPulseResult = {
   generatedAt: string;
@@ -228,15 +239,19 @@ type GitHubPulseResult = {
 
 let _serverCache: { data: GitHubPulseResult; cachedAt: number } | null = null;
 
-export async function buildGitHubPulse(): Promise<GitHubPulseResult> {
+export async function buildGitHubPulse(options?: {
+  githubToken?: string;
+}): Promise<GitHubPulseResult> {
   if (_serverCache && Date.now() - _serverCache.cachedAt < GITHUB_PULSE_CACHE_TTL_MS) {
     return _serverCache.data;
   }
 
+  const token = options?.githubToken ?? env.GITHUB_TOKEN;
+
   const [mainStats, latestActivity, workStats] = await Promise.all([
-    fetchGitHubStats(MAIN_USERNAME),
-    fetchRecentRepoActivities(MAIN_USERNAME, 3),
-    fetchGitHubStats(WORK_USERNAME).catch(() => null),
+    fetchGitHubStats(MAIN_USERNAME, token),
+    fetchRecentRepoActivities(MAIN_USERNAME, 3, 3, token),
+    fetchGitHubStats(WORK_USERNAME, token).catch(() => null),
   ]);
 
   const result: GitHubPulseResult = {
@@ -251,7 +266,7 @@ export async function buildGitHubPulse(): Promise<GitHubPulseResult> {
   return result;
 }
 
-async function formatGitHubEvent(event: GitHubEvent): Promise<GitHubPulseActivity> {
+async function formatGitHubEvent(event: GitHubEvent, token?: string): Promise<GitHubPulseActivity> {
   const repoName = event.repo.name;
   let commitMessage = "Active development";
   let commitSha = "";
@@ -284,7 +299,7 @@ async function formatGitHubEvent(event: GitHubEvent): Promise<GitHubPulseActivit
   }
 
   if (refToResolve) {
-    const commitDetails = await fetchCommitDetails(repoName, refToResolve);
+    const commitDetails = await fetchCommitDetails(repoName, refToResolve, token);
     if (commitDetails) {
       commitMessage = commitDetails.message;
       commitSha = commitDetails.sha;
