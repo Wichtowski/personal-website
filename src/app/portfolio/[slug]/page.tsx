@@ -8,6 +8,7 @@ import { getStatusConfig } from "@lib/status";
 import { TableOfContents } from "@components/layout/TableOfContents";
 import { StickyBackButton } from "@components/layout/StickyBackButton";
 import { fetchRepoDetails } from "@lib/github";
+import { SITE_OG_IMAGE } from "@lib/site";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -33,6 +34,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (alternateSlugs.en) languages["en"] = `/portfolio/${alternateSlugs.en}`;
   if (alternateSlugs.pl) languages["pl"] = `/portfolio/${alternateSlugs.pl}`;
 
+  const ogImage = metadata.ogImage ?? metadata.thumbnail ?? SITE_OG_IMAGE;
+
   return {
     title: metadata.title,
     description: metadata.description,
@@ -46,11 +49,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description: metadata.description,
       url: canonical,
       tags: metadata.tags,
+      images: [{ url: ogImage, width: 1200, height: 630, alt: metadata.title }],
     },
     twitter: {
       card: "summary_large_image",
       title: metadata.title,
       description: metadata.description,
+      images: [ogImage],
     },
   };
 }

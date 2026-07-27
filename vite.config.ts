@@ -10,9 +10,28 @@ import { fileURLToPath } from "node:url";
 export default defineConfig({
   optimizeDeps: {
     exclude: ["lucide-react"],
-    // Pre-bundle heavy deps up front so the first request isn't stalled by
-    // on-demand optimization (and avoid mid-session re-optimize reloads).
-    include: ["framer-motion", "three", "@react-three/fiber", "@react-three/rapier"],
+    // Only pre-bundle what the homepage cold path needs. three/@react-three/*
+    // (incl. rapier WASM) are lazy-loaded and only used on the 404/dice route,
+    // so pre-bundling them here just stalled every dev startup. They now get
+    // optimized on-demand the first time that route is visited.
+    include: [
+      "framer-motion",
+      "react-icons/si",
+      "react-icons/fa",
+      "react-icons/gi",
+      "react-icons/lu",
+    ],
+  },
+  server: {
+    // Pre-transform the homepage module graph on startup so the first
+    // navigation isn't hit with the full cold-compile cost.
+    warmup: {
+      clientFiles: [
+        "./src/app/layout.tsx",
+        "./src/app/page.tsx",
+        "./src/components/landingpage/LandingPage.tsx",
+      ],
+    },
   },
   resolve: {
     alias: {

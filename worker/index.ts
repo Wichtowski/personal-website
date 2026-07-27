@@ -74,6 +74,12 @@ export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
+    // Canonical host: redirect www -> apex to avoid duplicate content
+    if (url.hostname === "www.oskarwichtowski.com") {
+      url.hostname = "oskarwichtowski.com";
+      return Response.redirect(url.toString(), 301);
+    }
+
     // Image optimization via Cloudflare Images binding
     // The parseImageParams validation inside handleImageOptimization
     // normalizes backslashes and validates the origin hasn't changed

@@ -4,3 +4,4 @@ export const AUTHOR_NAME = "Oskar Wichtowski";
 export const SITE_TITLE = "Oskar Wichtowski - AI Engineer & Fullstack Developer";
 export const SITE_DESCRIPTION =
   "I build AI-powered applications, LLM integrations, ecommerce automations, and full-stack tools - from PoCs to production-ready systems.";
+export const SITE_OG_IMAGE = "/og-image.png";

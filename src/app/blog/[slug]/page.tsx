@@ -6,7 +6,7 @@ import { dictionaries, Language } from "@locales/dictionary";
 import { TableOfContents } from "@components/layout/TableOfContents";
 import { StickyBackButton } from "@components/layout/StickyBackButton";
 import { EndorsementButton, CommentsSection } from "@components/engagement";
-import { SITE_URL, AUTHOR_NAME } from "@lib/site";
+import { SITE_URL, AUTHOR_NAME, SITE_OG_IMAGE } from "@lib/site";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -32,6 +32,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (alternateSlugs.en) languages["en"] = `/blog/${alternateSlugs.en}`;
   if (alternateSlugs.pl) languages["pl"] = `/blog/${alternateSlugs.pl}`;
 
+  const ogImage = metadata.ogImage ?? SITE_OG_IMAGE;
+
   return {
     title: metadata.title,
     description: metadata.description,
@@ -47,11 +49,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       publishedTime: metadata.date,
       authors: [AUTHOR_NAME],
       tags: metadata.tags,
+      images: [{ url: ogImage, width: 1200, height: 630, alt: metadata.title }],
     },
     twitter: {
       card: "summary_large_image",
       title: metadata.title,
       description: metadata.description,
+      images: [ogImage],
     },
   };
 }

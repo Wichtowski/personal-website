@@ -5,7 +5,7 @@ import { ThemeProvider } from "@components/ThemeProvider";
 import { LanguageProvider } from "@context/LanguageContext";
 import { Navbar } from "@components/layout/Navbar";
 import { AppLayout } from "@components/layout/AppLayout";
-import { SITE_URL, SITE_NAME, SITE_TITLE, SITE_DESCRIPTION } from "@lib/site";
+import { SITE_URL, SITE_NAME, SITE_TITLE, SITE_DESCRIPTION, SITE_OG_IMAGE } from "@lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,11 +31,13 @@ export const metadata: Metadata = {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
     url: "/",
+    images: [{ url: SITE_OG_IMAGE, width: 1200, height: 630, alt: SITE_NAME }],
   },
   twitter: {
     card: "summary_large_image",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
+    images: [SITE_OG_IMAGE],
   },
   alternates: {
     canonical: "/",

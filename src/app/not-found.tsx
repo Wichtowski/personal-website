@@ -1,5 +1,5 @@
-import { NotFoundScene } from "@components/not-found/NotFoundScene";
+import { NotFoundSceneLazy } from "@components/not-found/NotFoundSceneLazy";
 
 export default function NotFound() {
-  return <NotFoundScene />;
+  return <NotFoundSceneLazy />;
 }

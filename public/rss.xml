@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Oskar Wichtowski - Articles</title>
+    <link>https://oskarwichtowski.com/articles</link>
+    <description>Articles on AI engineering, LLM integrations, serverless architecture, and quality assurance by Oskar Wichtowski.</description>
+    <language>en</language>
+    <atom:link href="https://oskarwichtowski.com/rss.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Testing AI Services at Scale with Playwright - A Practical Guide</title>
+      <link>https://oskarwichtowski.com/blog/testing-ai-services-at-scale</link>
+      <guid isPermaLink="true">https://oskarwichtowski.com/blog/testing-ai-services-at-scale</guid>
+      <description>How we built a layered integration testing strategy for a multi-service AI platform using Playwright's API testing, contract-driven test data from S3, evaluation metrics with percentage failure thresholds, and a Friday-to-Monday batched indexing verification workflow.</description>
+      <category>Testing</category>
+      <category>AI</category>
+      <category>Playwright</category>
+      <category>Integration Testing</category>
+      <category>CI/CD</category>
+      <category>Evaluation Metrics</category>
+      <category>Quality</category>
+      <pubDate>Wed, 01 Jul 2026 00:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Serverless Is a Lie and We All Just Agreed to Pretend</title>
+      <link>https://oskarwichtowski.com/blog/serverless-rant</link>
+      <guid isPermaLink="true">https://oskarwichtowski.com/blog/serverless-rant</guid>
+      <description>A rant about how 'serverless' still runs on servers - they're just someone else's servers, and you're still paying for them.</description>
+      <category>serverless</category>
+      <category>cloud</category>
+      <category>rant</category>
+      <category>devops</category>
+      <category>marketing</category>
+      <pubDate>Fri, 26 Jun 2026 00:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>How We Indexed Over 300,000 Scientific Papers with a Serverless AI Pipeline</title>
+      <link>https://oskarwichtowski.com/blog/serverless-ai-pipeline-indexed-300k-scientific-papers</link>
+      <guid isPermaLink="true">https://oskarwichtowski.com/blog/serverless-ai-pipeline-indexed-300k-scientific-papers</guid>
+      <description>How we rebuilt a serverless AI pipeline for indexing 300,000+ scientific papers - with OCR, chunking, figure enrichment, embeddings, retries, and cost-aware re-indexing.</description>
+      <category>AI</category>
+      <category>Cloud</category>
+      <category>Mistral AI</category>
+      <category>OCR</category>
+      <category>Serverless</category>
+      <category>Vector Search</category>
+      <category>Architecture</category>
+      <pubDate>Thu, 25 Jun 2026 00:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>

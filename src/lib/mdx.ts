@@ -7,6 +7,7 @@ export interface ProjectMetadata {
   category: "ai" | "dev" | "qa";
   tags: string[];
   thumbnail?: string;
+  ogImage?: string;
   githubUrl?: string;
   liveUrl?: string;
   slug: string;
@@ -20,6 +21,7 @@ export interface ArticleMetadata {
   date: string;
   readTime: string;
   tags: string[];
+  ogImage?: string;
   slug: string;
   language: "en" | "pl";
 }
@@ -51,6 +53,7 @@ const toArticleMetadata = (fm: Record<string, unknown>, slug: string): ArticleMe
     date: typeof fm.date === "string" ? fm.date : "",
     readTime: typeof fm.readTime === "string" ? fm.readTime : "3 min",
     tags: Array.isArray(fm.tags) ? (fm.tags as string[]) : [],
+    ogImage: typeof fm.ogImage === "string" ? fm.ogImage : undefined,
     slug,
     language: fm.language === "pl" ? "pl" : "en",
   };
@@ -66,6 +69,7 @@ const toProjectMetadata = (fm: Record<string, unknown>, slug: string): ProjectMe
     category,
     tags: Array.isArray(fm.tags) ? (fm.tags as string[]) : [],
     thumbnail: typeof fm.thumbnail === "string" ? fm.thumbnail : undefined,
+    ogImage: typeof fm.ogImage === "string" ? fm.ogImage : undefined,
     githubUrl: typeof fm.githubUrl === "string" ? fm.githubUrl : undefined,
     liveUrl: typeof fm.liveUrl === "string" ? fm.liveUrl : undefined,
     slug,
