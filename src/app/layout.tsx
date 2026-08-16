@@ -5,7 +5,14 @@ import { ThemeProvider } from "@components/ThemeProvider";
 import { LanguageProvider } from "@context/LanguageContext";
 import { Navbar } from "@components/layout/Navbar";
 import { AppLayout } from "@components/layout/AppLayout";
-import { SITE_URL, SITE_NAME, SITE_TITLE, SITE_DESCRIPTION, SITE_OG_IMAGE } from "@lib/site";
+import {
+  AUTHOR_NAME,
+  SITE_URL,
+  SITE_NAME,
+  SITE_TITLE,
+  SITE_DESCRIPTION,
+  SITE_OG_IMAGE,
+} from "@lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -25,6 +32,28 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  authors: [{ name: AUTHOR_NAME, url: SITE_URL }],
+  creator: AUTHOR_NAME,
+  publisher: AUTHOR_NAME,
+  keywords: [
+    AUTHOR_NAME,
+    "Oskar Wichtowski AI Engineer",
+    "Oskar Wichtowski Software Developer",
+    "AI Engineer Poland",
+    "LLM Engineer",
+  ],
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
@@ -38,9 +67,6 @@ export const metadata: Metadata = {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
     images: [SITE_OG_IMAGE],
-  },
-  alternates: {
-    canonical: "/",
   },
 };
 

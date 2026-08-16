@@ -1,5 +1,12 @@
 import { ExploreSection } from "@components/explore/ExploreSection";
 import { getArticles, getProjects } from "@lib/mdx";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Explore Projects and Articles",
+  description: "Explore AI engineering projects and articles by Oskar Wichtowski.",
+  alternates: { canonical: "/explore" },
+};
 
 function readTags(value: string | string[] | undefined) {
   const values = Array.isArray(value) ? value : value ? [value] : [];

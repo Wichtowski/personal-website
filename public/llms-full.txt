@@ -1,4 +1,4 @@
-# Oskar Wichtowski — AI Engineer and Fullstack Developer
+# Oskar Wichtowski — AI Engineer and Software Developer
 
 Oskar Wichtowski builds AI-powered applications, LLM integrations, ecommerce automations, and full-stack web products. He focuses on practical software: turning early ideas and PoCs into working systems with clean architecture, useful UX, and production-minded engineering.
 
