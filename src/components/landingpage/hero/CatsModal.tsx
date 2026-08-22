@@ -81,7 +81,7 @@ function CatsModalContent({ onClose }: { onClose: () => void }) {
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-emerald-400/70 bg-[#06140d]/60 backdrop-blur-sm z-10">
                 <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
                 <span className="font-mono text-xs uppercase tracking-widest">
-                  {t.github.loading}
+                  {t.hero.catsLoading}
                 </span>
               </div>
             )}

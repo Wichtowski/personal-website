@@ -93,6 +93,7 @@ export function ContactSection({ nowPlaying }: ContactSectionProps) {
             <MdOutlineConnectWithoutContact
               size={72}
               className="text-primary animate-pulse shrink-0"
+              aria-hidden="true"
             />
             {t.contact.title}
           </h2>
@@ -126,7 +127,7 @@ export function ContactSection({ nowPlaying }: ContactSectionProps) {
           <div className="p-6 rounded-2xl border border-border/40 bg-muted/5 backdrop-blur-sm flex flex-col gap-4">
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-xs font-mono text-green-500 font-semibold tracking-wider uppercase">
+              <span className="text-xs font-mono text-green-700 dark:text-green-400 font-semibold tracking-wider uppercase">
                 Available for work
               </span>
             </div>
@@ -152,7 +153,7 @@ export function ContactSection({ nowPlaying }: ContactSectionProps) {
                   rel="noopener noreferrer"
                   className={`flex items-center gap-3 p-3 rounded-xl border border-border/40 bg-background text-muted-foreground transition-all duration-300 ${s.color}`}
                 >
-                  <Icon size={18} className="shrink-0" />
+                  <Icon size={18} className="shrink-0" aria-hidden="true" />
                   <span className="text-sm font-mono truncate">{s.label}</span>
                 </a>
               );

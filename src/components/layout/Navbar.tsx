@@ -119,6 +119,7 @@ export function Navbar() {
         {/* Logo / Brand */}
         <button
           onClick={() => handleScrollTo("home")}
+          aria-label="Go to home page"
           className="flex items-center gap-2 group focus:outline-none"
         >
           <div
@@ -178,6 +179,9 @@ export function Navbar() {
           {/* Language Selector */}
           <button
             onClick={handleLanguageToggle}
+            aria-label={
+              language === "en" ? "Switch language to Polish" : "Switch language to English"
+            }
             className={cn(
               "p-2 rounded-lg transition-all duration-300 flex items-center gap-1.5 focus:outline-none text-xs font-mono font-medium",
               isDarkTheme
@@ -194,6 +198,7 @@ export function Navbar() {
           {themeMode && (
             <button
               onClick={toggleTheme}
+              aria-label={isDarkTheme ? "Switch to light theme" : "Switch to dark theme"}
               className={cn(
                 "p-2 rounded-lg transition-all duration-300 focus:outline-none",
                 isDarkTheme
@@ -211,6 +216,9 @@ export function Navbar() {
         <div className="flex items-center md:hidden">
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-navigation"
             className={cn(
               "p-2 rounded-lg transition-all focus:outline-none",
               isDarkTheme
@@ -227,6 +235,7 @@ export function Navbar() {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
+            id="mobile-navigation"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
@@ -264,6 +273,9 @@ export function Navbar() {
               >
                 <button
                   onClick={handleLanguageToggle}
+                  aria-label={
+                    language === "en" ? "Switch language to Polish" : "Switch language to English"
+                  }
                   className={cn(
                     "p-2 rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 focus:outline-none transition-all",
                     isDarkTheme
@@ -279,6 +291,7 @@ export function Navbar() {
                 {themeMode && (
                   <button
                     onClick={toggleTheme}
+                    aria-label={isDarkTheme ? "Switch to light theme" : "Switch to dark theme"}
                     className={cn(
                       "p-2 rounded-lg transition-all duration-300 focus:outline-none",
                       isDarkTheme

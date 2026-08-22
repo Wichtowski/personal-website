@@ -137,7 +137,7 @@ export default async function ProjectPage({ params, searchParams }: PageProps) {
                       rel="noreferrer"
                       className="flex items-center gap-1.5 hover:text-primary hover:underline text-foreground transition-colors"
                     >
-                      <FaGithub size={18} className="inline-block" />
+                      <FaGithub size={18} className="inline-block" aria-hidden="true" />
                       <span>Code</span>
                     </a>
                     <a

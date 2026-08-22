@@ -63,6 +63,8 @@ export function PageTransition({
     <AnimatePresence mode="popLayout" initial={false} custom={activeTransitionState}>
       <motion.div
         key={pathname}
+        id="main-content"
+        tabIndex={-1}
         custom={activeTransitionState}
         variants={pageVariants}
         initial="initial"

@@ -76,7 +76,11 @@ import { GiArtificialHive, GiThorHammer } from "react-icons/gi";
 import { FaAws } from "react-icons/fa";
 import { LuBrainCircuit } from "react-icons/lu";
 
-export type TechStackIconComponent = ComponentType<{ size?: number; className?: string }>;
+export type TechStackIconComponent = ComponentType<{
+  size?: number;
+  className?: string;
+  "aria-hidden"?: boolean;
+}>;
 
 export type TechStackItem = {
   label: string;

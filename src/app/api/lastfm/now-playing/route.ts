@@ -2,15 +2,18 @@ import { createFallbackLastFmNowPlaying, getLastFmNowPlaying } from "@lib/lastfm
 
 export const runtime = "nodejs";
 
-const CACHE_SECONDS = 60;
-const STALE_SECONDS = 60 * 10;
-
 function jsonResponse(data: unknown, cacheStatus: "HIT" | "MISS" | "BYPASS", status = 200) {
+  const isNowPlaying =
+    typeof data === "object" && data !== null && "isPlaying" in data && data.isPlaying === true;
+  const cacheControl = isNowPlaying
+    ? "public, max-age=15, s-maxage=30, stale-while-revalidate=30"
+    : "no-store";
+
   return Response.json(data, {
     status,
     headers: {
-      "Cache-Control": `public, max-age=30, s-maxage=${CACHE_SECONDS}, stale-while-revalidate=${STALE_SECONDS}`,
-      "CDN-Cache-Control": `public, max-age=${CACHE_SECONDS}, stale-while-revalidate=${STALE_SECONDS}`,
+      "Cache-Control": cacheControl,
+      "CDN-Cache-Control": cacheControl,
       "Content-Type": "application/json; charset=utf-8",
       "X-Cache": cacheStatus,
     },

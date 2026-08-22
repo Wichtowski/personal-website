@@ -9,7 +9,7 @@ import { FaBarsStaggered } from "react-icons/fa6";
 interface SocialLink {
   name: string;
   url: string;
-  icon: React.ComponentType<{ size?: number }>;
+  icon: React.ComponentType<{ size?: number; "aria-hidden"?: boolean }>;
   color: string;
   type?: string;
   rel?: string;
@@ -83,10 +83,11 @@ export function Footer() {
                 target="_blank"
                 rel={s.rel ?? "noopener noreferrer"}
                 title={s.name}
+                aria-label={s.name}
                 type={s.type ?? undefined}
                 className={`p-3 rounded-xl border border-border/40 bg-background text-muted-foreground transition-all duration-300 ${s.color}`}
               >
-                <Icon size={18} />
+                <Icon size={18} aria-hidden={true} />
               </a>
             );
           })}

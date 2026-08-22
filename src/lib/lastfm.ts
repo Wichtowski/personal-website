@@ -36,7 +36,7 @@ type LastFmOptions = {
   apiKey?: string;
 };
 
-const LASTFM_CACHE_TTL_MS = 180_000;
+const LASTFM_CACHE_TTL_MS = 30_000;
 let lastFmCache: LastFmCacheEntry | null = null;
 
 export function createFallbackLastFmNowPlaying(): LastFmNowPlaying {
@@ -60,14 +60,6 @@ const pickCurrentTrack = (tracks: LastFmTrack[] | LastFmTrack | undefined) => {
 
 export async function getLastFmNowPlaying(options: LastFmOptions = {}): Promise<LastFmNowPlaying> {
   if (lastFmCache && lastFmCache.data.isPlaying && Date.now() < lastFmCache.expiresAt) {
-    if (process.env.NODE_ENV !== "production") {
-      console.info("[lastfm] cache hit", {
-        isPlaying: lastFmCache.data.isPlaying,
-        trackName: lastFmCache.data.track,
-        artist: lastFmCache.data.artist,
-      });
-    }
-
     return lastFmCache.data;
   }
 
@@ -107,28 +99,13 @@ export async function getLastFmNowPlaying(options: LastFmOptions = {}): Promise<
     updatedAt: new Date().toISOString(),
   };
 
-  if (process.env.NODE_ENV !== "production") {
-    console.info("[lastfm] response", {
-      hasRecentTracks: Boolean(data.recenttracks),
-      trackType: Array.isArray(recentTracks) ? "array" : typeof recentTracks,
-      hasTrack: Boolean(track),
-      nowPlaying,
-      trackName: result.track,
-      artist: result.artist,
-    });
-  }
-
   if (nowPlaying) {
     lastFmCache = {
       data: result,
       expiresAt: Date.now() + LASTFM_CACHE_TTL_MS,
     };
   } else {
-    // Never retain an inactive response; the next request should re-check Last.fm.
     lastFmCache = null;
-    if (process.env.NODE_ENV !== "production") {
-      console.info("[lastfm] inactive response, not caching");
-    }
   }
 
   return result;

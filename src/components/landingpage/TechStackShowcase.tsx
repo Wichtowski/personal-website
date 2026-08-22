@@ -99,7 +99,7 @@ export function TechStackShowcase() {
             <p
               className={cn(
                 "mb-3 text-xs font-mono uppercase tracking-[0.35em]",
-                isDarkTheme ? "text-white/45" : "text-slate-500",
+                isDarkTheme ? "text-white/70" : "text-slate-600",
               )}
             >
               {techStack.eyebrow}
@@ -281,6 +281,7 @@ export function TechStackShowcase() {
                                     <item.icon
                                       size={item.iconSize ?? 18}
                                       className={cn("shrink-0", item.iconClassName)}
+                                      aria-hidden={true}
                                     />
                                   </span>
                                   <span>{item.label}</span>
@@ -435,6 +436,7 @@ export function TechStackShowcase() {
                                     <item.icon
                                       size={item.iconSize ?? 18}
                                       className={cn("shrink-0", item.iconClassName)}
+                                      aria-hidden={true}
                                     />
                                   </span>
                                   <span>{item.label}</span>

@@ -21,6 +21,7 @@ export interface TranslationDict {
     lastFmLabel: string;
     idleTrack: string;
     idleArtist: string;
+    catsLoading: string;
   };
   techStack: {
     eyebrow: string;
@@ -171,6 +172,7 @@ export const dictionaries: Record<Language, TranslationDict> = {
       lastFmLabel: "Last.fm",
       idleTrack: "purring of my cats",
       idleArtist: "Sezamek & Florka",
+      catsLoading: "Waking up the cats...",
     },
     techStack: {
       eyebrow: "tech stack",
@@ -383,6 +385,7 @@ export const dictionaries: Record<Language, TranslationDict> = {
       lastFmLabel: "Last.fm",
       idleTrack: "mruczenia moich kotów",
       idleArtist: "Sezamek & Florka",
+      catsLoading: "Budzenie kotów...",
     },
     techStack: {
       eyebrow: "Wybrany stack",

@@ -84,6 +84,12 @@ export default async function RootLayout({
       <body className="h-screen w-screen overflow-hidden relative bg-background text-foreground transition-colors duration-300">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <LanguageProvider>
+            <a
+              href="#main-content"
+              className="sr-only fixed left-4 top-4 z-[60] rounded-lg bg-primary px-4 py-2 font-mono text-sm font-bold text-primary-foreground shadow-lg focus:not-sr-only focus:outline-none focus:ring-2 focus:ring-primary-foreground focus:ring-offset-2 focus:ring-offset-background"
+            >
+              Skip to content
+            </a>
             <Navbar />
             <AppLayout>{children}</AppLayout>
           </LanguageProvider>
