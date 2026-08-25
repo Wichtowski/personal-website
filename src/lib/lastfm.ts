@@ -26,18 +26,15 @@ type LastFmTrack = {
   "@attr"?: { nowplaying?: "true" };
 };
 
-type LastFmCacheEntry = {
-  data: LastFmNowPlaying;
-  expiresAt: number;
-};
-
 type LastFmOptions = {
   user?: string;
   apiKey?: string;
 };
 
-const LASTFM_CACHE_TTL_MS = 30_000;
-let lastFmCache: LastFmCacheEntry | null = null;
+type LastFmCacheStatus = "MISS" | "BYPASS";
+
+const LASTFM_EDGE_CACHE_CONTROL = "public, max-age=30";
+const LASTFM_NO_STORE = "no-store";
 
 export function createFallbackLastFmNowPlaying(): LastFmNowPlaying {
   return {
@@ -58,11 +55,27 @@ const pickCurrentTrack = (tracks: LastFmTrack[] | LastFmTrack | undefined) => {
   return Array.isArray(tracks) ? (tracks[0] ?? null) : tracks;
 };
 
-export async function getLastFmNowPlaying(options: LastFmOptions = {}): Promise<LastFmNowPlaying> {
-  if (lastFmCache && lastFmCache.data.isPlaying && Date.now() < lastFmCache.expiresAt) {
-    return lastFmCache.data;
-  }
+export function createLastFmNowPlayingResponse(
+  data: LastFmNowPlaying,
+  cacheStatus: LastFmCacheStatus,
+  status = 200,
+) {
+  const edgeCacheControl =
+    data.isPlaying && data.track ? LASTFM_EDGE_CACHE_CONTROL : LASTFM_NO_STORE;
 
+  return Response.json(data, {
+    status,
+    headers: {
+      "Cache-Control": LASTFM_NO_STORE,
+      "CDN-Cache-Control": edgeCacheControl,
+      "Cloudflare-CDN-Cache-Control": edgeCacheControl,
+      "Content-Type": "application/json; charset=utf-8",
+      "X-Cache": cacheStatus,
+    },
+  });
+}
+
+export async function getLastFmNowPlaying(options: LastFmOptions = {}): Promise<LastFmNowPlaying> {
   const user = options.user ?? env.LASTFM_USERNAME;
   const apiKey = options.apiKey ?? env.LASTFM_API_KEY;
 
@@ -89,24 +102,14 @@ export async function getLastFmNowPlaying(options: LastFmOptions = {}): Promise<
   const data = (await response.json()) as LastFmRecentTracksResponse;
   const recentTracks = data.recenttracks?.track;
   const track = pickCurrentTrack(recentTracks);
-  const nowPlaying = track?.["@attr"]?.nowplaying === "true";
-  const result: LastFmNowPlaying = {
-    isPlaying: nowPlaying,
+  const isPlaying = track?.["@attr"]?.nowplaying === "true" && Boolean(track.name);
+
+  return {
+    isPlaying,
     track: track?.name ?? null,
     artist: track?.artist?.["#text"] ?? null,
     url: track?.url ?? null,
     source: "lastfm",
     updatedAt: new Date().toISOString(),
   };
-
-  if (nowPlaying) {
-    lastFmCache = {
-      data: result,
-      expiresAt: Date.now() + LASTFM_CACHE_TTL_MS,
-    };
-  } else {
-    lastFmCache = null;
-  }
-
-  return result;
 }

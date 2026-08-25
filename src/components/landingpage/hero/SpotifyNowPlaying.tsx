@@ -53,10 +53,17 @@ export function SpotifyNowPlaying({ nowPlaying }: SpotifyNowPlayingProps) {
 
   useEffect(() => {
     let active = true;
+    let timeoutId: number | undefined;
+    let controller: AbortController | undefined;
 
     const refreshNowPlaying = async () => {
+      controller = new AbortController();
+
       try {
-        const response = await fetch("/api/lastfm/now-playing", { cache: "no-store" });
+        const response = await fetch("/api/lastfm/now-playing", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
         const data: unknown = await response.json();
 
         if (!active) {
@@ -67,21 +74,33 @@ export function SpotifyNowPlaying({ nowPlaying }: SpotifyNowPlayingProps) {
           setCurrentNowPlaying(data);
           return;
         }
-      } catch {
-        // The cats fallback is intentionally shown when Last.fm cannot confirm playback
-      }
 
-      if (active) {
         setCurrentNowPlaying(createFallbackNowPlaying());
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+
+        // The cats fallback is intentionally shown when Last.fm cannot confirm playback
+        if (active) {
+          setCurrentNowPlaying(createFallbackNowPlaying());
+        }
+      } finally {
+        if (active) {
+          timeoutId = window.setTimeout(refreshNowPlaying, LASTFM_REFRESH_INTERVAL_MS);
+        }
       }
     };
 
     void refreshNowPlaying();
-    const intervalId = window.setInterval(refreshNowPlaying, LASTFM_REFRESH_INTERVAL_MS);
 
     return () => {
       active = false;
-      window.clearInterval(intervalId);
+      controller?.abort();
+
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
     };
   }, []);
 

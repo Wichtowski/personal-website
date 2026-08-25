@@ -17,7 +17,11 @@ import {
 import type { ImageConfig } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
 import { buildGitHubPulse } from "../src/lib/github-pulse";
-import { createFallbackLastFmNowPlaying, getLastFmNowPlaying } from "../src/lib/lastfm";
+import {
+  createFallbackLastFmNowPlaying,
+  createLastFmNowPlayingResponse,
+  getLastFmNowPlaying,
+} from "../src/lib/lastfm";
 
 const imageConfig: ImageConfig = {
   deviceSizes: JSON.parse(
@@ -54,20 +58,6 @@ interface ExecutionContext {
 // To route SVGs through the optimizer (with security headers), set
 // dangerouslyAllowSVG: true in next.config.js and uncomment below
 // const imageConfig: ImageConfig = { dangerouslyAllowSVG: true };
-
-function jsonLastFmResponse(data: unknown, cacheStatus: "MISS" | "BYPASS", status = 200) {
-  const CACHE_SECONDS = 30;
-  const STALE_SECONDS = 60;
-
-  return Response.json(data, {
-    status,
-    headers: {
-      "Cache-Control": `public, max-age=0, s-maxage=${CACHE_SECONDS}, stale-while-revalidate=${STALE_SECONDS}`,
-      "CDN-Cache-Control": `public, max-age=${CACHE_SECONDS}, stale-while-revalidate=${STALE_SECONDS}`,
-      "X-Cache": cacheStatus,
-    },
-  });
-}
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
@@ -132,11 +122,11 @@ export default {
           apiKey: env.LASTFM_API_KEY,
           user: env.LASTFM_USERNAME,
         });
-        return jsonLastFmResponse(data, "MISS");
+        return createLastFmNowPlayingResponse(data, "MISS");
       } catch (error) {
         console.error(error);
 
-        return jsonLastFmResponse(createFallbackLastFmNowPlaying(), "BYPASS", 502);
+        return createLastFmNowPlayingResponse(createFallbackLastFmNowPlaying(), "BYPASS", 502);
       }
     }
 

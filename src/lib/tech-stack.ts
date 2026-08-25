@@ -152,9 +152,9 @@ export const TECH_STACK_SECTIONS: readonly TechStackSection[] = [
     icon: Crosshair,
     layout: {
       lightClassName:
-        "lg:col-span-6 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.10),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.92))]",
+        "xl:col-span-6 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.10),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.92))]",
       darkClassName:
-        "lg:col-span-6 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.16),transparent_34%),linear-gradient(180deg,rgba(10,10,14,0.98),rgba(6,6,9,0.96))]",
+        "xl:col-span-6 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.16),transparent_34%),linear-gradient(180deg,rgba(10,10,14,0.98),rgba(6,6,9,0.96))]",
       lightAccentClassName: "from-sky-500/15 via-cyan-500/8 to-transparent",
       darkAccentClassName: "from-sky-500/20 via-cyan-500/10 to-transparent",
     },
@@ -173,9 +173,9 @@ export const TECH_STACK_SECTIONS: readonly TechStackSection[] = [
     icon: Bot,
     layout: {
       lightClassName:
-        "lg:col-span-6 bg-[radial-gradient(circle_at_top_right,rgba(168,85,247,0.12),transparent_35%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.92))]",
+        "xl:col-span-6 bg-[radial-gradient(circle_at_top_right,rgba(168,85,247,0.12),transparent_35%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.92))]",
       darkClassName:
-        "lg:col-span-6 bg-[radial-gradient(circle_at_top_right,rgba(168,85,247,0.2),transparent_35%),linear-gradient(180deg,rgba(10,10,14,0.98),rgba(6,6,9,0.96))]",
+        "xl:col-span-6 bg-[radial-gradient(circle_at_top_right,rgba(168,85,247,0.2),transparent_35%),linear-gradient(180deg,rgba(10,10,14,0.98),rgba(6,6,9,0.96))]",
       lightAccentClassName: "from-violet-500/15 via-fuchsia-500/8 to-transparent",
       darkAccentClassName: "from-violet-500/20 via-fuchsia-500/10 to-transparent",
     },
@@ -193,8 +193,8 @@ export const TECH_STACK_SECTIONS: readonly TechStackSection[] = [
     group: "ai-ml",
     icon: Mic,
     layout: {
-      lightClassName: "lg:col-span-4 bg-white/90",
-      darkClassName: "lg:col-span-4 bg-[#0f1015]",
+      lightClassName: "xl:col-span-4 bg-white/90",
+      darkClassName: "xl:col-span-4 bg-[#0f1015]",
       lightAccentClassName: "from-emerald-500/10 via-transparent to-transparent",
       darkAccentClassName: "from-emerald-500/15 via-transparent to-transparent",
     },
@@ -205,8 +205,8 @@ export const TECH_STACK_SECTIONS: readonly TechStackSection[] = [
     group: "ai-ml",
     icon: BrainCircuit,
     layout: {
-      lightClassName: "lg:col-span-4 bg-white/90",
-      darkClassName: "lg:col-span-4 bg-[#0f1015]",
+      lightClassName: "xl:col-span-4 bg-white/90",
+      darkClassName: "xl:col-span-4 bg-[#0f1015]",
       lightAccentClassName: "from-violet-500/10 via-transparent to-transparent",
       darkAccentClassName: "from-violet-500/15 via-transparent to-transparent",
     },
@@ -220,8 +220,8 @@ export const TECH_STACK_SECTIONS: readonly TechStackSection[] = [
     group: "ai-ml",
     icon: Sigma,
     layout: {
-      lightClassName: "lg:col-span-4 bg-white/90",
-      darkClassName: "lg:col-span-4 bg-[#0f1015]",
+      lightClassName: "xl:col-span-4 bg-white/90",
+      darkClassName: "xl:col-span-4 bg-[#0f1015]",
       lightAccentClassName: "from-emerald-500/10 via-transparent to-transparent",
       darkAccentClassName: "from-emerald-500/15 via-transparent to-transparent",
     },
@@ -235,8 +235,8 @@ export const TECH_STACK_SECTIONS: readonly TechStackSection[] = [
     group: "application-engineering",
     icon: Server,
     layout: {
-      lightClassName: "lg:col-span-4 bg-white/90",
-      darkClassName: "lg:col-span-4 bg-[#0f1015]",
+      lightClassName: "xl:col-span-4 bg-white/90",
+      darkClassName: "xl:col-span-4 bg-[#0f1015]",
       lightAccentClassName: "from-amber-500/10 via-transparent to-transparent",
       darkAccentClassName: "from-amber-500/15 via-transparent to-transparent",
     },
@@ -255,8 +255,8 @@ export const TECH_STACK_SECTIONS: readonly TechStackSection[] = [
     group: "application-engineering",
     icon: Boxes,
     layout: {
-      lightClassName: "lg:col-span-4 bg-white/90",
-      darkClassName: "lg:col-span-4 bg-[#0f1015]",
+      lightClassName: "xl:col-span-4 bg-white/90",
+      darkClassName: "xl:col-span-4 bg-[#0f1015]",
       lightAccentClassName: "from-cyan-500/10 via-transparent to-transparent",
       darkAccentClassName: "from-cyan-500/15 via-transparent to-transparent",
     },
@@ -274,8 +274,8 @@ export const TECH_STACK_SECTIONS: readonly TechStackSection[] = [
     group: "ai-ml",
     icon: SearchCheck,
     layout: {
-      lightClassName: "lg:col-span-4 bg-white/90",
-      darkClassName: "lg:col-span-4 bg-[#0f1015]",
+      lightClassName: "xl:col-span-4 bg-white/90",
+      darkClassName: "xl:col-span-4 bg-[#0f1015]",
       lightAccentClassName: "from-emerald-500/10 via-transparent to-transparent",
       darkAccentClassName: "from-emerald-500/15 via-transparent to-transparent",
     },
@@ -292,8 +292,8 @@ export const TECH_STACK_SECTIONS: readonly TechStackSection[] = [
     group: "application-engineering",
     icon: Code2,
     layout: {
-      lightClassName: "lg:col-span-4 bg-white/90",
-      darkClassName: "lg:col-span-4 bg-[#0f1015]",
+      lightClassName: "xl:col-span-4 bg-white/90",
+      darkClassName: "xl:col-span-4 bg-[#0f1015]",
       lightAccentClassName: "from-slate-500/10 via-transparent to-transparent",
       darkAccentClassName: "from-slate-500/15 via-transparent to-transparent",
     },
@@ -313,8 +313,8 @@ export const TECH_STACK_SECTIONS: readonly TechStackSection[] = [
     group: "application-engineering",
     icon: Code2,
     layout: {
-      lightClassName: "lg:col-span-4 bg-white/90",
-      darkClassName: "lg:col-span-4 bg-[#0f1015]",
+      lightClassName: "xl:col-span-4 bg-white/90",
+      darkClassName: "xl:col-span-4 bg-[#0f1015]",
       lightAccentClassName: "from-pink-500/10 via-transparent to-transparent",
       darkAccentClassName: "from-pink-500/15 via-transparent to-transparent",
     },
@@ -334,8 +334,8 @@ export const TECH_STACK_SECTIONS: readonly TechStackSection[] = [
     group: "application-engineering",
     icon: Wrench,
     layout: {
-      lightClassName: "lg:col-span-8 bg-white/90",
-      darkClassName: "lg:col-span-8 bg-[#0f1015]",
+      lightClassName: "xl:col-span-8 bg-white/90",
+      darkClassName: "xl:col-span-8 bg-[#0f1015]",
       lightAccentClassName: "from-slate-500/10 via-transparent to-transparent",
       darkAccentClassName: "from-slate-500/15 via-transparent to-transparent",
     },
@@ -357,8 +357,8 @@ export const TECH_STACK_SECTIONS: readonly TechStackSection[] = [
     group: "quality-workflow",
     icon: TestTube2,
     layout: {
-      lightClassName: "lg:col-span-4 bg-white/90",
-      darkClassName: "lg:col-span-4 bg-[#0f1015]",
+      lightClassName: "xl:col-span-4 bg-white/90",
+      darkClassName: "xl:col-span-4 bg-[#0f1015]",
       lightAccentClassName: "from-orange-500/10 via-transparent to-transparent",
       darkAccentClassName: "from-orange-500/15 via-transparent to-transparent",
     },
@@ -381,8 +381,8 @@ export const TECH_STACK_SECTIONS: readonly TechStackSection[] = [
   //   group: "environment",
   //   icon: LaptopMinimal,
   //   layout: {
-  //     lightClassName: "lg:col-span-6 bg-white/90",
-  //     darkClassName: "lg:col-span-6 bg-[#0f1015]",
+  //     lightClassName: "xl:col-span-6 bg-white/90",
+  //     darkClassName: "xl:col-span-6 bg-[#0f1015]",
   //     lightAccentClassName: "from-indigo-500/10 via-transparent to-transparent",
   //     darkAccentClassName: "from-indigo-500/15 via-transparent to-transparent",
   //   },
