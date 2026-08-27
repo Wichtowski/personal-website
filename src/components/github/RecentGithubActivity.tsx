@@ -1,6 +1,7 @@
 import { ArrowRight, GitBranch, GitCommit } from "lucide-react";
 import { motion } from "framer-motion";
 import type { GitHubActivity } from "@lib/github";
+import { getGitHubActivityDisplayName } from "@lib/github-pulse";
 import type { Language } from "@locales/dictionary";
 import { formatDate } from "@lib/date";
 
@@ -12,10 +13,6 @@ interface RecentGithubActivityProps {
   pushedAtLabel: string;
   language: Language;
 }
-
-const getRepoDisplayName = (repoName: string) => {
-  return repoName.includes("/") ? repoName.split("/").at(-1) : repoName;
-};
 
 const formatEventType = (type: string) => {
   return type.replace("Event", "");
@@ -66,7 +63,7 @@ export function RecentGithubActivity({
                     rel="noreferrer"
                     className="text-base md:text-lg font-bold font-mono text-foreground truncate hover:text-primary hover:underline block"
                   >
-                    {getRepoDisplayName(activity.repoName)}
+                    {getGitHubActivityDisplayName(activity.repoName)}
                   </a>
 
                   <span className="text-[10px] font-mono text-muted-foreground">

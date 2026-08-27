@@ -70,6 +70,22 @@ interface GitHubCommitResponse {
 
 const MAIN_USERNAME = "Wichtowski";
 const WORK_USERNAME = "oskar-wichtowski-wttech";
+const PRIMARY_REPO_OWNER = MAIN_USERNAME.toLowerCase();
+const EXCLUDED_ACTIVITY_OWNERS = new Set([PRIMARY_REPO_OWNER, "restorio-labs"]);
+
+export function isOutsideGitHubActivityScope(repoName: string) {
+  const owner = repoName.split("/")[0]?.toLowerCase();
+  return Boolean(owner) && !EXCLUDED_ACTIVITY_OWNERS.has(owner);
+}
+
+export function getGitHubActivityDisplayName(repoName: string) {
+  const [owner, repo] = repoName.split("/");
+  if (owner?.toLowerCase() === PRIMARY_REPO_OWNER && repo) {
+    return repo;
+  }
+
+  return repoName;
+}
 
 async function githubFetch<T>(path: string, token?: string): Promise<T> {
   const authToken = token ?? env.GITHUB_TOKEN;
@@ -192,7 +208,7 @@ async function fetchRecentRepoActivities(
   const supportedTypes = new Set(["PushEvent", "PullRequestEvent", "IssuesEvent", "CreateEvent"]);
 
   const seenRepos = new Set<string>();
-  const activities: GitHubPulseActivity[] = [];
+  const eventCandidates: GitHubEvent[] = [];
 
   for (let page = 1; page <= maxPages; page++) {
     const events = await githubFetch<GitHubEvent[]>(
@@ -205,28 +221,42 @@ async function fetchRecentRepoActivities(
       if (seenRepos.has(event.repo.name)) continue;
 
       seenRepos.add(event.repo.name);
-      activities.push(await formatGitHubEvent(event, token));
-
-      if (activities.length >= limit) return activities;
+      eventCandidates.push(event);
     }
 
     if (events.length < 30) break;
   }
 
-  if (activities.length < limit) {
+  const externalEvent = eventCandidates.find((event) =>
+    isOutsideGitHubActivityScope(event.repo.name),
+  );
+
+  if (!externalEvent) {
+    return [];
+  }
+
+  const activities = await Promise.all(
+    eventCandidates
+      .filter((event) => event !== externalEvent)
+      .slice(0, Math.max(0, limit - 1))
+      .map((event) => formatGitHubEvent(event, token)),
+  );
+
+  if (activities.length < limit - 1) {
     const fallbackActivities = await fetchRepoCommitActivities(
       username,
-      limit - activities.length,
+      limit - 1 - activities.length,
       seenRepos,
       token,
     );
     activities.push(...fallbackActivities);
   }
 
+  activities.push(await formatGitHubEvent(externalEvent, token));
   return activities;
 }
 
-export const GITHUB_PULSE_CACHE_KEY = "github-pulse-cache-v1";
+export const GITHUB_PULSE_CACHE_KEY = "github-pulse-cache-v2";
 export const GITHUB_PULSE_LEGACY_CACHE_KEYS = ["github-pulse-cache"];
 export const GITHUB_PULSE_CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6h
 
