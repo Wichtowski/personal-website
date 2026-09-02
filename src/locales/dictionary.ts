@@ -143,7 +143,7 @@ export const dictionaries: Record<Language, TranslationDict> = {
     hero: {
       greeting: "Hi, I'm",
       role: "AI Engineer / Software Engineer / QA Specialist",
-      bio: "A versatile tech professional blending Artificial Intelligence capabilities with robust software engineering and rigid Quality Assurance standards. I design intelligent agents, craft modern web experiences, and build production-ready test suites.",
+      bio: "I build useful things with AI, thoughtful software, and a healthy obsession with quality. From intelligent agents and polished web experiences to dependable test automation, I enjoy turning ambitious ideas into products people can trust.",
       ctaPrimary: "View Projects",
       ctaSecondary: "Get in Touch",
       statusActive: "Available for freelance & full-time roles",
@@ -316,7 +316,7 @@ export const dictionaries: Record<Language, TranslationDict> = {
     hero: {
       greeting: "Cześć, jestem",
       role: "AI Engineer / Software Engineer / Specjalista QA",
-      bio: "Wszechstronny inżynier łączący możliwości sztucznej inteligencji z solidną inżynierią oprogramowania i rygorystycznymi standardami zapewnienia jakości. Projektuję inteligentne agenty, tworzę nowoczesne strony oraz buduję produkcyjne zestawy testów automatycznych.",
+      bio: "Tworzę przydatne rozwiązania z AI i dopracowane oprogramowanie, zawsze z dużą dbałością o jakość. Od inteligentnych agentów i nowoczesnych aplikacji internetowych po niezawodną automatyzację testów - najbardziej lubię zamieniać ambitne pomysły w produkty, którym można zaufać.",
       ctaPrimary: "Zobacz Projekty",
       ctaSecondary: "Skontaktuj się",
       statusActive: "Dostępny na zlecenia i pełen etat",
