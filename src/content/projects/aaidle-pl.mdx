@@ -1,0 +1,70 @@
+---
+title: "aAIdle"
+description: "Codzienna gra w zgadywanie modeli AI z trybami Classic, Emoji i Timeline, frontendem w React, API w Rust/Axum oraz postępem kontrolowanym przez serwer i zapisywanym w SQLite."
+date: "2026-09-01"
+category: "ai"
+tags: ["AI", "React", "TypeScript", "Rust", "Axum", "SQLite", "Vite", "PWA", "Projektowanie gier"]
+githubUrl: "https://github.com/Wichtowski/aaidle"
+liveUrl: "https://aaidle.com"
+status: "W trakcie"
+language: "pl"
+---
+
+## Opis projektu
+
+**aAIdle** to codzienna gra w zgadywanie modeli AI.
+Każde wyzwanie daje graczowi wskazówki i zestaw możliwych odpowiedzi, a następnie prosi o wskazanie modelu pasującego do ukrytej odpowiedzi.
+
+Gra ma ułatwiać poznawanie szybko zmieniającego się świata modeli AI bez zamieniania go w kolejną tabelę.
+Łączy krótkie codzienne sesje z rosnącym katalogiem modeli, wydarzeniami historycznymi i bardziej zabawowymi wskazówkami wizualnymi.
+
+## Pomysł na grę
+
+Pierwotny pomysł powstał podczas jednej z pierwszych rozmów z **Michałem Wojdylakiem**.
+Zamiast traktować prompty jako cel sam w sobie, Michał zaproponował spojrzenie na szerszy krajobraz sztucznej inteligencji: modele, systemy, metody i ludzi, którzy sprawiają, że te rzeczy są użyteczne.
+To wyznaczyło kierunek gry o odnajdywaniu modelu stojącego za odpowiedzią.
+
+## Tryby gry
+
+Tryb **Classic** jest główną grą opartą na porównywaniu modeli.
+Wykorzystuje kategorie takie jak data wydania, rodzina modelu, dostawca, długość kontekstu i możliwości, żeby pomóc zawęzić odpowiedź.
+Codzienne wyzwania są wybierane deterministycznie po stronie serwera, a odpowiedź pozostaje ukryta do ukończenia gry.
+
+Tryb **Emoji** przedstawia model lub pojęcie za pomocą sekwencji emoji.
+Tryb **Timeline** zamienia katalog modeli w wyzwanie historyczne, w którym trzeba ułożyć wydania modeli i wydarzenia AI we właściwej kolejności.
+Razem te tryby pozwalają wykorzystywać ten sam katalog do dedukcji, rozpoznawania i nauki.
+
+## Jak to działa
+
+Frontend jest aplikacją typu single-page zbudowaną w **React** i Vite.
+Odpowiada za interfejs, lokalny postęp anonimowych graczy, animacje i dostępne kontrolki gry.
+
+Backend to serwis w **Rust** zbudowany przy użyciu **Axum** i **SQLx**, który używa **SQLite** do przechowywania katalogu, codziennych wyzwań, zgadywań, kont, postępu i zagregowanych statystyk.
+API jest źródłem prawdy: wybiera wyzwania, ukrywa odpowiedzi, sprawdza zgadywania i zapisuje ukończenia.
+
+Retry są idempotentne, a liczba prób jest ograniczona rozmiarem puli odpowiedzi, więc odświeżenie strony lub dwukrotne wysłanie tego samego żądania nie tworzy dodatkowego postępu.
+Zalogowani gracze mogą synchronizować zweryfikowany postęp między urządzeniami, a anonimowi mogą grać bez zakładania konta.
+
+## Mała gra oparta na prawdziwym systemie
+
+Interfejs jest celowo lekki, ale aAIdle zawiera elementy produkcyjnej aplikacji webowej, o których łatwo zapomnieć przy małym projekcie.
+Projekt ma wersjonowane kontrakty API, logowanie hasłem i przez OAuth, ochronę CSRF, odzyskiwanie kont, role administracyjne, zgłaszanie problemów, migracje, walidację danych seed oraz osobne testy frontendu i backendu.
+
+Chciałem też, żeby gra pozostała wygodna w użyciu wraz z rozwojem.
+Frontend można zainstalować jako PWA, katalog modeli da się przeglądać niezależnie od codziennego wyzwania, a deployment rozdziela statyczny frontend od prywatnego kontenera API.
+
+## Deployment
+
+aAIdle jest wdrażane na VPS-ie przez GitHub Actions.
+Każde wydanie przechodzi testy, dostaje wersję SemVer, a następnie służy do zbudowania obrazu API w Rust, publikowanego w GitHub Container Registry.
+Frontend z Vite jest budowany jako statyczne assety i przesyłany razem z konfiguracją uruchomieniową.
+
+Na VPS-ie Caddy serwuje statyczną aplikację SPA i przekazuje żądania `/api/*` do prywatnego kontenera API zarządzanego przez Docker Compose.
+API i jednorazowy serwis seed współdzielą trwały wolumen SQLite, a wersjonowane wydania frontendu są przełączane atomowo przez symlink `current`.
+Dzięki temu statyczne assety pozostają łatwe do wycofania niezależnie od runtime'u aplikacji, a wdrożona wersja jest widoczna w samej aplikacji.
+
+## Podsumowanie
+
+aAIdle to eksperyment z zamianą technicznej ciekawości w codzienny nawyk.
+Jest jednocześnie grą, katalogiem modeli i ćwiczeniem z budowania bezpiecznej aplikacji opartej na serwerze, od początku do końca.
+Najważniejsze ograniczenie jest też najprostsze: gra ma dawać powód, żeby wrócić jutro.

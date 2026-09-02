@@ -2,79 +2,85 @@ import type { ComponentType } from "react";
 import {
   SiBun,
   SiCelery,
-  SiCloudflareworkers,
   SiCloudflare,
+  SiCloudflareworkers,
+  SiCypress,
   SiDocker,
+  SiDoctrine,
+  SiElectron,
   SiFastapi,
   SiFigma,
   SiGit,
+  SiGithubactions,
   SiGitlab,
   SiGo,
   SiGooglegemini,
+  SiGrafana,
   SiHuggingface,
-  SiMistralai,
+  SiJest,
+  SiKubernetes,
   SiMinio,
+  SiMistralai,
   SiMongodb,
   SiNextdotjs,
+  SiNodedotjs,
   SiNumpy,
   SiOpenai,
+  SiOpencv,
   SiPandas,
-  SiPostgresql,
   SiPhp,
+  SiPostgresql,
   SiPydantic,
-  SiPytorch,
+  SiPytest,
   SiPython,
+  SiPytorch,
   SiRabbitmq,
   SiReact,
+  SiNvidia,
   SiRedis,
+  SiRuff,
   SiRust,
   SiSnyk,
+  SiSqlalchemy,
   SiSurrealdb,
   SiSymfony,
-  SiSqlalchemy,
-  SiKubernetes,
   SiTailwindcss,
   SiTauri,
-  SiTypescript,
-  SiVite,
-  SiElectron,
-  SiGrafana,
-  SiOpencv,
-  SiJest,
-  SiVitest,
-  SiCypress,
-  SiPytest,
   SiTestinglibrary,
-  SiRuff,
+  SiTypescript,
+  SiJavascript,
+  SiVite,
+  SiVitest,
   SiYolo,
-  SiGithubactions,
 } from "react-icons/si";
 import {
   Bot,
   Boxes,
+  BrainCircuit,
+  ChartNoAxesCombined,
   CloudCog,
   Code2,
   Crosshair,
   FileCode2,
   Gauge,
   LaptopMinimal,
+  MonitorCheck,
+  ShieldCheck,
   Mic,
   SearchCheck,
   Server,
   Sigma,
-  SquareMousePointer,
   Terminal,
   TestTube2,
-  ChartNoAxesCombined,
-  BrainCircuit,
-  Zap,
   Wrench,
+  Zap,
 } from "lucide-react";
+import { FaAws, FaTheaterMasks } from "react-icons/fa";
+import { GiThorHammer } from "react-icons/gi";
+import { LuBrainCircuit } from "react-icons/lu";
+import { SiK3S } from "react-icons/si";
 import { OpenRouterIcon } from "@components/icons/openrouter-icon";
 import { QdrantIcon } from "@components/icons/qdrant-icon";
-import { GiArtificialHive, GiThorHammer } from "react-icons/gi";
-import { FaAws } from "react-icons/fa";
-import { LuBrainCircuit } from "react-icons/lu";
 
 export type TechStackIconComponent = ComponentType<{
   size?: number;
@@ -89,309 +95,259 @@ export type TechStackItem = {
   iconClassName?: string;
 };
 
-export type TechStackCategoryLayout = {
-  lightClassName: string;
-  darkClassName: string;
-  lightAccentClassName: string;
-  darkAccentClassName: string;
-};
+export const TECH_STACK_ITEMS = {
+  TypeScript: { label: "TypeScript", icon: SiTypescript, iconClassName: "text-[#3178C6]" },
+  JavaScript: { label: "JavaScript", icon: SiJavascript, iconClassName: "text-[#F0DB4F]" },
+  "Node.js": { label: "Node.js", icon: SiNodedotjs, iconClassName: "text-[#5FA04E]" },
 
-export type TechStackGroupKey =
-  | "ai-ml"
-  | "application-engineering"
-  | "data-infrastructure"
-  | "quality-workflow"
-  | "environment";
-
-export type TechStackGroup = {
-  key: TechStackGroupKey;
-  title: string;
-  icon: TechStackIconComponent;
-};
-
-export type TechStackSection = {
-  key: string;
-  group: TechStackGroupKey;
-  icon: TechStackIconComponent;
-  layout: TechStackCategoryLayout;
-  items: readonly TechStackItem[];
-};
-
-export const TECH_STACK_GROUPS: readonly TechStackGroup[] = [
-  {
-    key: "ai-ml",
-    title: "AI & Machine Learning",
-    icon: GiArtificialHive,
+  Python: { label: "Python", icon: SiPython, iconClassName: "text-[#3776AB]" },
+  Go: { label: "Go", icon: SiGo, iconClassName: "text-[#00ADD8]", iconSize: 24 },
+  Rust: { label: "Rust", icon: SiRust, iconClassName: "text-[#B7410E]", iconSize: 24 },
+  PHP: { label: "PHP", icon: SiPhp, iconClassName: "text-[#777BB4]", iconSize: 24 },
+  Bash: { label: "Bash", icon: Terminal, iconClassName: "text-green-400" },
+  React: { label: "React", icon: SiReact, iconClassName: "text-[#61DAFB]" },
+  "React Native": { label: "React Native", icon: SiReact, iconClassName: "text-[#61DAFB]" },
+  Vinext: { label: "Vinext", icon: SiCloudflare, iconSize: 22, iconClassName: "text-[#F38020]" },
+  "Next.js": {
+    label: "Next.js",
+    icon: SiNextdotjs,
+    iconClassName: "text-neutral-950 dark:text-white",
   },
+  Vike: { label: "Vike", icon: GiThorHammer, iconClassName: "text-slate-400" },
+  Vite: { label: "Vite", icon: SiVite, iconClassName: "text-[#646CFF]" },
+  "Tailwind CSS": { label: "Tailwind CSS", icon: SiTailwindcss, iconClassName: "text-[#38BDF8]" },
+  Bun: {
+    label: "Bun",
+    icon: SiBun,
+    iconClassName: "text-neutral-900 dark:text-[#FBF0DF]",
+  },
+  Tauri: { label: "Tauri", icon: SiTauri, iconClassName: "text-[#24C8DB]" },
+  Electron: { label: "Electron", icon: SiElectron, iconClassName: "text-[#47848F]" },
+  FastAPI: { label: "FastAPI", icon: SiFastapi, iconClassName: "text-[#009688]" },
+  Pydantic: { label: "Pydantic", icon: SiPydantic, iconClassName: "text-[#E92063]" },
+  SQLAlchemy: { label: "SQLAlchemy", icon: SiSqlalchemy, iconClassName: "text-[#D71F00]" },
+  Doctrine: { label: "Doctrine", icon: SiDoctrine, iconClassName: "text-[#FC6A31]" },
+  Symfony: {
+    label: "Symfony",
+    icon: SiSymfony,
+    iconClassName: "text-neutral-900 dark:text-white",
+  },
+  Alembic: { label: "Alembic", icon: TestTube2, iconClassName: "text-amber-400" },
+  Celery: { label: "Celery", icon: SiCelery, iconClassName: "text-[#37814A]" },
+  Uvicorn: { label: "Uvicorn", icon: Server, iconClassName: "text-sky-400" },
+  Postgres: { label: "Postgres", icon: SiPostgresql, iconClassName: "text-[#4169E1]" },
+  MongoDB: { label: "MongoDB", icon: SiMongodb, iconClassName: "text-[#47A248]" },
+  SurrealDB: { label: "SurrealDB", icon: SiSurrealdb, iconClassName: "text-[#FF00A0]" },
+  Redis: { label: "Redis", icon: SiRedis, iconClassName: "text-[#DC382D]", iconSize: 16 },
+  RabbitMQ: { label: "RabbitMQ", icon: SiRabbitmq, iconClassName: "text-[#FF6600]", iconSize: 16 },
+  MinIO: { label: "MinIO", icon: SiMinio, iconClassName: "text-[#C72E49]", iconSize: 22 },
+  YOLO: { label: "YOLO", icon: SiYolo, iconClassName: "text-[#042AFF]" },
+  OpenCV: { label: "OpenCV", icon: SiOpencv, iconClassName: "text-[#5C3EE8]" },
+  "Faster R-CNN": { label: "Faster R-CNN", icon: Boxes, iconClassName: "text-sky-400" },
+  RCNN: { label: "RCNN", icon: SearchCheck, iconClassName: "text-cyan-400" },
+  "RT-DETRv2": { label: "RT-DETRv2", icon: Crosshair, iconClassName: "text-blue-400" },
+  Albumentations: {
+    label: "Albumentations",
+    icon: TestTube2,
+    iconClassName: "text-fuchsia-400",
+  },
+  "Nvidia Parakeet": { label: "Nvidia Parakeet", icon: SiNvidia, iconClassName: "text-[#76B900]" },
+  ChatGPT: { label: "ChatGPT", icon: SiOpenai, iconClassName: "text-[#10A37F]" },
+  "Mistral AI": { label: "Mistral AI", icon: SiMistralai, iconClassName: "text-[#FF7000]" },
+  Qwen: { label: "Qwen", icon: Bot, iconClassName: "text-violet-400" },
+  Gemini: { label: "Gemini", icon: SiGooglegemini, iconClassName: "text-[#4285F4]" },
+  OpenRouter: {
+    label: "OpenRouter",
+    icon: OpenRouterIcon,
+    iconClassName: "text-slate-400",
+    iconSize: 26,
+  },
+  "AWS Bedrock": { label: "AWS Bedrock", icon: LuBrainCircuit, iconClassName: "text-[#FF9900]" },
+  Whisper: { label: "Whisper", icon: Mic, iconClassName: "text-emerald-400" },
+  PyTorch: { label: "PyTorch", icon: SiPytorch, iconClassName: "text-[#EE4C2C]" },
+  "PyTorch Lightning": {
+    label: "PyTorch Lightning",
+    icon: Zap,
+    iconClassName: "text-violet-400",
+  },
+  NumPy: { label: "NumPy", icon: SiNumpy, iconClassName: "text-[#4DABCF]" },
+  Pandas: { label: "Pandas", icon: SiPandas, iconClassName: "text-[#150458]" },
+  RAG: { label: "RAG", icon: SearchCheck, iconClassName: "text-emerald-400" },
+  Qdrant: { label: "Qdrant", icon: QdrantIcon, iconClassName: "text-[#DC244C]" },
+  RAGAS: { label: "RAGAS", icon: ChartNoAxesCombined, iconClassName: "text-fuchsia-400" },
+  "HF TEI": { label: "HF TEI", icon: SiHuggingface, iconClassName: "text-[#FFD21E]" },
+  "OpenAI API": { label: "OpenAI API", icon: SiOpenai, iconClassName: "text-[#10A37F]" },
+  uv: { label: "uv", icon: Terminal, iconClassName: "text-slate-400" },
+  Git: { label: "Git", icon: SiGit, iconClassName: "text-[#F05032]" },
+  GitLab: { label: "GitLab", icon: SiGitlab, iconClassName: "text-[#FC6D26]" },
+  K8S: { label: "K8S", icon: SiKubernetes, iconClassName: "text-[#326CE5]" },
+  K3S: { label: "K3S", icon: SiK3S, iconClassName: "text-[#ffc61c]" },
+  Docker: { label: "Docker", icon: SiDocker, iconClassName: "text-[#2496ED]", iconSize: 22 },
+  "Docker Compose": {
+    label: "Docker Compose",
+    icon: SiDocker,
+    iconClassName: "text-[#2496ED]",
+    iconSize: 22,
+  },
+  AWS: { label: "AWS", icon: FaAws, iconClassName: "text-[#FF9900]", iconSize: 22 },
+  "Cloudflare Workers": {
+    label: "Cloudflare Workers",
+    icon: SiCloudflareworkers,
+    iconClassName: "text-[#F38020]",
+  },
+  Figma: { label: "Figma", icon: SiFigma, iconClassName: "text-[#F24E1E]" },
+  Cursor: { label: "Cursor", icon: FileCode2, iconClassName: "text-slate-400" },
+  Playwright: {
+    label: "Playwright",
+    icon: FaTheaterMasks,
+    iconClassName: "text-[#1D8D22]",
+  },
+  Vitest: { label: "Vitest", icon: SiVitest, iconClassName: "text-[#6E9F18]" },
+  "Github Actions": { label: "Github Actions", icon: SiGithubactions },
+  Jest: { label: "Jest", icon: SiJest, iconClassName: "text-[#C21325]" },
+  Pytest: { label: "Pytest", icon: SiPytest, iconClassName: "text-[#0A9EDC]" },
+  "Testing Library": {
+    label: "Testing Library",
+    icon: SiTestinglibrary,
+    iconClassName: "text-[#E33332]",
+  },
+  Cypress: { label: "Cypress", icon: SiCypress, iconClassName: "text-[#69D3A7]" },
+  Ruff: { label: "Ruff", icon: SiRuff, iconClassName: "text-[#D7FF64]" },
+  Mypy: { label: "Mypy", icon: FileCode2, iconClassName: "text-indigo-400" },
+  Grafana: { label: "Grafana", icon: SiGrafana, iconClassName: "text-[#F46800]" },
+  Snyk: { label: "Snyk", icon: SiSnyk, iconClassName: "text-[#4C4A73]" },
+} satisfies Record<string, TechStackItem>;
+
+export type TechStackItemKey = keyof typeof TECH_STACK_ITEMS;
+export type TechStackDomainKey = "frontend" | "backend" | "ai-data" | "platform-quality";
+
+export type TechStackDomain = {
+  key: TechStackDomainKey;
+  icon: TechStackIconComponent;
+  sections: readonly {
+    key: string;
+    icon: TechStackIconComponent;
+    items: readonly TechStackItemKey[];
+    wide?: boolean;
+  }[];
+};
+
+export const TECH_STACK_DOMAINS: readonly TechStackDomain[] = [
   {
-    key: "application-engineering",
-    title: "Application Engineering",
+    key: "frontend",
     icon: Code2,
-  },
-  {
-    key: "data-infrastructure",
-    title: "Data & Infrastructure",
-    icon: CloudCog,
-  },
-  {
-    key: "quality-workflow",
-    title: "Quality & Workflow",
-    icon: Gauge,
-  },
-  {
-    key: "environment",
-    title: "Environment",
-    icon: LaptopMinimal,
-  },
-];
-
-export const TECH_STACK_SECTIONS: readonly TechStackSection[] = [
-  {
-    key: "computer-vision",
-    group: "ai-ml",
-    icon: Crosshair,
-    layout: {
-      lightClassName:
-        "xl:col-span-6 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.10),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.92))]",
-      darkClassName:
-        "xl:col-span-6 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.16),transparent_34%),linear-gradient(180deg,rgba(10,10,14,0.98),rgba(6,6,9,0.96))]",
-      lightAccentClassName: "from-sky-500/15 via-cyan-500/8 to-transparent",
-      darkAccentClassName: "from-sky-500/20 via-cyan-500/10 to-transparent",
-    },
-    items: [
-      { label: "YOLO", icon: SiYolo, iconClassName: "text-[#042AFF]" },
-      { label: "OpenCV", icon: SiOpencv, iconClassName: "text-[#5C3EE8]" },
-      { label: "Faster R-CNN", icon: Boxes, iconClassName: "text-sky-400" },
-      { label: "RCNN", icon: SearchCheck, iconClassName: "text-cyan-400" },
-      { label: "RT-DETRv2", icon: Crosshair, iconClassName: "text-blue-400" },
-      { label: "Albumentations", icon: TestTube2, iconClassName: "text-fuchsia-400" },
-    ],
-  },
-  {
-    key: "llms",
-    group: "ai-ml",
-    icon: Bot,
-    layout: {
-      lightClassName:
-        "xl:col-span-6 bg-[radial-gradient(circle_at_top_right,rgba(168,85,247,0.12),transparent_35%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.92))]",
-      darkClassName:
-        "xl:col-span-6 bg-[radial-gradient(circle_at_top_right,rgba(168,85,247,0.2),transparent_35%),linear-gradient(180deg,rgba(10,10,14,0.98),rgba(6,6,9,0.96))]",
-      lightAccentClassName: "from-violet-500/15 via-fuchsia-500/8 to-transparent",
-      darkAccentClassName: "from-violet-500/20 via-fuchsia-500/10 to-transparent",
-    },
-    items: [
-      { label: "ChatGPT", icon: SiOpenai, iconClassName: "text-[#10A37F]" },
-      { label: "Mistral AI", icon: SiMistralai, iconClassName: "text-[#FF7000]" },
-      { label: "Qwen", icon: Bot, iconClassName: "text-violet-400" },
-      { label: "Gemini", icon: SiGooglegemini, iconClassName: "text-[#4285F4]" },
-      { label: "OpenRouter", icon: OpenRouterIcon, iconClassName: "text-slate-400", iconSize: 26 },
-      { label: "AWS Bedrock", icon: LuBrainCircuit, iconClassName: "text-[#FF9900]" },
-    ],
-  },
-  {
-    key: "speech-audio-ai",
-    group: "ai-ml",
-    icon: Mic,
-    layout: {
-      lightClassName: "xl:col-span-4 bg-white/90",
-      darkClassName: "xl:col-span-4 bg-[#0f1015]",
-      lightAccentClassName: "from-emerald-500/10 via-transparent to-transparent",
-      darkAccentClassName: "from-emerald-500/15 via-transparent to-transparent",
-    },
-    items: [{ label: "Whisper", icon: Mic, iconClassName: "text-emerald-400" }],
-  },
-  {
-    key: "deep-learning",
-    group: "ai-ml",
-    icon: BrainCircuit,
-    layout: {
-      lightClassName: "xl:col-span-4 bg-white/90",
-      darkClassName: "xl:col-span-4 bg-[#0f1015]",
-      lightAccentClassName: "from-violet-500/10 via-transparent to-transparent",
-      darkAccentClassName: "from-violet-500/15 via-transparent to-transparent",
-    },
-    items: [
-      { label: "PyTorch", icon: SiPytorch, iconClassName: "text-[#EE4C2C]" },
-      { label: "PyTorch Lightning", icon: Zap, iconClassName: "text-violet-400" },
-    ],
-  },
-  {
-    key: "data-science",
-    group: "ai-ml",
-    icon: Sigma,
-    layout: {
-      lightClassName: "xl:col-span-4 bg-white/90",
-      darkClassName: "xl:col-span-4 bg-[#0f1015]",
-      lightAccentClassName: "from-emerald-500/10 via-transparent to-transparent",
-      darkAccentClassName: "from-emerald-500/15 via-transparent to-transparent",
-    },
-    items: [
-      { label: "NumPy", icon: SiNumpy, iconClassName: "text-[#4DABCF]" },
-      { label: "Pandas", icon: SiPandas, iconClassName: "text-[#150458]" },
+    sections: [
+      {
+        key: "frontend-languages-frameworks",
+        icon: Code2,
+        wide: true,
+        items: ["TypeScript", "JavaScript", "React", "Next.js", "Vinext", "Vike", "React Native"],
+      },
+      { key: "build-styling", icon: Wrench, items: ["Bun", "Vite", "Tailwind CSS", "Figma"] },
+      { key: "desktop", icon: LaptopMinimal, items: ["Tauri", "Electron"] },
     ],
   },
   {
     key: "backend",
-    group: "application-engineering",
     icon: Server,
-    layout: {
-      lightClassName: "xl:col-span-4 bg-white/90",
-      darkClassName: "xl:col-span-4 bg-[#0f1015]",
-      lightAccentClassName: "from-amber-500/10 via-transparent to-transparent",
-      darkAccentClassName: "from-amber-500/15 via-transparent to-transparent",
-    },
-    items: [
-      { label: "FastAPI", icon: SiFastapi, iconClassName: "text-[#009688]" },
-      { label: "Pydantic", icon: SiPydantic, iconClassName: "text-[#E92063]" },
-      { label: "SQLAlchemy", icon: SiSqlalchemy, iconClassName: "text-[#D71F00]" },
-      { label: "Symfony", icon: SiSymfony, iconClassName: "text-neutral-900 dark:text-white" },
-      { label: "Alembic", icon: TestTube2, iconClassName: "text-amber-400" },
-      { label: "Celery", icon: SiCelery, iconClassName: "text-[#37814A]" },
-      { label: "Uvicorn", icon: Server, iconClassName: "text-sky-400" },
+    sections: [
+      {
+        key: "backend-languages-apis-frameworks",
+        icon: Code2,
+        wide: true,
+        items: [
+          "Python",
+          "Go",
+          "Rust",
+          "PHP",
+          "TypeScript",
+          "Node.js",
+          "FastAPI",
+          "Pydantic",
+          "SQLAlchemy",
+          "Doctrine",
+          "Alembic",
+          "Uvicorn",
+          "Symfony",
+        ],
+      },
+      {
+        key: "data-storage",
+        icon: Boxes,
+        items: ["Postgres", "MongoDB", "SurrealDB", "Redis", "MinIO"],
+      },
+      { key: "jobs-messaging", icon: Zap, items: ["Celery", "RabbitMQ"] },
     ],
   },
   {
-    key: "storage",
-    group: "application-engineering",
-    icon: Boxes,
-    layout: {
-      lightClassName: "xl:col-span-4 bg-white/90",
-      darkClassName: "xl:col-span-4 bg-[#0f1015]",
-      lightAccentClassName: "from-cyan-500/10 via-transparent to-transparent",
-      darkAccentClassName: "from-cyan-500/15 via-transparent to-transparent",
-    },
-    items: [
-      { label: "Postgres", icon: SiPostgresql, iconClassName: "text-[#4169E1]" },
-      { label: "MongoDB", icon: SiMongodb, iconClassName: "text-[#47A248]" },
-      { label: "SurrealDB", icon: SiSurrealdb, iconClassName: "text-[#FF00A0]" },
-      { label: "Redis", icon: SiRedis, iconClassName: "text-[#DC382D]", iconSize: 16 },
-      { label: "RabbitMQ", icon: SiRabbitmq, iconClassName: "text-[#FF6600]", iconSize: 16 },
-      { label: "MinIO", icon: SiMinio, iconClassName: "text-[#C72E49]", iconSize: 22 },
+    key: "ai-data",
+    icon: BrainCircuit,
+    sections: [
+      {
+        key: "models-apis",
+        icon: Bot,
+        items: [
+          "ChatGPT",
+          "Mistral AI",
+          "Qwen",
+          "Gemini",
+          "OpenRouter",
+          "AWS Bedrock",
+          "OpenAI API",
+        ],
+      },
+      {
+        key: "computer-vision",
+        icon: Crosshair,
+        items: ["YOLO", "OpenCV", "Faster R-CNN", "RCNN", "RT-DETRv2", "Albumentations"],
+      },
+      {
+        key: "ml-data",
+        icon: Sigma,
+        items: ["Python", "PyTorch", "PyTorch Lightning", "NumPy", "Pandas"],
+      },
+      {
+        key: "retrieval",
+        icon: SearchCheck,
+        items: ["RAG", "Qdrant", "RAGAS", "HF TEI", "OpenAI API"],
+      },
+      { key: "speech", icon: Mic, items: ["Whisper", "Nvidia Parakeet"] },
     ],
   },
   {
-    key: "retrieval",
-    group: "ai-ml",
-    icon: SearchCheck,
-    layout: {
-      lightClassName: "xl:col-span-4 bg-white/90",
-      darkClassName: "xl:col-span-4 bg-[#0f1015]",
-      lightAccentClassName: "from-emerald-500/10 via-transparent to-transparent",
-      darkAccentClassName: "from-emerald-500/15 via-transparent to-transparent",
-    },
-    items: [
-      { label: "RAG", icon: SearchCheck, iconClassName: "text-emerald-400" },
-      { label: "Qdrant", icon: QdrantIcon, iconClassName: "text-[#DC244C]" },
-      { label: "RAGAS", icon: ChartNoAxesCombined, iconClassName: "text-fuchsia-400" },
-      { label: "HF TEI", icon: SiHuggingface, iconClassName: "text-[#FFD21E]" },
-      { label: "OpenAI API", icon: SiOpenai, iconClassName: "text-[#10A37F]" },
+    key: "platform-quality",
+    icon: ShieldCheck,
+    sections: [
+      {
+        key: "infrastructure-runtime",
+        icon: CloudCog,
+        wide: true,
+        items: [
+          "AWS",
+          "Cloudflare Workers",
+          "AWS Bedrock",
+          "Docker",
+          "Docker Compose",
+          "K8S",
+          "K3S",
+        ],
+      },
+      {
+        key: "developer-tooling",
+        icon: Wrench,
+        items: ["Bun", "uv", "Git", "GitLab", "Bash", "Cursor"],
+      },
+      { key: "browser-e2e", icon: MonitorCheck, items: ["Playwright", "Cypress"] },
+      {
+        key: "unit-code-quality",
+        icon: TestTube2,
+        items: ["Vitest", "Jest", "Testing Library", "Pytest", "Ruff", "Mypy"],
+      },
+      {
+        key: "delivery-observability",
+        icon: Gauge,
+        items: ["Github Actions", "Grafana", "Snyk"],
+      },
     ],
   },
-  {
-    key: "languages-runtimes",
-    group: "application-engineering",
-    icon: Code2,
-    layout: {
-      lightClassName: "xl:col-span-4 bg-white/90",
-      darkClassName: "xl:col-span-4 bg-[#0f1015]",
-      lightAccentClassName: "from-slate-500/10 via-transparent to-transparent",
-      darkAccentClassName: "from-slate-500/15 via-transparent to-transparent",
-    },
-    items: [
-      { label: "TypeScript", icon: SiTypescript, iconClassName: "text-[#3178C6]" },
-      { label: "Python", icon: SiPython, iconClassName: "text-[#3776AB]" },
-      { label: "Go", icon: SiGo, iconClassName: "text-[#00ADD8]", iconSize: 24 },
-      { label: "Rust", icon: SiRust, iconClassName: "text-[#B7410E]", iconSize: 24 },
-      { label: "PHP", icon: SiPhp, iconClassName: "text-[#777BB4]", iconSize: 24 },
-      { label: "Bash", icon: Terminal, iconClassName: "text-green-400" },
-      { label: "Tauri", icon: SiTauri, iconClassName: "text-[#24C8DB]" },
-      { label: "Electron", icon: SiElectron, iconClassName: "text-[#47848F]" },
-    ],
-  },
-  {
-    key: "frontend",
-    group: "application-engineering",
-    icon: Code2,
-    layout: {
-      lightClassName: "xl:col-span-4 bg-white/90",
-      darkClassName: "xl:col-span-4 bg-[#0f1015]",
-      lightAccentClassName: "from-pink-500/10 via-transparent to-transparent",
-      darkAccentClassName: "from-pink-500/15 via-transparent to-transparent",
-    },
-    items: [
-      { label: "React", icon: SiReact, iconClassName: "text-[#61DAFB]" },
-      { label: "Vinext", icon: SiCloudflare, iconSize: 22, iconClassName: "text-[#F38020]" },
-      { label: "Next.js", icon: SiNextdotjs, iconClassName: "text-neutral-950 dark:text-white" },
-      { label: "Vike", icon: GiThorHammer, iconClassName: "text-slate-400" },
-      { label: "Vite", icon: SiVite, iconClassName: "text-[#646CFF]" },
-      { label: "Tailwind CSS", icon: SiTailwindcss, iconClassName: "text-[#38BDF8]" },
-      { label: "Bun", icon: SiBun, iconClassName: "text-neutral-900 dark:text-[#FBF0DF]" },
-      { label: "React Native", icon: SiReact, iconClassName: "text-[#61DAFB]" },
-    ],
-  },
-  {
-    key: "developer-tools-platforms",
-    group: "application-engineering",
-    icon: Wrench,
-    layout: {
-      lightClassName: "xl:col-span-8 bg-white/90",
-      darkClassName: "xl:col-span-8 bg-[#0f1015]",
-      lightAccentClassName: "from-slate-500/10 via-transparent to-transparent",
-      darkAccentClassName: "from-slate-500/15 via-transparent to-transparent",
-    },
-    items: [
-      { label: "uv", icon: Terminal, iconClassName: "text-slate-400" },
-      { label: "Git", icon: SiGit, iconClassName: "text-[#F05032]" },
-      { label: "GitLab", icon: SiGitlab, iconClassName: "text-[#FC6D26]" },
-      { label: "Kubernetes", icon: SiKubernetes, iconClassName: "text-[#326CE5]" },
-      { label: "Docker", icon: SiDocker, iconClassName: "text-[#2496ED]", iconSize: 22 },
-      { label: "Docker Compose", icon: SiDocker, iconClassName: "text-[#2496ED]", iconSize: 22 },
-      { label: "AWS", icon: FaAws, iconClassName: "text-[#FF9900]", iconSize: 22 },
-      { label: "Cloudflare Workers", icon: SiCloudflareworkers, iconClassName: "text-[#F38020]" },
-      { label: "Figma", icon: SiFigma, iconClassName: "text-[#F24E1E]" },
-      { label: "Cursor", icon: FileCode2, iconClassName: "text-slate-400" },
-    ],
-  },
-  {
-    key: "quality-delivery",
-    group: "quality-workflow",
-    icon: TestTube2,
-    layout: {
-      lightClassName: "xl:col-span-4 bg-white/90",
-      darkClassName: "xl:col-span-4 bg-[#0f1015]",
-      lightAccentClassName: "from-orange-500/10 via-transparent to-transparent",
-      darkAccentClassName: "from-orange-500/15 via-transparent to-transparent",
-    },
-    items: [
-      { label: "Playwright", icon: SquareMousePointer, iconClassName: "text-emerald-400" },
-      { label: "Vitest", icon: SiVitest, iconClassName: "text-[#6E9F18]" },
-      { label: "Github Actions", icon: SiGithubactions, iconClassName: "" },
-      { label: "Jest", icon: SiJest, iconClassName: "text-[#C21325]" },
-      { label: "Pytest", icon: SiPytest, iconClassName: "text-[#0A9EDC]" },
-      { label: "Testing Library", icon: SiTestinglibrary, iconClassName: "text-[#E33332]" },
-      { label: "Cypress", icon: SiCypress, iconClassName: "text-[#69D3A7]" },
-      { label: "Ruff", icon: SiRuff, iconClassName: "text-[#D7FF64]" },
-      { label: "Mypy", icon: FileCode2, iconClassName: "text-indigo-400" },
-      { label: "Grafana", icon: SiGrafana, iconClassName: "text-[#F46800]" },
-      { label: "Snyk", icon: SiSnyk, iconClassName: "text-[#4C4A73]" },
-    ],
-  },
-  // {
-  //   key: "current-os",
-  //   group: "environment",
-  //   icon: LaptopMinimal,
-  //   layout: {
-  //     lightClassName: "xl:col-span-6 bg-white/90",
-  //     darkClassName: "xl:col-span-6 bg-[#0f1015]",
-  //     lightAccentClassName: "from-indigo-500/10 via-transparent to-transparent",
-  //     darkAccentClassName: "from-indigo-500/15 via-transparent to-transparent",
-  //   },
-  //   items: [
-  //     { label: "EndeavourOS", icon: SiEndeavouros, iconClassName: "text-[#7F7FFF]" },
-  //     { label: "Ubuntu", icon: SiUbuntu, iconClassName: "text-[#E95420]" },
-  //     { label: "Windows", icon: WindowsIcon, iconClassName: "text-[#0078D4]" },
-  //   ],
-  // },
 ];
-
-export type TechStackCategoryKey = (typeof TECH_STACK_SECTIONS)[number]["key"];

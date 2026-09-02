@@ -1,0 +1,70 @@
+---
+title: "aAIdle"
+description: "A daily guessing game about AI models, with Classic, Emoji, and Timeline modes, a React frontend, a Rust/Axum API, and server-authoritative progress backed by SQLite."
+date: "2026-09-01"
+category: "ai"
+tags: ["AI", "React", "TypeScript", "Rust", "Axum", "SQLite", "Vite", "PWA", "Game Design"]
+githubUrl: "https://github.com/Wichtowski/aaidle"
+liveUrl: "https://aaidle.com"
+status: "In Progress"
+language: "en"
+---
+
+## Overview
+
+**aAIdle** is a daily guessing game about AI models.
+Each challenge gives you clues and a set of possible answers, then asks you to identify the model that matches the hidden answer.
+
+The game is designed to make the fast-moving AI model landscape easier to explore without turning it into a spreadsheet.
+It combines short daily sessions with a growing catalog of models, historical events, and playful visual clues.
+
+## The Idea Behind It
+
+The original idea came from an early conversation with **Michał Wojdylak**.
+Instead of treating prompts as the destination, he suggested looking at the wider landscape of artificial intelligence: models, systems, methods, and the people who make them useful.
+That became the direction for a game about finding the model behind the answer.
+
+## Game Modes
+
+The **Classic** mode is the main model-comparison game.
+It uses categories such as release date, model family, provider, context window, and capabilities to help players narrow down the answer.
+Daily challenges are selected deterministically on the server, while the answer remains private until the game is completed.
+
+The **Emoji** mode represents a model or concept through a sequence of emoji clues.
+The **Timeline** mode turns the model catalog into a historical challenge, asking players to place AI releases and events in the right order.
+Together, the modes make the same catalog useful for deduction, recognition, and learning.
+
+## How It Works
+
+The frontend is a Vite-built **React** single-page application.
+It owns the interface, local anonymous progress, animations, and accessible game controls.
+
+The backend is a **Rust** service built with **Axum** and **SQLx**, using **SQLite** for the catalog, daily challenges, guesses, accounts, progress, and aggregate statistics.
+The API is server-authoritative: it selects challenges, keeps answers secret, validates guesses, and records completion events.
+
+Retries are idempotent and attempts are bounded by the eligible answer pool, so refreshing the page or submitting the same request twice cannot create extra progress.
+Signed-in players can synchronize verified progress across devices, while anonymous players can keep playing without creating an account.
+
+## Building a Small Game Around a Real System
+
+Although the interface is intentionally lightweight, aAIdle includes the parts of a production web application that are easy to overlook in a small game.
+The project has versioned API contracts, password and OAuth authentication, CSRF protection, account recovery, administrative roles, issue reporting, migrations, seed validation, and browser and backend test suites.
+
+I also wanted the game to remain pleasant to use as it grows.
+The frontend is installable as a PWA, the model catalog is navigable outside the daily challenge, and the deployment keeps the static frontend separate from the private API container.
+
+## Deployment
+
+aAIdle is deployed to a VPS through GitHub Actions.
+Each release is tested, tagged with a SemVer version, and used to build the Rust API image published to GitHub Container Registry.
+The Vite frontend is built as static assets and uploaded alongside the runtime configuration.
+
+On the VPS, Caddy serves the static SPA and proxies `/api/*` to the private API container managed by Docker Compose.
+The API and one-shot seed service share a persistent SQLite volume, while versioned frontend releases are switched atomically through a `current` symlink.
+This keeps rollback-friendly static assets separate from the application runtime and makes the deployed release visible through the app version.
+
+## Takeaway
+
+aAIdle is an experiment in turning technical curiosity into a daily habit.
+It is part game, part model catalog, and part exercise in building a secure, server-authoritative application from end to end.
+The most important constraint is also the simplest one: the game should give you a reason to come back tomorrow.

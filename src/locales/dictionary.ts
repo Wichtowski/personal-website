@@ -27,36 +27,17 @@ export interface TranslationDict {
     eyebrow: string;
     heading: string;
     selectionHint: string;
-    groups: Array<{
-      key:
-        | "ai-ml"
-        | "application-engineering"
-        | "data-infrastructure"
-        | "quality-workflow"
-        | "environment";
+    toolCount: string;
+    tabListLabel: string;
+    exploreLabel: string;
+    tabs: Array<{
+      key: "frontend" | "backend" | "ai-data" | "platform-quality";
       title: string;
-      description?: string;
+      description: string;
     }>;
-    categories: Array<{
+    subcategories: Array<{
       key: string;
-      group:
-        | "ai-ml"
-        | "application-engineering"
-        | "data-infrastructure"
-        | "quality-workflow"
-        | "environment";
       title: string;
-      icon:
-        | "monitor"
-        | "sparkles"
-        | "server"
-        | "layers"
-        | "wrench"
-        | "brain"
-        | "scan"
-        | "database"
-        | "shield";
-      summary?: string;
     }>;
   };
   github: {
@@ -177,96 +158,56 @@ export const dictionaries: Record<Language, TranslationDict> = {
     techStack: {
       eyebrow: "tech stack",
       heading: "Tools I actually use",
-      selectionHint: "Select technologies, then use Explore to see matching projects and articles.",
-      groups: [
+      selectionHint: "Shiny items are the ones I use on daily basis",
+      toolCount: "tools",
+      tabListLabel: "Technology areas",
+      exploreLabel: "Explore",
+      tabs: [
         {
-          key: "ai-ml",
-          title: "AI & Machine Learning",
-        },
-        {
-          key: "application-engineering",
-          title: "Application Engineering",
-        },
-        {
-          key: "data-infrastructure",
-          title: "Data & Infrastructure",
-        },
-        {
-          key: "quality-workflow",
-          title: "Quality & Workflow",
-        },
-        {
-          key: "environment",
-          title: "Environment",
-        },
-      ],
-      categories: [
-        {
-          key: "llms",
-          group: "ai-ml",
-          title: "LLMs",
-          icon: "sparkles",
-        },
-        {
-          key: "computer-vision",
-          group: "ai-ml",
-          title: "Computer Vision",
-          icon: "scan",
-        },
-        {
-          key: "deep-learning",
-          group: "ai-ml",
-          title: "Deep Learning",
-          icon: "brain",
-        },
-        {
-          key: "data-science",
-          group: "ai-ml",
-          title: "Data Science",
-          icon: "database",
+          key: "frontend",
+          title: "Frontend",
+          description: "Interfaces, web runtimes, styling, and cross-platform experiences.",
         },
         {
           key: "backend",
-          group: "application-engineering",
           title: "Backend",
-          icon: "server",
+          description: "APIs, services, persistence, and asynchronous workloads.",
         },
         {
-          key: "storage",
-          group: "data-infrastructure",
-          title: "Storage",
-          icon: "database",
+          key: "ai-data",
+          title: "AI & Data",
+          description: "Applied ML, model APIs, computer vision, and retrieval systems.",
         },
         {
-          key: "retrieval",
-          group: "ai-ml",
-          title: "Retrieval",
-          icon: "scan",
+          key: "platform-quality",
+          title: "Platform & Quality",
+          description:
+            "Cloud infrastructure, developer tooling, testing, delivery, and observability.",
         },
+      ],
+      subcategories: [
+        { key: "frontend-languages-frameworks", title: "Languages & frameworks" },
+        { key: "build-styling", title: "Build, styling & design" },
+        { key: "desktop", title: "Desktop & native" },
         {
-          key: "languages-runtimes",
-          group: "application-engineering",
-          title: "Languages & Runtimes",
-          icon: "monitor",
+          key: "backend-languages-apis-frameworks",
+          title: "Languages, APIs & frameworks",
         },
+        { key: "data-storage", title: "Data & storage" },
+        { key: "jobs-messaging", title: "Jobs & messaging" },
+        { key: "models-apis", title: "Models & APIs" },
+        { key: "computer-vision", title: "Computer vision" },
+        { key: "ml-data", title: "ML & data science" },
+        { key: "retrieval", title: "Retrieval" },
+        { key: "speech", title: "Speech & audio" },
         {
-          key: "developer-tools-platforms",
-          group: "application-engineering",
-          title: "Developer Tools & Platforms",
-          icon: "wrench",
+          key: "infrastructure-runtime",
+          title: "Cloud, runtime & infrastructure",
         },
-        {
-          key: "frontend",
-          group: "application-engineering",
-          title: "Frontend",
-          icon: "layers",
-        },
-        {
-          key: "quality-delivery",
-          group: "quality-workflow",
-          title: "Quality & Delivery",
-          icon: "shield",
-        },
+        { key: "developer-tooling", title: "Developer tooling" },
+        { key: "browser-e2e", title: "Browser & E2E" },
+        { key: "unit-code-quality", title: "Unit & code quality" },
+        { key: "delivery-observability", title: "Delivery & observability" },
       ],
     },
     github: {
@@ -390,97 +331,56 @@ export const dictionaries: Record<Language, TranslationDict> = {
     techStack: {
       eyebrow: "Wybrany stack",
       heading: "Narzędzia, których używam",
-      selectionHint:
-        "Wybierz technologie, potem użyj Explore, żeby zobaczyć pasujące projekty i artykuły.",
-      groups: [
+      selectionHint: "Błyszczące pozycje to te, których używam na co dzień.",
+      toolCount: "narzędzi",
+      tabListLabel: "Obszary technologiczne",
+      exploreLabel: "Odkrywaj",
+      tabs: [
         {
-          key: "ai-ml",
-          title: "AI i Machine Learning",
-        },
-        {
-          key: "application-engineering",
-          title: "Inżynieria aplikacji",
-        },
-        {
-          key: "data-infrastructure",
-          title: "Dane i infrastruktura",
-        },
-        {
-          key: "quality-workflow",
-          title: "Jakość i workflow",
-        },
-        {
-          key: "environment",
-          title: "Środowisko",
-        },
-      ],
-      categories: [
-        {
-          key: "llms",
-          group: "ai-ml",
-          title: "LLM-y",
-          icon: "sparkles",
-        },
-        {
-          key: "computer-vision",
-          group: "ai-ml",
-          title: "Widzenie komputerowe",
-          icon: "scan",
-        },
-        {
-          key: "deep-learning",
-          group: "ai-ml",
-          title: "Deep Learning",
-          icon: "brain",
-        },
-        {
-          key: "data-science",
-          group: "ai-ml",
-          title: "Data Science",
-          icon: "database",
+          key: "frontend",
+          title: "Frontend",
+          description: "Interfejsy, środowiska webowe, stylowanie i aplikacje wieloplatformowe.",
         },
         {
           key: "backend",
-          group: "application-engineering",
           title: "Backend",
-          icon: "server",
+          description: "API, serwisy, przechowywanie danych i zadania asynchroniczne.",
         },
         {
-          key: "storage",
-          group: "data-infrastructure",
-          title: "Bazy i Storage",
-          icon: "database",
+          key: "ai-data",
+          title: "AI i dane",
+          description: "Praktyczny ML, API modeli, widzenie komputerowe i systemy wyszukiwania.",
         },
         {
-          key: "retrieval",
-          group: "ai-ml",
-          title: "Retrieval",
-          icon: "scan",
+          key: "platform-quality",
+          title: "Platforma i jakość",
+          description:
+            "Infrastruktura chmurowa, narzędzia deweloperskie, testy, delivery i obserwowalność.",
         },
+      ],
+      subcategories: [
+        { key: "frontend-languages-frameworks", title: "Języki i frameworki" },
+        { key: "build-styling", title: "Build, stylowanie i design" },
+        { key: "desktop", title: "Desktop i aplikacje natywne" },
         {
-          key: "languages-runtimes",
-          group: "application-engineering",
-          title: "Języki i środowiska uruchomieniowe",
-          icon: "monitor",
+          key: "backend-languages-apis-frameworks",
+          title: "Języki, API i frameworki",
         },
+        { key: "data-storage", title: "Dane i storage" },
+        { key: "jobs-messaging", title: "Zadania i komunikacja" },
+        { key: "models-apis", title: "Modele i API" },
+        { key: "computer-vision", title: "Widzenie komputerowe" },
+        { key: "ml-data", title: "ML i data science" },
+        { key: "retrieval", title: "Retrieval" },
+        { key: "speech", title: "Mowa i audio" },
         {
-          key: "developer-tools-platforms",
-          group: "application-engineering",
-          title: "Narzędzia deweloperskie i platformy",
-          icon: "wrench",
+          key: "infrastructure-runtime",
+          title: "Chmura, runtime i infrastruktura",
         },
-        {
-          key: "frontend",
-          group: "application-engineering",
-          title: "Frontend",
-          icon: "layers",
-        },
-        {
-          key: "quality-delivery",
-          group: "quality-workflow",
-          title: "Jakość i Delivery",
-          icon: "shield",
-        },
+        { key: "developer-tooling", title: "Narzędzia deweloperskie" },
+        { key: "browser-e2e", title: "Przeglądarka i E2E" },
+        { key: "unit-code-quality", title: "Testy jednostkowe i jakość kodu" },
+        { key: "delivery-observability", title: "Delivery i obserwowalność" },
       ],
     },
     github: {
