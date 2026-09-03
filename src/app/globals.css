@@ -170,7 +170,7 @@ a,
   nav,
   button,
   a[href^="#"],
-  #github,
+  #contributions,
   #portfolio,
   #articles {
     display: none !important;

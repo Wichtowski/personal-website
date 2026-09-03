@@ -25,8 +25,8 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   let activeSection = "home";
-  if (pathname.startsWith("/github")) {
-    activeSection = "github";
+  if (pathname.startsWith("/contributions") || pathname.startsWith("/github")) {
+    activeSection = "contributions";
   } else if (pathname.startsWith("/portfolio")) {
     activeSection = "portfolio";
   } else if (pathname.startsWith("/articles") || pathname.startsWith("/blog")) {
@@ -79,7 +79,7 @@ export function Navbar() {
 
   const navItems = [
     { label: t.nav.home, id: "home" },
-    { label: t.nav.github, id: "github" },
+    { label: t.nav.contributions, id: "contributions" },
     { label: t.nav.portfolio, id: "portfolio" },
     { label: t.nav.articles, id: "articles" },
     { label: t.nav.contact, id: "contact" },
@@ -87,7 +87,7 @@ export function Navbar() {
 
   const SECTION_TO_ROUTE: Record<string, string> = {
     home: "/",
-    github: "/github",
+    contributions: "/contributions",
     portfolio: "/portfolio",
     articles: "/articles",
     contact: "/contact",

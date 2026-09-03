@@ -13,7 +13,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname() ?? "/";
   const isMainRoute = ROUTES.includes(pathname);
 
-  // Main-route sections (LandingPage, Portfolio, Blog, GitHub, Contact) render
+  // Main-route sections (LandingPage, Portfolio, Blog, Contributions, Contact) render
   // their own Footer, so we skip a duplicate one here. Only the current route
   // is mounted, which keeps navigation in sync and avoids mounting every
   // section at once.

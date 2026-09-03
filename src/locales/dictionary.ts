@@ -5,7 +5,7 @@ export interface TranslationDict {
     home: string;
     portfolio: string;
     articles: string;
-    github: string;
+    contributions: string;
     contact: string;
   };
   hero: {
@@ -61,8 +61,9 @@ export interface TranslationDict {
     totalCommits: string;
     totalPRs: string;
     totalIssues: string;
-    primaryAccountLabel: string;
-    workAccountTag: string;
+    personalGithubAccount: string;
+    workGithubAccount: string;
+    gitlabAccount: string;
   };
   portfolio: {
     title: string;
@@ -137,7 +138,7 @@ export const dictionaries: Record<Language, TranslationDict> = {
       home: "Home",
       portfolio: "Portfolio",
       articles: "Articles",
-      github: "Activity",
+      contributions: "Contributions",
       contact: "Contact",
     },
     hero: {
@@ -211,8 +212,8 @@ export const dictionaries: Record<Language, TranslationDict> = {
       ],
     },
     github: {
-      title: "Real-time WorkStream",
-      subtitle: "My latest development activity, powered directly by public GitHub APIs.",
+      title: "Contributions",
+      subtitle: "My latest public GitHub activity and profiles across GitHub and GitLab.",
       latestActivity: "Latest GitHub Action",
       lastPushedRepo: "Last Public Repo Pushed To",
       pushedAt: "Pushed",
@@ -231,8 +232,9 @@ export const dictionaries: Record<Language, TranslationDict> = {
       totalCommits: "Commits",
       totalPRs: "PRs",
       totalIssues: "QA Issues",
-      primaryAccountLabel: "Primary Account",
-      workAccountTag: "Work Account",
+      personalGithubAccount: "GitHub - Personal",
+      workGithubAccount: "GitHub - Work",
+      gitlabAccount: "GitLab",
     },
     portfolio: {
       title: "Portfolio Showcase",
@@ -310,7 +312,7 @@ export const dictionaries: Record<Language, TranslationDict> = {
       home: "Start",
       portfolio: "Portfolio",
       articles: "Artykuły",
-      github: "Aktywność",
+      contributions: "Aktywność",
       contact: "Kontakt",
     },
     hero: {
@@ -386,7 +388,7 @@ export const dictionaries: Record<Language, TranslationDict> = {
     github: {
       title: "Aktywność deweloperska",
       subtitle:
-        "Moje najnowsze działania na GitHub, pobierane bezpośrednio przez publiczne API. Bezserwerowe i na żywo.",
+        "Moja najnowsza publiczna aktywność na GitHubie oraz profile w serwisach GitHub i GitLab.",
       latestActivity: "Ostatnie zdarzenie",
       lastPushedRepo: "Ostatnie repozytoria z wypchniętymi zmianami",
       pushedAt: "Wypchnięto",
@@ -405,8 +407,9 @@ export const dictionaries: Record<Language, TranslationDict> = {
       totalCommits: "Commity",
       totalPRs: "PR-y",
       totalIssues: "Zgłoszenia QA",
-      primaryAccountLabel: "Konto Główne",
-      workAccountTag: "Konto Pracownicze",
+      personalGithubAccount: "GitHub - konto prywatne",
+      workGithubAccount: "GitHub - konto służbowe",
+      gitlabAccount: "GitLab",
     },
     portfolio: {
       title: "Moje portfolio",

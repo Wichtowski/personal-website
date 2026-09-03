@@ -7,5 +7,6 @@ export const SITE_DESCRIPTION =
 export const SITE_OG_IMAGE = "/og-image.png";
 export const AUTHOR_PROFILES = [
   "https://github.com/Wichtowski",
+  "https://gitlab.com/Wichtowski1",
   "https://www.linkedin.com/in/oskar-wichtowski/",
 ] as const;

@@ -2,14 +2,14 @@
 
 Personal website and portfolio for Oskar Wichtowski.
 
-This site is built with Next.js 16, React 19, TypeScript, Tailwind CSS, and `vinext`. It presents a bilingual portfolio experience, project case studies, articles, GitHub activity, and contact details in a single place.
+This site is built with Next.js 16, React 19, TypeScript, Tailwind CSS, and `vinext`. It presents a bilingual portfolio experience, project case studies, articles, development contributions, and contact details in a single place.
 
 ## What's inside
 
 - Landing page with a custom hero section
 - Portfolio pages backed by MDX content
 - Articles section with MDX posts in English and Polish
-- GitHub activity page with live public API data
+- Contributions page with live public GitHub API data and development profiles
 - Contact page and downloadable resume
 - Light/dark theme support
 - English and Polish localization
@@ -31,7 +31,7 @@ This site is built with Next.js 16, React 19, TypeScript, Tailwind CSS, and `vin
 - `/portfolio/[slug]` - individual project case studies
 - `/articles` - articles index
 - `/blog/[slug]` - article pages
-- `/github` - GitHub activity dashboard
+- `/contributions` - development activity dashboard and profiles
 - `/contact` - contact page
 
 ## Getting Started
@@ -90,4 +90,4 @@ The site is set up to work well with Cloudflare Pages-style static hosting. The 
 - The root layout is defined in `src/app/layout.tsx`
 - Metadata is configured there as well
 - The default language is English, with Polish available from the UI
-- The `/github` page can work without a token, but `GITHUB_TOKEN` is recommended for better API limits
+- The `/contributions` page can work without a token, but `GITHUB_TOKEN` is recommended for better API limits

@@ -201,7 +201,7 @@ async function fetchRepoCommitActivities(
 
 async function fetchRecentRepoActivities(
   username: string,
-  limit = 3,
+  limit = 5,
   maxPages = 3,
   token?: string,
 ): Promise<GitHubPulseActivity[]> {
@@ -227,36 +227,36 @@ async function fetchRecentRepoActivities(
     if (events.length < 30) break;
   }
 
-  const externalEvent = eventCandidates.find((event) =>
-    isOutsideGitHubActivityScope(event.repo.name),
-  );
-
-  if (!externalEvent) {
-    return [];
-  }
+  const externalLimit = Math.min(2, limit);
+  const scopedLimit = Math.max(0, limit - externalLimit);
+  const scopedEvents = eventCandidates
+    .filter((event) => !isOutsideGitHubActivityScope(event.repo.name))
+    .slice(0, scopedLimit);
+  const externalEvents = eventCandidates
+    .filter((event) => isOutsideGitHubActivityScope(event.repo.name))
+    .slice(0, externalLimit);
 
   const activities = await Promise.all(
-    eventCandidates
-      .filter((event) => event !== externalEvent)
-      .slice(0, Math.max(0, limit - 1))
-      .map((event) => formatGitHubEvent(event, token)),
+    scopedEvents.map((event) => formatGitHubEvent(event, token)),
   );
 
-  if (activities.length < limit - 1) {
+  if (activities.length < scopedLimit) {
     const fallbackActivities = await fetchRepoCommitActivities(
       username,
-      limit - 1 - activities.length,
+      scopedLimit - activities.length,
       seenRepos,
       token,
     );
     activities.push(...fallbackActivities);
   }
 
-  activities.push(await formatGitHubEvent(externalEvent, token));
+  activities.push(
+    ...(await Promise.all(externalEvents.map((event) => formatGitHubEvent(event, token)))),
+  );
   return activities;
 }
 
-export const GITHUB_PULSE_CACHE_KEY = "github-pulse-cache-v2";
+export const GITHUB_PULSE_CACHE_KEY = "github-pulse-cache-v4";
 export const GITHUB_PULSE_LEGACY_CACHE_KEYS = ["github-pulse-cache"];
 export const GITHUB_PULSE_CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6h
 
@@ -280,7 +280,7 @@ export async function buildGitHubPulse(options?: {
 
   const [mainStats, latestActivity, workStats] = await Promise.all([
     fetchGitHubStats(MAIN_USERNAME, token),
-    fetchRecentRepoActivities(MAIN_USERNAME, 3, 3, token),
+    fetchRecentRepoActivities(MAIN_USERNAME, 5, 3, token),
     fetchGitHubStats(WORK_USERNAME, token).catch(() => null),
   ]);
 

@@ -194,7 +194,7 @@ export default function GithubContent({ initialData }: GithubContentProps) {
 
   return (
     <section
-      id="github"
+      id="contributions"
       className="w-screen h-screen overflow-y-auto no-scrollbar flex flex-col items-start justify-center bg-background/50 border-r border-border/40 relative pt-6 pb-4 md:pt-32"
     >
       <div className="absolute inset-0 bg-radial-gradient from-primary/5 via-transparent to-transparent -z-10" />
@@ -243,11 +243,10 @@ export default function GithubContent({ initialData }: GithubContentProps) {
             </div>
 
             <GithubAccountsPanel
-              mainStats={mainStats}
-              workStats={workStats}
               labels={{
-                primaryAccountLabel: t.github.primaryAccountLabel,
-                workAccountTag: t.github.workAccountTag,
+                personalGithubAccount: t.github.personalGithubAccount,
+                workGithubAccount: t.github.workGithubAccount,
+                gitlabAccount: t.github.gitlabAccount,
               }}
             />
           </div>

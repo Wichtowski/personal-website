@@ -1,18 +1,16 @@
 import { motion } from "framer-motion";
-import type { GitHubStats } from "@lib/github";
 import { GithubAccountCard } from "./GithubAccountCard";
 import Link from "next/link";
 
 interface GithubAccountsPanelProps {
-  mainStats: GitHubStats | null;
-  workStats: GitHubStats | null;
   labels: {
-    primaryAccountLabel: string;
-    workAccountTag: string;
+    personalGithubAccount: string;
+    workGithubAccount: string;
+    gitlabAccount: string;
   };
 }
 
-export function GithubAccountsPanel({ mainStats, workStats, labels }: GithubAccountsPanelProps) {
+export function GithubAccountsPanel({ labels }: GithubAccountsPanelProps) {
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -22,12 +20,11 @@ export function GithubAccountsPanel({ mainStats, workStats, labels }: GithubAcco
       <div className="space-y-4 gap-3 flex flex-col">
         <Link href="https://github.com/Wichtowski" target="_blank" rel="noopener noreferrer">
           <GithubAccountCard
-            label={labels.primaryAccountLabel}
+            label={labels.personalGithubAccount}
             username="Wichtowski"
-            avatarUrl={mainStats?.avatarUrl}
+            avatarUrl="/contributions/private.png"
             avatarAlt="Personal Account"
             labelClassName="text-primary"
-            fallbackClassName="bg-primary/10 border-primary/20"
           />
         </Link>
 
@@ -37,12 +34,21 @@ export function GithubAccountsPanel({ mainStats, workStats, labels }: GithubAcco
           rel="noopener noreferrer"
         >
           <GithubAccountCard
-            label={labels.workAccountTag}
+            label={labels.workGithubAccount}
             username="oskar-wichtowski-wttech"
-            avatarUrl={workStats?.avatarUrl}
+            avatarUrl="/contributions/work.png"
             avatarAlt="Work Account"
             labelClassName="text-blue-500"
-            fallbackClassName="bg-blue-500/10 border-blue-500/20"
+          />
+        </Link>
+
+        <Link href="https://gitlab.com/Wichtowski1" target="_blank" rel="noopener noreferrer">
+          <GithubAccountCard
+            label={labels.gitlabAccount}
+            username="Wichtowski1"
+            avatarUrl="/contributions/gitlab.png"
+            avatarAlt="GitLab Account"
+            labelClassName="text-[#FC6D26]"
           />
         </Link>
       </div>
