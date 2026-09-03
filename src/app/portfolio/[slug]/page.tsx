@@ -7,7 +7,7 @@ import { dictionaries, Language } from "@locales/dictionary";
 import { getStatusConfig } from "@lib/status";
 import { TableOfContents } from "@components/layout/TableOfContents";
 import { StickyBackButton } from "@components/layout/StickyBackButton";
-import { fetchRepoDetails } from "@lib/github";
+import { fetchRepoDetails } from "@lib/github-contributions";
 import { SITE_OG_IMAGE } from "@lib/site";
 
 interface PageProps {

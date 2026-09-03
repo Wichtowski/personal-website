@@ -2,14 +2,19 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useLanguage } from "@context/LanguageContext";
-import type { GitHubPulseActivity, GitHubPulseStats } from "@lib/github-pulse";
+import type {
+  GitHubContributionsActivities,
+  GitHubContributionsActivity,
+  GitHubContributionsStats,
+} from "@lib/github-contributions";
 import {
-  GITHUB_PULSE_CACHE_KEY,
-  GITHUB_PULSE_CACHE_TTL_MS,
-  GITHUB_PULSE_LEGACY_CACHE_KEYS,
-} from "@lib/github-pulse";
+  GITHUB_CONTRIBUTIONS_CACHE_KEY,
+  GITHUB_CONTRIBUTIONS_CACHE_TTL_MS,
+  GITHUB_CONTRIBUTIONS_LEGACY_CACHE_KEYS,
+  isOutsideGitHubActivityScope,
+  isWithinGitHubContributionsWindow,
+} from "@lib/github-contributions";
 import { Activity } from "lucide-react";
-import { motion } from "framer-motion";
 import {
   RecentGithubActivity,
   GithubAccountsPanel,
@@ -19,26 +24,28 @@ import {
 } from "@components/github";
 import { Footer } from "@components/layout/Footer";
 
-type GithubPulseData = {
+type GithubContributionsData = {
   generatedAt: string;
-  mainStats: GitHubPulseStats;
-  latestActivity: GitHubPulseActivity[];
-  workStats: GitHubPulseStats | null;
+  mainStats: GitHubContributionsStats | null;
+  activities?: GitHubContributionsActivities;
+  latestActivity?: GitHubContributionsActivity[];
+  workStats: GitHubContributionsStats | null;
+  partial?: boolean;
 };
 
 interface GithubContentProps {
-  initialData?: GithubPulseData | null;
+  initialData?: GithubContributionsData | null;
 }
 
-type GithubPulseCacheEntry = {
+type GithubContributionsCacheEntry = {
   cachedAt: string;
-  data: GithubPulseData;
+  data: GithubContributionsData;
 };
 
-function parseGithubPulseCache(value: unknown): GithubPulseCacheEntry | null {
+function parseGithubContributionsCache(value: unknown): GithubContributionsCacheEntry | null {
   if (!value || typeof value !== "object") return null;
 
-  const data = value as { cachedAt?: string; data?: GithubPulseData };
+  const data = value as { cachedAt?: string; data?: GithubContributionsData };
   if (!data.cachedAt || !data.data) return null;
 
   const cachedAtMs = Date.parse(data.cachedAt);
@@ -50,17 +57,72 @@ function parseGithubPulseCache(value: unknown): GithubPulseCacheEntry | null {
   };
 }
 
-function isFreshGithubPulseCache(cache: GithubPulseCacheEntry) {
-  return Date.now() - Date.parse(cache.cachedAt) < GITHUB_PULSE_CACHE_TTL_MS;
+function isFreshGithubContributionsCache(cache: GithubContributionsCacheEntry) {
+  return Date.now() - Date.parse(cache.cachedAt) < GITHUB_CONTRIBUTIONS_CACHE_TTL_MS;
 }
 
-function readGithubPulseCache(): GithubPulseCacheEntry | null {
-  for (const key of [GITHUB_PULSE_CACHE_KEY, ...GITHUB_PULSE_LEGACY_CACHE_KEYS]) {
+function getActivitySections(data: GithubContributionsData): GitHubContributionsActivities {
+  if (data.activities) {
+    return {
+      private: Array.isArray(data.activities.private)
+        ? data.activities.private.filter((activity) =>
+            isWithinGitHubContributionsWindow(activity.pushedAt),
+          )
+        : [],
+      public: Array.isArray(data.activities.public)
+        ? data.activities.public.filter((activity) =>
+            isWithinGitHubContributionsWindow(activity.pushedAt),
+          )
+        : [],
+    };
+  }
+
+  const legacyActivity = Array.isArray(data.latestActivity) ? data.latestActivity : [];
+
+  return {
+    private: legacyActivity.filter(
+      (activity) =>
+        isWithinGitHubContributionsWindow(activity.pushedAt) &&
+        !isOutsideGitHubActivityScope(activity.repoName) &&
+        activity.type === "PushEvent",
+    ),
+    public: legacyActivity.filter(
+      (activity) =>
+        isWithinGitHubContributionsWindow(activity.pushedAt) &&
+        isOutsideGitHubActivityScope(activity.repoName),
+    ),
+  };
+}
+
+function mergeContributionsData(
+  data: GithubContributionsData,
+  cachedData: GithubContributionsData,
+): GithubContributionsData {
+  const incomingActivities = getActivitySections(data);
+  const cachedActivities = getActivitySections(cachedData);
+
+  return {
+    ...data,
+    mainStats: data.mainStats ?? cachedData.mainStats,
+    workStats: data.workStats ?? cachedData.workStats,
+    activities: {
+      private:
+        incomingActivities.private.length > 0
+          ? incomingActivities.private
+          : cachedActivities.private,
+      public:
+        incomingActivities.public.length > 0 ? incomingActivities.public : cachedActivities.public,
+    },
+  };
+}
+
+function readGithubContributionsCache(): GithubContributionsCacheEntry | null {
+  for (const key of [GITHUB_CONTRIBUTIONS_CACHE_KEY, ...GITHUB_CONTRIBUTIONS_LEGACY_CACHE_KEYS]) {
     try {
       const rawCache = localStorage.getItem(key);
       if (!rawCache) continue;
 
-      const parsed = parseGithubPulseCache(JSON.parse(rawCache));
+      const parsed = parseGithubContributionsCache(JSON.parse(rawCache));
       if (parsed) return parsed;
     } catch {
       continue;
@@ -73,13 +135,13 @@ function readGithubPulseCache(): GithubPulseCacheEntry | null {
 export default function GithubContent({ initialData }: GithubContentProps) {
   const { language, t } = useLanguage();
 
-  const [mainStats, setMainStats] = useState<GitHubPulseStats | null>(
+  const [mainStats, setMainStats] = useState<GitHubContributionsStats | null>(
     initialData?.mainStats ?? null,
   );
-  const [activities, setActivities] = useState<GitHubPulseActivity[]>(
-    initialData?.latestActivity ?? [],
+  const [activities, setActivities] = useState<GitHubContributionsActivities>(
+    initialData ? getActivitySections(initialData) : { private: [], public: [] },
   );
-  const [workStats, setWorkStats] = useState<GitHubPulseStats | null>(
+  const [workStats, setWorkStats] = useState<GitHubContributionsStats | null>(
     initialData?.workStats ?? null,
   );
   const [loading, setLoading] = useState<boolean>(() => {
@@ -87,16 +149,16 @@ export default function GithubContent({ initialData }: GithubContentProps) {
   });
   const [error, setError] = useState<string | null>(null);
 
-  const applyPulseData = useCallback((data: GithubPulseData) => {
+  const applyContributionsData = useCallback((data: GithubContributionsData) => {
     setMainStats(data.mainStats);
-    setActivities(Array.isArray(data.latestActivity) ? data.latestActivity : []);
+    setActivities(getActivitySections(data));
     setWorkStats(data.workStats);
   }, []);
 
-  const persistPulseData = useCallback((data: GithubPulseData) => {
+  const persistContributionsData = useCallback((data: GithubContributionsData) => {
     try {
       localStorage.setItem(
-        GITHUB_PULSE_CACHE_KEY,
+        GITHUB_CONTRIBUTIONS_CACHE_KEY,
         JSON.stringify({
           cachedAt: new Date().toISOString(),
           data,
@@ -115,20 +177,25 @@ export default function GithubContent({ initialData }: GithubContentProps) {
       }
 
       try {
-        const res = await fetch("/api/github/pulse");
+        const res = await fetch("/api/github/contributions");
 
         if (!res.ok) {
-          throw new Error(`Failed to fetch GitHub pulse: ${res.status}`);
+          throw new Error(`Failed to fetch GitHub Contributions: ${res.status}`);
         }
 
-        const data = (await res.json()) as GithubPulseData;
-        applyPulseData(data);
-        persistPulseData(data);
+        const data = (await res.json()) as GithubContributionsData;
+        const cached = readGithubContributionsCache();
+        const resolvedData =
+          data.partial && cached ? mergeContributionsData(data, cached.data) : data;
+        applyContributionsData(resolvedData);
+        if (!data.partial) {
+          persistContributionsData(resolvedData);
+        }
         setLoading(false);
       } catch (err) {
-        const cached = readGithubPulseCache();
+        const cached = readGithubContributionsCache();
         if (cached) {
-          applyPulseData(cached.data);
+          applyContributionsData(cached.data);
         } else {
           console.error(err);
           setError(t.github.error);
@@ -136,7 +203,7 @@ export default function GithubContent({ initialData }: GithubContentProps) {
         setLoading(false);
       }
     },
-    [applyPulseData, persistPulseData, t.github.error],
+    [applyContributionsData, persistContributionsData, t.github.error],
   );
 
   useEffect(() => {
@@ -144,15 +211,15 @@ export default function GithubContent({ initialData }: GithubContentProps) {
     let timeoutId: number | undefined;
 
     try {
-      const cached = readGithubPulseCache();
+      const cached = readGithubContributionsCache();
       if (cached) {
         timeoutId = window.setTimeout(() => {
           if (!active) return;
 
-          applyPulseData(cached.data);
+          applyContributionsData(cached.data);
           setLoading(false);
 
-          if (!isFreshGithubPulseCache(cached)) {
+          if (!isFreshGithubContributionsCache(cached)) {
             void loadData({ keepExistingData: true });
           }
         }, 0);
@@ -164,7 +231,7 @@ export default function GithubContent({ initialData }: GithubContentProps) {
       }
 
       if (initialData) {
-        persistPulseData(initialData);
+        persistContributionsData(initialData);
       } else {
         timeoutId = window.setTimeout(() => {
           if (active) {
@@ -174,7 +241,7 @@ export default function GithubContent({ initialData }: GithubContentProps) {
       }
     } catch {
       if (initialData) {
-        persistPulseData(initialData);
+        persistContributionsData(initialData);
       } else {
         timeoutId = window.setTimeout(() => {
           if (active) {
@@ -190,29 +257,21 @@ export default function GithubContent({ initialData }: GithubContentProps) {
         window.clearTimeout(timeoutId);
       }
     };
-  }, [applyPulseData, initialData, persistPulseData, loadData]);
+  }, [applyContributionsData, initialData, persistContributionsData, loadData]);
 
   return (
     <section
       id="contributions"
-      className="w-screen h-screen overflow-y-auto no-scrollbar flex flex-col items-start justify-center bg-background/50 border-r border-border/40 relative pt-6 pb-4 md:pt-32"
+      className="w-screen h-screen overflow-y-auto no-scrollbar flex flex-col items-start justify-start bg-background/50 border-r border-border/40 relative pt-24 pb-4 md:pt-32"
     >
       <div className="absolute inset-0 bg-radial-gradient from-primary/5 via-transparent to-transparent -z-10" />
 
-      <motion.div
-        initial={{ opacity: 0, y: 18 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-        viewport={{ once: true, amount: 0.15 }}
-        className="max-w-7xl mx-auto px-6 w-full"
-      >
+      <div className="max-w-7xl mx-auto mb-12 px-6 w-full md:mb-20">
         <div className="text-left md:text-center max-w-3xl md:mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-4 tracking-tight flex items-center justify-start md:justify-center gap-3">
             <Activity size={56} className="text-primary shrink-0 mr-2" />
             {t.github.title}
           </h2>
-
-          <p className="text-base text-muted-foreground">{t.github.subtitle}</p>
         </div>
 
         {loading ? (
@@ -224,22 +283,27 @@ export default function GithubContent({ initialData }: GithubContentProps) {
             <div className="lg:col-span-2 space-y-8">
               <RecentGithubActivity
                 activities={activities}
-                title={t.github.lastPushedRepo}
+                title={t.github.latestActivity}
+                tabsLabel={t.github.activityTabsLabel}
+                privateTabLabel={t.github.privateActivity}
+                publicTabLabel={t.github.publicActivity}
                 emptyMessage={t.github.noRecentActivity}
                 viewOnGithub={t.github.viewOnGithub}
                 pushedAtLabel={t.github.pushedAt}
                 language={language}
               />
 
-              <GithubStatsGrid
-                mainStats={mainStats}
-                workStats={workStats}
-                labels={{
-                  repos: t.github.repos,
-                  stars: t.github.stars,
-                  followers: t.github.followers,
-                }}
-              />
+              {(mainStats || workStats) && (
+                <GithubStatsGrid
+                  mainStats={mainStats}
+                  workStats={workStats}
+                  labels={{
+                    repos: t.github.repos,
+                    stars: t.github.stars,
+                    followers: t.github.followers,
+                  }}
+                />
+              )}
             </div>
 
             <GithubAccountsPanel
@@ -251,7 +315,7 @@ export default function GithubContent({ initialData }: GithubContentProps) {
             />
           </div>
         )}
-      </motion.div>
+      </div>
       <Footer />
     </section>
   );

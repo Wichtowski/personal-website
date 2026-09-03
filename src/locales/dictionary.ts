@@ -42,8 +42,10 @@ export interface TranslationDict {
   };
   github: {
     title: string;
-    subtitle: string;
     latestActivity: string;
+    activityTabsLabel: string;
+    privateActivity: string;
+    publicActivity: string;
     lastPushedRepo: string;
     pushedAt: string;
     viewOnGithub: string;
@@ -213,12 +215,14 @@ export const dictionaries: Record<Language, TranslationDict> = {
     },
     github: {
       title: "Contributions",
-      subtitle: "My latest public GitHub activity and profiles across GitHub and GitLab.",
-      latestActivity: "Latest GitHub Action",
+      latestActivity: "Latest GitHub Contributions",
+      activityTabsLabel: "Contribution visibility",
+      privateActivity: "Private",
+      publicActivity: "Public",
       lastPushedRepo: "Last Public Repo Pushed To",
       pushedAt: "Pushed",
       viewOnGithub: "View on GitHub",
-      statsTitle: "GitHub Pulse Metrics",
+      statsTitle: "GitHub Contributions Metrics",
       stars: "Stars Earned",
       repos: "Public Repos",
       followers: "Followers",
@@ -387,9 +391,10 @@ export const dictionaries: Record<Language, TranslationDict> = {
     },
     github: {
       title: "Aktywność deweloperska",
-      subtitle:
-        "Moja najnowsza publiczna aktywność na GitHubie oraz profile w serwisach GitHub i GitLab.",
-      latestActivity: "Ostatnie zdarzenie",
+      latestActivity: "Najnowsza aktywność",
+      activityTabsLabel: "Widoczność aktywności",
+      privateActivity: "Prywatne",
+      publicActivity: "Publiczne",
       lastPushedRepo: "Ostatnie repozytoria z wypchniętymi zmianami",
       pushedAt: "Wypchnięto",
       viewOnGithub: "Zobacz na GitHubie",

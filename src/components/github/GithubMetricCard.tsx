@@ -1,4 +1,3 @@
-import { motion, type Variants } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 
 interface GithubMetricCardProps {
@@ -7,7 +6,6 @@ interface GithubMetricCardProps {
   icon: LucideIcon;
   iconClassName: string;
   hoverClassName: string;
-  variants: Variants;
 }
 
 export function GithubMetricCard({
@@ -16,11 +14,9 @@ export function GithubMetricCard({
   icon: Icon,
   iconClassName,
   hoverClassName,
-  variants,
 }: GithubMetricCardProps) {
   return (
-    <motion.div
-      variants={variants}
+    <div
       className={`p-5 rounded-2xl border border-border/40 bg-muted/10 backdrop-blur-sm flex items-center gap-4 transition-colors ${hoverClassName}`}
     >
       <div className={`p-3 rounded-xl border ${iconClassName}`}>
@@ -31,6 +27,6 @@ export function GithubMetricCard({
         <span className="text-xs text-muted-foreground block">{label}</span>
         <span className="text-2xl font-bold font-mono text-foreground">{value}</span>
       </div>
-    </motion.div>
+    </div>
   );
 }

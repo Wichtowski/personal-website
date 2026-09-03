@@ -1,45 +1,76 @@
-import { ArrowRight, GitBranch, GitCommit } from "lucide-react";
-import { motion } from "framer-motion";
-import type { GitHubActivity } from "@lib/github";
-import { getGitHubActivityDisplayName } from "@lib/github-pulse";
+import { useMemo, useState } from "react";
+import { GitBranch } from "lucide-react";
+import {
+  type GitHubContributionsActivities,
+  type GitHubContributionsActivity,
+} from "@lib/github-contributions";
 import type { Language } from "@locales/dictionary";
-import { formatDate } from "@lib/date";
+import { GithubRepoActivityAccordion } from "./GithubRepoActivityAccordion";
 
 interface RecentGithubActivityProps {
-  activities: GitHubActivity[];
+  activities: GitHubContributionsActivities;
   title: string;
+  tabsLabel: string;
+  privateTabLabel: string;
+  publicTabLabel: string;
   emptyMessage: string;
   viewOnGithub: string;
   pushedAtLabel: string;
   language: Language;
 }
 
-const formatEventType = (type: string) => {
-  return type.replace("Event", "");
-};
+interface GithubRepoActivityGroup {
+  repoName: string;
+  repoUrl: string;
+  activities: GitHubContributionsActivity[];
+}
 
-const formatCommitSha = (commitSha: string) => {
-  if (!commitSha || commitSha.startsWith("#")) {
-    return commitSha;
+function groupActivitiesByRepo(
+  activities: GitHubContributionsActivity[],
+): GithubRepoActivityGroup[] {
+  const groups = new Map<string, GithubRepoActivityGroup>();
+
+  for (const activity of activities) {
+    const key = activity.repoName.toLowerCase();
+    const group = groups.get(key);
+
+    if (group) {
+      group.activities.push(activity);
+    } else {
+      groups.set(key, {
+        repoName: activity.repoName,
+        repoUrl: activity.repoUrl,
+        activities: [activity],
+      });
+    }
   }
 
-  return commitSha.length > 7 ? commitSha.slice(0, 7) : commitSha;
-};
+  return [...groups.values()].sort((a, b) => {
+    const latestA = Math.max(...a.activities.map((activity) => Date.parse(activity.pushedAt)));
+    const latestB = Math.max(...b.activities.map((activity) => Date.parse(activity.pushedAt)));
+    return latestB - latestA;
+  });
+}
 
 export function RecentGithubActivity({
   activities,
   title,
+  tabsLabel,
+  privateTabLabel,
+  publicTabLabel,
   emptyMessage,
   viewOnGithub,
   pushedAtLabel,
   language,
 }: RecentGithubActivityProps) {
+  const [activeTab, setActiveTab] = useState<keyof GitHubContributionsActivities>("private");
+  const activityGroups = useMemo(
+    () => groupActivitiesByRepo(activities[activeTab]),
+    [activeTab, activities],
+  );
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="p-6 md:p-8 rounded-2xl border border-border/40 bg-muted/10 backdrop-blur-sm relative overflow-hidden"
-    >
+    <div className="p-6 md:p-8 rounded-2xl border border-border/40 bg-muted/10 backdrop-blur-sm relative overflow-hidden">
       <div className="absolute top-0 right-0 p-4 opacity-5">
         <GitBranch size={120} />
       </div>
@@ -48,79 +79,64 @@ export function RecentGithubActivity({
         {title}
       </span>
 
-      {activities.length > 0 ? (
-        <div className="space-y-4">
-          {activities.map((activity) => (
-            <div
-              key={`${activity.repoName}-${activity.pushedAt}-${activity.type}`}
-              className="p-4 rounded-xl border border-border/40 bg-background/50"
+      <div
+        role="tablist"
+        aria-label={tabsLabel}
+        className="relative z-10 mb-5 grid grid-cols-2 gap-1 rounded-xl border border-border/40 bg-background/50 p-1"
+      >
+        {(
+          [
+            ["private", privateTabLabel],
+            ["public", publicTabLabel],
+          ] as const
+        ).map(([tab, label]) => {
+          const isActive = activeTab === tab;
+
+          return (
+            <button
+              key={tab}
+              id={`github-${tab}-tab`}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              aria-controls={`github-${tab}-panel`}
+              onClick={() => setActiveTab(tab)}
+              className={`rounded-lg px-4 py-2 text-sm font-mono font-semibold transition-colors ${
+                isActive
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
             >
-              <div className="flex items-start justify-between gap-4 mb-3">
-                <div className="min-w-0">
-                  <a
-                    href={activity.repoUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-base md:text-lg font-bold font-mono text-foreground truncate hover:text-primary hover:underline block"
-                  >
-                    {getGitHubActivityDisplayName(activity.repoName)}
-                  </a>
+              {label}
+            </button>
+          );
+        })}
+      </div>
 
-                  <span className="text-[10px] font-mono text-muted-foreground">
-                    {formatEventType(activity.type)}
-                  </span>
-                </div>
-
-                <a
-                  href={activity.repoUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-xs font-mono font-bold text-primary hover:underline group shrink-0"
-                >
-                  {viewOnGithub}
-                  <ArrowRight
-                    size={14}
-                    className="transition-transform group-hover:translate-x-1"
-                  />
-                </a>
-              </div>
-
-              <div className="font-mono text-sm text-foreground/90 flex items-start gap-3">
-                <div className="p-1 rounded bg-muted text-muted-foreground mt-0.5">
-                  <GitCommit size={14} />
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <p className="line-clamp-2 text-foreground/80 leading-relaxed font-mono">
-                    &ldquo;{activity.commitMessage}&rdquo;
-                  </p>
-
-                  <div className="flex items-center gap-2 flex-wrap mt-2">
-                    {activity.commitSha && (
-                      <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                        {formatCommitSha(activity.commitSha)}
-                      </span>
-                    )}
-
-                    <span className="text-[10px] text-muted-foreground font-mono">
-                      {pushedAtLabel}{" "}
-                      {formatDate(activity.pushedAt, language, {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-sm text-muted-foreground font-mono">{emptyMessage}</p>
-      )}
-    </motion.div>
+      <div
+        id={`github-${activeTab}-panel`}
+        role="tabpanel"
+        aria-labelledby={`github-${activeTab}-tab`}
+      >
+        {activityGroups.length > 0 ? (
+          <div className="space-y-4">
+            {activityGroups.map((group, index) => (
+              <GithubRepoActivityAccordion
+                key={group.repoName}
+                repoName={group.repoName}
+                repoUrl={group.repoUrl}
+                activities={group.activities}
+                defaultOpen={index < 3}
+                viewOnGithub={viewOnGithub}
+                pushedAtLabel={pushedAtLabel}
+                language={language}
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground font-mono">{emptyMessage}</p>
+        )}
+      </div>
+    </div>
   );
 }

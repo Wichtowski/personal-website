@@ -16,7 +16,7 @@ import {
 } from "vinext/server/image-optimization";
 import type { ImageConfig } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
-import { buildGitHubPulse } from "../src/lib/github-pulse";
+import { buildGitHubContributions } from "../src/lib/github-contributions";
 import {
   createFallbackLastFmNowPlaying,
   createLastFmNowPlayingResponse,
@@ -94,12 +94,12 @@ export default {
       );
     }
 
-    // GitHub Pulse API - handled here because vinext v0.1.8 does not route App Router route handlers
-    if (url.pathname === "/api/github/pulse" && request.method === "GET") {
+    // GitHub Contributions API - handled here because vinext v0.1.8 does not route App Router route handlers
+    if (url.pathname === "/api/github/contributions" && request.method === "GET") {
       const CACHE_SECONDS = 60 * 30;
       const STALE_SECONDS = 60 * 60 * 24;
       try {
-        const data = await buildGitHubPulse({ githubToken: env.GITHUB_TOKEN });
+        const data = await buildGitHubContributions({ githubToken: env.GITHUB_TOKEN });
         return Response.json(data, {
           headers: {
             "Cache-Control": `public, max-age=60, s-maxage=${CACHE_SECONDS}, stale-while-revalidate=${STALE_SECONDS}`,
@@ -109,7 +109,7 @@ export default {
         });
       } catch {
         return Response.json(
-          { error: "Could not load GitHub pulse", generatedAt: new Date().toISOString() },
+          { error: "Could not load GitHub Contributions", generatedAt: new Date().toISOString() },
           { status: 502 },
         );
       }

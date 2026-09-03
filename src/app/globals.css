@@ -42,6 +42,33 @@
   }
 }
 
+@keyframes github-skeleton-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.github-skeleton {
+  background-image: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--muted) 72%, transparent) 20%,
+    color-mix(in srgb, var(--muted-foreground) 18%, transparent) 50%,
+    color-mix(in srgb, var(--muted) 72%, transparent) 80%
+  );
+  background-size: 200% 100%;
+  animation: github-skeleton-shimmer 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .github-skeleton {
+    animation: none;
+  }
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
