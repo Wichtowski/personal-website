@@ -10,9 +10,16 @@ interface GithubRepoActivityAccordionProps {
   repoName: string;
   repoUrl: string;
   activities: GitHubContributionsActivity[];
+  forks?: Array<{
+    repoName: string;
+    repoUrl: string;
+    activities: GitHubContributionsActivity[];
+  }>;
+  activityOnly?: boolean;
   defaultOpen?: boolean;
   viewOnGithub: string;
   pushedAtLabel: string;
+  forkLabel: string;
   language: Language;
 }
 
@@ -42,9 +49,12 @@ export function GithubRepoActivityAccordion({
   repoName,
   repoUrl,
   activities,
+  forks = [],
+  activityOnly = false,
   defaultOpen = false,
   viewOnGithub,
   pushedAtLabel,
+  forkLabel,
   language,
 }: GithubRepoActivityAccordionProps) {
   const sortedActivities = [...activities]
@@ -57,6 +67,66 @@ export function GithubRepoActivityAccordion({
 
       return priorityDifference || Date.parse(b.pushedAt) - Date.parse(a.pushedAt);
     });
+
+  const activityCards = sortedActivities.map((activity, index) => (
+    <div
+      key={
+        activity.eventId ?? `${activity.repoName}-${activity.pushedAt}-${activity.type}-${index}`
+      }
+      className="rounded-lg border border-border/30 bg-muted/10 p-4"
+    >
+      <div className="mb-3 flex items-start justify-between gap-4">
+        <span className="text-[10px] font-mono text-primary font-semibold uppercase tracking-wider">
+          {formatEventType(activity.type)}
+        </span>
+
+        <a
+          href={repoUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex shrink-0 items-center gap-1 text-xs font-mono font-bold text-primary hover:underline group/link"
+        >
+          {viewOnGithub}
+          <ArrowRight size={14} className="transition-transform group-hover/link:translate-x-1" />
+        </a>
+      </div>
+
+      <div className="flex items-start gap-3 font-mono text-sm text-foreground/90">
+        <div className="mt-0.5 rounded bg-muted p-1 text-muted-foreground">
+          <GitCommit size={14} />
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <p className="text-foreground/80 leading-relaxed font-mono">
+            &ldquo;{activity.commitMessage}&rdquo;
+          </p>
+
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            {activity.commitSha && (
+              <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                {formatCommitSha(activity.commitSha)}
+              </span>
+            )}
+
+            <span className="text-[10px] text-muted-foreground font-mono">
+              {pushedAtLabel}{" "}
+              {formatDate(activity.pushedAt, language, {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  ));
+
+  if (activityOnly) {
+    return <>{activityCards}</>;
+  }
 
   return (
     <details
@@ -81,64 +151,39 @@ export function GithubRepoActivityAccordion({
       </summary>
 
       <div className="space-y-3 border-t border-border/40 p-4">
-        {sortedActivities.map((activity, index) => (
-          <div
-            key={
-              activity.eventId ??
-              `${activity.repoName}-${activity.pushedAt}-${activity.type}-${index}`
-            }
-            className="rounded-lg border border-border/30 bg-muted/10 p-4"
+        {activityCards}
+
+        {forks.map((fork) => (
+          <details
+            key={fork.repoName}
+            className="group/fork rounded-lg border border-border/30 bg-muted/10"
           >
-            <div className="mb-3 flex items-start justify-between gap-4">
-              <span className="text-[10px] font-mono text-primary font-semibold uppercase tracking-wider">
-                {formatEventType(activity.type)}
+            <summary className="flex cursor-pointer list-none items-center gap-3 p-4 marker:content-none">
+              <span className="min-w-0 flex-1 truncate font-mono text-sm font-bold text-foreground">
+                {forkLabel}: {fork.repoName}
               </span>
+              <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-mono text-muted-foreground">
+                {Math.min(fork.activities.length, 3)}
+              </span>
+              <ChevronDown
+                size={16}
+                className="shrink-0 text-muted-foreground transition-transform group-open/fork:rotate-180"
+              />
+            </summary>
 
-              <a
-                href={repoUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex shrink-0 items-center gap-1 text-xs font-mono font-bold text-primary hover:underline group/link"
-              >
-                {viewOnGithub}
-                <ArrowRight
-                  size={14}
-                  className="transition-transform group-hover/link:translate-x-1"
-                />
-              </a>
+            <div className="space-y-3 border-t border-border/30 p-3">
+              <GithubRepoActivityAccordion
+                repoName={fork.repoName}
+                repoUrl={fork.repoUrl}
+                activities={fork.activities}
+                activityOnly
+                viewOnGithub={viewOnGithub}
+                pushedAtLabel={pushedAtLabel}
+                forkLabel={forkLabel}
+                language={language}
+              />
             </div>
-
-            <div className="flex items-start gap-3 font-mono text-sm text-foreground/90">
-              <div className="mt-0.5 rounded bg-muted p-1 text-muted-foreground">
-                <GitCommit size={14} />
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <p className="text-foreground/80 leading-relaxed font-mono">
-                  &ldquo;{activity.commitMessage}&rdquo;
-                </p>
-
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  {activity.commitSha && (
-                    <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
-                      {formatCommitSha(activity.commitSha)}
-                    </span>
-                  )}
-
-                  <span className="text-[10px] text-muted-foreground font-mono">
-                    {pushedAtLabel}{" "}
-                    {formatDate(activity.pushedAt, language, {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+          </details>
         ))}
       </div>
     </details>

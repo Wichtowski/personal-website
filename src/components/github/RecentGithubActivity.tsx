@@ -16,6 +16,7 @@ interface RecentGithubActivityProps {
   emptyMessage: string;
   viewOnGithub: string;
   pushedAtLabel: string;
+  forkLabel: string;
   language: Language;
 }
 
@@ -23,6 +24,7 @@ interface GithubRepoActivityGroup {
   repoName: string;
   repoUrl: string;
   activities: GitHubContributionsActivity[];
+  forks: GithubRepoActivityGroup[];
 }
 
 function groupActivitiesByRepo(
@@ -41,13 +43,43 @@ function groupActivitiesByRepo(
         repoName: activity.repoName,
         repoUrl: activity.repoUrl,
         activities: [activity],
+        forks: [],
       });
     }
   }
 
-  return [...groups.values()].sort((a, b) => {
-    const latestA = Math.max(...a.activities.map((activity) => Date.parse(activity.pushedAt)));
-    const latestB = Math.max(...b.activities.map((activity) => Date.parse(activity.pushedAt)));
+  const topLevelGroups = new Map(groups);
+
+  for (const [key, group] of groups) {
+    const forkParentName = group.activities.find(
+      (activity) => activity.forkParentName,
+    )?.forkParentName;
+    if (!forkParentName) continue;
+
+    const parentKey = forkParentName.toLowerCase();
+    const parentGroup = groups.get(parentKey) ?? {
+      repoName: forkParentName,
+      repoUrl: `https://github.com/${forkParentName}`,
+      activities: [],
+      forks: [],
+    };
+
+    parentGroup.forks.push(group);
+    topLevelGroups.set(parentKey, parentGroup);
+    topLevelGroups.delete(key);
+  }
+
+  const latestActivity = (group: GithubRepoActivityGroup) =>
+    Math.max(
+      ...group.activities.map((activity) => Date.parse(activity.pushedAt)),
+      ...group.forks.flatMap((fork) =>
+        fork.activities.map((activity) => Date.parse(activity.pushedAt)),
+      ),
+    );
+
+  return [...topLevelGroups.values()].sort((a, b) => {
+    const latestA = latestActivity(a);
+    const latestB = latestActivity(b);
     return latestB - latestA;
   });
 }
@@ -61,6 +93,7 @@ export function RecentGithubActivity({
   emptyMessage,
   viewOnGithub,
   pushedAtLabel,
+  forkLabel,
   language,
 }: RecentGithubActivityProps) {
   const [activeTab, setActiveTab] = useState<keyof GitHubContributionsActivities>("private");
@@ -126,9 +159,11 @@ export function RecentGithubActivity({
                 repoName={group.repoName}
                 repoUrl={group.repoUrl}
                 activities={group.activities}
-                defaultOpen={index < 3}
+                forks={group.forks}
+                defaultOpen={index === 0}
                 viewOnGithub={viewOnGithub}
                 pushedAtLabel={pushedAtLabel}
+                forkLabel={forkLabel}
                 language={language}
               />
             ))}

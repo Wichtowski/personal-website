@@ -49,6 +49,7 @@ export interface TranslationDict {
     lastPushedRepo: string;
     pushedAt: string;
     viewOnGithub: string;
+    fork: string;
     statsTitle: string;
     stars: string;
     repos: string;
@@ -222,6 +223,7 @@ export const dictionaries: Record<Language, TranslationDict> = {
       lastPushedRepo: "Last Public Repo Pushed To",
       pushedAt: "Pushed",
       viewOnGithub: "View on GitHub",
+      fork: "Fork",
       statsTitle: "GitHub Contributions Metrics",
       stars: "Stars Earned",
       repos: "Public Repos",
@@ -398,6 +400,7 @@ export const dictionaries: Record<Language, TranslationDict> = {
       lastPushedRepo: "Ostatnie repozytoria z wypchniętymi zmianami",
       pushedAt: "Wypchnięto",
       viewOnGithub: "Zobacz na GitHubie",
+      fork: "Fork",
       statsTitle: "Statystyki GitHub",
       stars: "Zdobyte gwiazdki",
       repos: "Publiczne repozytoria",

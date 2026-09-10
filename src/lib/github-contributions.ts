@@ -14,6 +14,7 @@ export interface GitHubContributionsActivity {
   eventId?: string;
   repoName: string;
   repoUrl: string;
+  forkParentName?: string;
   commitMessage: string;
   commitSha: string;
   pushedAt: string;
@@ -29,6 +30,13 @@ interface GitHubRepo {
   name: string;
   pushed_at: string | null;
   stargazers_count?: number;
+}
+
+interface GitHubRepoActivityDetails {
+  fork?: boolean;
+  parent?: {
+    full_name?: string;
+  };
 }
 
 interface GitHubEvent {
@@ -88,9 +96,11 @@ interface GitHubCommitResponse {
 
 const MAIN_USERNAME = "Wichtowski";
 const PRIMARY_REPO_OWNER = MAIN_USERNAME.toLowerCase();
+const PRIVATE_ACTIVITY_REPO_OWNER = "restorio-labs";
 export const GITHUB_CONTRIBUTIONS_WINDOW_DAYS = 45;
 const GITHUB_CONTRIBUTIONS_WINDOW_MS = GITHUB_CONTRIBUTIONS_WINDOW_DAYS * 24 * 60 * 60 * 1000;
 const repoDetailsCache = new Map<string, Promise<GitHubRepoDetails | null>>();
+const repoActivityDetailsCache = new Map<string, Promise<GitHubRepoActivityDetails | null>>();
 
 function getContributionsCutoff() {
   return Date.now() - GITHUB_CONTRIBUTIONS_WINDOW_MS;
@@ -103,7 +113,33 @@ export function isWithinGitHubContributionsWindow(date: string) {
 
 export function isOutsideGitHubActivityScope(repoName: string) {
   const owner = repoName.split("/")[0]?.toLowerCase();
-  return Boolean(owner) && owner !== PRIMARY_REPO_OWNER;
+  return Boolean(owner) && owner !== PRIMARY_REPO_OWNER && owner !== PRIVATE_ACTIVITY_REPO_OWNER;
+}
+
+async function isPrivateGitHubActivity(repoName: string, token?: string) {
+  const owner = repoName.split("/")[0]?.toLowerCase();
+  if (owner === PRIVATE_ACTIVITY_REPO_OWNER) return true;
+  return owner === PRIMARY_REPO_OWNER && !(await isGitHubFork(repoName, token));
+}
+
+async function getGitHubRepoActivityDetails(repoName: string, token?: string) {
+  const cacheKey = repoName.toLowerCase();
+  const cached = repoActivityDetailsCache.get(cacheKey);
+
+  if (cached) {
+    return cached;
+  }
+
+  const request = githubFetch<GitHubRepoActivityDetails>(`/repos/${repoName}`, token).catch(
+    () => null,
+  );
+  repoActivityDetailsCache.set(cacheKey, request);
+
+  return request;
+}
+
+async function isGitHubFork(repoName: string, token?: string) {
+  return (await getGitHubRepoActivityDetails(repoName, token))?.fork === true;
 }
 
 export function getGitHubActivityDisplayName(repoName: string) {
@@ -213,7 +249,8 @@ async function fetchPublicCommentActivities(username: string, maxPages: number, 
       if (!isWithinGitHubContributionsWindow(item.updated_at)) continue;
 
       const repoName = item.repository_url.split("/repos/")[1];
-      if (!repoName || !isOutsideGitHubActivityScope(repoName)) continue;
+      if (!repoName) continue;
+      if (await isPrivateGitHubActivity(repoName, token)) continue;
 
       const isPullRequest = Boolean(item.pull_request);
       activities.push({
@@ -291,6 +328,22 @@ async function hydratePushCommitMessages(
   });
 }
 
+async function hydrateForkParents(
+  activities: GitHubContributionsActivity[],
+  token?: string,
+): Promise<GitHubContributionsActivity[]> {
+  return Promise.all(
+    activities.map(async (activity) => {
+      const owner = activity.repoName.split("/")[0]?.toLowerCase();
+      if (owner !== PRIMARY_REPO_OWNER) return activity;
+
+      const details = await getGitHubRepoActivityDetails(activity.repoName, token);
+      const forkParentName = details?.fork ? details.parent?.full_name : undefined;
+      return forkParentName ? { ...activity, forkParentName } : activity;
+    }),
+  );
+}
+
 async function fetchRecentRepoActivities(
   username: string,
   maxPages = 3,
@@ -320,11 +373,11 @@ async function fetchRecentRepoActivities(
     for (const event of events) {
       if (!isWithinGitHubContributionsWindow(event.created_at)) continue;
 
-      const isPublicContribution = isOutsideGitHubActivityScope(event.repo.name);
-      const target = isPublicContribution ? publicEvents : privateEvents;
-      const isSupported = isPublicContribution
-        ? publicEventTypes.has(event.type)
-        : event.type === "PushEvent";
+      const isPrivateContribution = await isPrivateGitHubActivity(event.repo.name, token);
+      const target = isPrivateContribution ? privateEvents : publicEvents;
+      const isSupported = isPrivateContribution
+        ? event.type === "PushEvent"
+        : publicEventTypes.has(event.type);
 
       if (!isSupported) continue;
 
@@ -361,8 +414,12 @@ async function fetchRecentRepoActivities(
   );
 
   const [hydratedPrivateActivity, hydratedPublicActivity] = await Promise.all([
-    hydratePushCommitMessages(recentPrivateActivity, token),
-    hydratePushCommitMessages(recentPublicActivity, token),
+    hydratePushCommitMessages(recentPrivateActivity, token).then((activities) =>
+      hydrateForkParents(activities, token),
+    ),
+    hydratePushCommitMessages(recentPublicActivity, token).then((activities) =>
+      hydrateForkParents(activities, token),
+    ),
   ]);
 
   return {
@@ -371,7 +428,7 @@ async function fetchRecentRepoActivities(
   };
 }
 
-export const GITHUB_CONTRIBUTIONS_CACHE_KEY = "github-contributions-cache-v3";
+export const GITHUB_CONTRIBUTIONS_CACHE_KEY = "github-contributions-cache-v5";
 export const GITHUB_CONTRIBUTIONS_LEGACY_CACHE_KEYS = ["github-cache"];
 export const GITHUB_CONTRIBUTIONS_CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6h
 

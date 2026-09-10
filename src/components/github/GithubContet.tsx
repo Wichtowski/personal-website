@@ -290,6 +290,7 @@ export default function GithubContent({ initialData }: GithubContentProps) {
                 emptyMessage={t.github.noRecentActivity}
                 viewOnGithub={t.github.viewOnGithub}
                 pushedAtLabel={t.github.pushedAt}
+                forkLabel={t.github.fork}
                 language={language}
               />
 

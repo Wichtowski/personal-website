@@ -1,16 +1,41 @@
 "use client";
 
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Hero } from "./hero/Hero";
-import { SpotifyNowPlaying } from "./hero/SpotifyNowPlaying";
-import { TechStackShowcase } from "./TechStackShowcase";
 import { Footer } from "@components/layout/Footer";
 import type { LastFmNowPlaying } from "@lib/lastfm";
+
+const DeferredLandingContent = lazy(() => import("./DeferredLandingContent"));
 
 interface LandingPageProps {
   nowPlaying?: LastFmNowPlaying;
 }
 
 export function LandingPage({ nowPlaying }: LandingPageProps) {
+  const deferredContentRef = useRef<HTMLDivElement>(null);
+  const [shouldLoadDeferredContent, setShouldLoadDeferredContent] = useState(false);
+
+  useEffect(() => {
+    const deferredContent = deferredContentRef.current;
+    if (!deferredContent) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldLoadDeferredContent(true);
+          observer.disconnect();
+        }
+      },
+      {
+        root: document.getElementById("main-content"),
+        rootMargin: "400px 0px",
+      },
+    );
+
+    observer.observe(deferredContent);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section
       id="home"
@@ -24,9 +49,12 @@ export function LandingPage({ nowPlaying }: LandingPageProps) {
         <Hero />
 
         {/* Social links and a calmer stack preview */}
-        <div className="w-full flex flex-col gap-12 pt-4">
-          <TechStackShowcase />
-          <SpotifyNowPlaying nowPlaying={nowPlaying} />
+        <div ref={deferredContentRef} className="w-full min-h-[48rem] pt-4">
+          {shouldLoadDeferredContent ? (
+            <Suspense fallback={<div className="min-h-[48rem]" aria-hidden="true" />}>
+              <DeferredLandingContent nowPlaying={nowPlaying} />
+            </Suspense>
+          ) : null}
         </div>
       </div>
       <Footer />
