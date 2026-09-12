@@ -6,7 +6,7 @@ interface HeroTitleProps {
 
 export function HeroTitle({ role }: HeroTitleProps) {
   return (
-    <div className="space-y-2">
+    <div className="hero-title-enter space-y-2">
       <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground font-mono">
         Oskar <span className="text-primary">Wichtowski</span>
       </h1>

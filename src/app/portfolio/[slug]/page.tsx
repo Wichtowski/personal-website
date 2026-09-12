@@ -85,7 +85,7 @@ export default async function ProjectPage({ params, searchParams }: PageProps) {
   const backLabel = from === "explore" && tags ? "Back to Explore" : t.portfolio.backToProjects;
 
   return (
-    <main className="min-h-full bg-background flex flex-col justify-between w-full pt-24 pb-8">
+    <main className="min-h-full bg-background/60 flex flex-col justify-between w-full pt-24 pb-8">
       <div className="max-w-6xl w-full mx-auto px-6 lg:grid lg:grid-cols-[1fr_250px] lg:gap-12 lg:items-start flex-1 mb-16">
         {/* Main Content */}
         <div className="max-w-4xl w-full">

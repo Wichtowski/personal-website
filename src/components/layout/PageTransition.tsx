@@ -80,7 +80,7 @@ export function PageTransition({
             ? { type: "tween", duration: PAGE_FADE_DURATION_MS / 1000, ease: "easeOut" }
             : { type: "tween", duration: PAGE_FADE_DURATION_MS / 1000, ease: [0.25, 0.1, 0.25, 1] }
         }
-        className="absolute top-20 md:top-0 inset-x-0 bottom-0 overflow-y-auto no-scrollbar flex flex-col"
+        className="absolute top-20 md:top-0 inset-x-0 bottom-0 z-10 overflow-y-auto no-scrollbar flex flex-col"
       >
         <div className="flex-1 w-full flex flex-col">{children}</div>
         {withFooter && <Footer />}

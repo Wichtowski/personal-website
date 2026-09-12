@@ -75,21 +75,12 @@ export function TechStackShowcase() {
     <section className="w-full max-w-6xl mx-auto px-4 sm:px-6">
       <div
         className={cn(
-          "relative overflow-hidden rounded-[2rem] border px-5 py-6 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-xl sm:px-7 sm:py-8",
+          "relative overflow-hidden rounded-[2rem] border px-5 py-6 backdrop-blur-xl sm:px-7 sm:py-8",
           isDarkTheme
-            ? "border-white/10 bg-[#07070a] shadow-[0_24px_80px_rgba(0,0,0,0.35)]"
-            : "border-slate-200/80 bg-white/95",
+            ? "border-white/8 bg-background/88 shadow-[0_20px_60px_rgba(0,0,0,0.22)]"
+            : "border-border/80 bg-background/88 shadow-[0_20px_60px_rgba(15,23,42,0.06)]",
         )}
       >
-        <div
-          className={cn(
-            "pointer-events-none absolute inset-0",
-            isDarkTheme
-              ? "bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.13),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.09),transparent_30%)]"
-              : "bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.08),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.05),transparent_30%)]",
-          )}
-        />
-
         <div className="relative">
           <div className="flex flex-col gap-3 text-left sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-2xl">
@@ -259,7 +250,7 @@ export function TechStackShowcase() {
                           aria-pressed={isSelected}
                           onClick={() => toggleSelectedItem(item.label)}
                           className={cn(
-                            "inline-flex max-w-full items-center gap-2 rounded-xl border px-3 py-2 text-[13px] font-mono transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+                            "group inline-flex max-w-full items-center gap-2 rounded-xl border px-3 py-2 text-[13px] font-mono transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
                             isDarkTheme
                               ? "border-white/10 bg-black/20 text-white/75 hover:border-white/20 hover:bg-white/8 hover:text-white"
                               : "border-slate-200 bg-white text-slate-700 hover:border-primary/30 hover:text-slate-950",
@@ -275,7 +266,10 @@ export function TechStackShowcase() {
                             ) : (
                               <item.icon
                                 size={item.iconSize ?? 18}
-                                className={cn("shrink-0", item.iconClassName)}
+                                className={cn(
+                                  "shrink-0 opacity-70 saturate-[0.65] transition-[filter,opacity] group-hover:opacity-90 group-hover:saturate-100",
+                                  item.iconClassName,
+                                )}
                                 aria-hidden={true}
                               />
                             )}

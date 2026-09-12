@@ -70,7 +70,7 @@ export function ExploreSection({ projects, articles, activeTags }: ExploreSectio
   const exploreTagsValue = normalizedActiveTags.join(",");
 
   return (
-    <section className="min-h-screen bg-background pt-24 pb-16 md:pt-28">
+    <section className="min-h-screen bg-background/60 pt-24 pb-16 md:pt-28">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-6">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="max-w-3xl">

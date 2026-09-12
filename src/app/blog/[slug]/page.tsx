@@ -96,7 +96,7 @@ export default async function ArticlePage({ params, searchParams }: PageProps) {
   const backLabel = from === "explore" && tags ? "Back to Explore" : t.blog.backToArticles;
 
   return (
-    <main className="min-h-full bg-background flex flex-col justify-between w-full pt-24 pb-8">
+    <main className="min-h-full bg-background/60 flex flex-col justify-between w-full pt-24 pb-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
