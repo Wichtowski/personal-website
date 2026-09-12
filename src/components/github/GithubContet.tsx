@@ -13,6 +13,7 @@ import {
   GITHUB_CONTRIBUTIONS_LEGACY_CACHE_KEYS,
   isOutsideGitHubActivityScope,
   isWithinGitHubContributionsWindow,
+  removeDuplicateForkActivities,
 } from "@lib/github-contributions";
 import { Activity } from "lucide-react";
 import {
@@ -63,7 +64,7 @@ function isFreshGithubContributionsCache(cache: GithubContributionsCacheEntry) {
 
 function getActivitySections(data: GithubContributionsData): GitHubContributionsActivities {
   if (data.activities) {
-    return {
+    const activities = {
       private: Array.isArray(data.activities.private)
         ? data.activities.private.filter((activity) =>
             isWithinGitHubContributionsWindow(activity.pushedAt),
@@ -75,11 +76,13 @@ function getActivitySections(data: GithubContributionsData): GitHubContributions
           )
         : [],
     };
+
+    return removeDuplicateForkActivities(activities.private, activities.public);
   }
 
   const legacyActivity = Array.isArray(data.latestActivity) ? data.latestActivity : [];
 
-  return {
+  const activities = {
     private: legacyActivity.filter(
       (activity) =>
         isWithinGitHubContributionsWindow(activity.pushedAt) &&
@@ -92,6 +95,8 @@ function getActivitySections(data: GithubContributionsData): GitHubContributions
         isOutsideGitHubActivityScope(activity.repoName),
     ),
   };
+
+  return removeDuplicateForkActivities(activities.private, activities.public);
 }
 
 function mergeContributionsData(

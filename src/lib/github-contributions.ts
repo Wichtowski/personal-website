@@ -142,6 +142,26 @@ async function isGitHubFork(repoName: string, token?: string) {
   return (await getGitHubRepoActivityDetails(repoName, token))?.fork === true;
 }
 
+function getRepoSlug(repoName: string) {
+  return repoName.split("/").at(-1)?.toLowerCase() ?? repoName.toLowerCase();
+}
+
+export function removeDuplicateForkActivities(
+  privateActivities: GitHubContributionsActivity[],
+  publicActivities: GitHubContributionsActivity[],
+) {
+  const publicRepoSlugs = new Set(
+    publicActivities.map((activity) => getRepoSlug(activity.repoName)),
+  );
+
+  return {
+    private: privateActivities.filter(
+      (activity) => !publicRepoSlugs.has(getRepoSlug(activity.repoName)),
+    ),
+    public: publicActivities,
+  };
+}
+
 export function getGitHubActivityDisplayName(repoName: string) {
   const [owner, repo] = repoName.split("/");
   if (owner?.toLowerCase() === PRIMARY_REPO_OWNER && repo) {
@@ -412,12 +432,16 @@ async function fetchRecentRepoActivities(
     ],
     6,
   );
+  const deduplicatedActivities = removeDuplicateForkActivities(
+    recentPrivateActivity,
+    recentPublicActivity,
+  );
 
   const [hydratedPrivateActivity, hydratedPublicActivity] = await Promise.all([
-    hydratePushCommitMessages(recentPrivateActivity, token).then((activities) =>
+    hydratePushCommitMessages(deduplicatedActivities.private, token).then((activities) =>
       hydrateForkParents(activities, token),
     ),
-    hydratePushCommitMessages(recentPublicActivity, token).then((activities) =>
+    hydratePushCommitMessages(deduplicatedActivities.public, token).then((activities) =>
       hydrateForkParents(activities, token),
     ),
   ]);
