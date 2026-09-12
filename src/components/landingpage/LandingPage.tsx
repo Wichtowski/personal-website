@@ -18,6 +18,7 @@ export function LandingPage({ nowPlaying }: LandingPageProps) {
   useEffect(() => {
     const deferredContent = deferredContentRef.current;
     if (!deferredContent) return;
+    const scrollContainer = deferredContent.closest("#main-content");
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -27,7 +28,7 @@ export function LandingPage({ nowPlaying }: LandingPageProps) {
         }
       },
       {
-        root: document.getElementById("main-content"),
+        root: scrollContainer,
         rootMargin: "400px 0px",
       },
     );
