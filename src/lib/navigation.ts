@@ -1,4 +1,4 @@
-export const ROUTES = ["/", "/contributions", "/portfolio", "/articles", "/contact"];
+export const ROUTES = ["/", "/contributions", "/portfolio", "/articles", "/contact", "/terminal"];
 export const PAGE_FADE_OUT_EVENT = "personal-website:page-fade-out";
 export const PAGE_FADE_DURATION_MS = 400;
 
@@ -26,6 +26,10 @@ export function getRouteIndex(pathname: string): number {
 
   if (pathname.startsWith("/contact")) {
     return ROUTES.indexOf("/contact");
+  }
+
+  if (pathname.startsWith("/terminal")) {
+    return ROUTES.indexOf("/terminal");
   }
 
   return -1;

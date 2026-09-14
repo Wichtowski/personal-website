@@ -13,7 +13,78 @@ import {
   TECH_STACK_ITEMS,
   type TechStackDomainKey,
   type TechStackItem,
+  type TechStackItemKey,
+  type TechStackLevel,
+  type TechStackUsage,
 } from "@lib/tech-stack";
+
+const USAGE_PRIORITY: Record<TechStackUsage, number> = {
+  daily: 0,
+  regular: 1,
+  occasional: 2,
+};
+
+const LEVEL_PRIORITY: Record<TechStackLevel, number> = {
+  expert: 0,
+  advanced: 1,
+  comfortable: 2,
+  learning: 3,
+};
+
+const LEVEL_LEGEND: readonly TechStackLevel[] = ["learning", "comfortable", "advanced", "expert"];
+
+const LEVEL_LEGEND_SWATCH_STYLES: Record<TechStackLevel, string> = {
+  learning: "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.55)]",
+  comfortable: "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.55)]",
+  advanced: "bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.55)]",
+  expert: "bg-violet-400 shadow-[0_0_8px_rgba(167,139,250,0.55)]",
+};
+
+const LEVEL_USAGE_STYLES: Record<TechStackLevel, Record<TechStackUsage | "unspecified", string>> = {
+  learning: {
+    daily: "border-emerald-400/55 bg-emerald-400/15 shadow-[0_0_18px_rgba(52,211,153,0.14)]",
+    regular: "border-emerald-400/35 bg-emerald-400/[0.08]",
+    occasional: "border-emerald-400/20 bg-emerald-400/[0.035]",
+    unspecified: "border-emerald-400/15 bg-emerald-400/[0.025]",
+  },
+  comfortable: {
+    daily: "border-amber-400/55 bg-amber-400/15 shadow-[0_0_18px_rgba(251,191,36,0.14)]",
+    regular: "border-amber-400/35 bg-amber-400/[0.08]",
+    occasional: "border-amber-400/20 bg-amber-400/[0.035]",
+    unspecified: "border-amber-400/15 bg-amber-400/[0.025]",
+  },
+  advanced: {
+    daily: "border-red-400/55 bg-red-400/15 shadow-[0_0_18px_rgba(248,113,113,0.14)]",
+    regular: "border-red-400/35 bg-red-400/[0.08]",
+    occasional: "border-red-400/20 bg-red-400/[0.035]",
+    unspecified: "border-red-400/15 bg-red-400/[0.025]",
+  },
+  expert: {
+    daily: "border-violet-400/55 bg-violet-400/15 shadow-[0_0_18px_rgba(167,139,250,0.14)]",
+    regular: "border-violet-400/35 bg-violet-400/[0.08]",
+    occasional: "border-violet-400/20 bg-violet-400/[0.035]",
+    unspecified: "border-violet-400/15 bg-violet-400/[0.025]",
+  },
+};
+
+const USAGE_FALLBACK_STYLES: Record<TechStackUsage, string> = {
+  daily: "border-primary/55 bg-primary/15 shadow-[0_0_18px_rgba(139,92,246,0.14)]",
+  regular: "border-primary/35 bg-primary/[0.08]",
+  occasional: "border-primary/20 bg-primary/[0.035]",
+};
+
+const USAGE_ICON_STYLES: Record<TechStackUsage, string> = {
+  daily: "opacity-100 saturate-100",
+  regular: "opacity-85 saturate-[0.85]",
+  occasional: "opacity-70 saturate-[0.7]",
+};
+
+function getItemPriority(label: TechStackItemKey) {
+  const item: TechStackItem = TECH_STACK_ITEMS[label];
+  const usagePriority = item.usage ? USAGE_PRIORITY[item.usage] : 3;
+  const levelPriority = item.level ? LEVEL_PRIORITY[item.level] : 4;
+  return levelPriority * 10 + usagePriority;
+}
 
 export function TechStackShowcase() {
   const { t } = useLanguage();
@@ -100,14 +171,23 @@ export function TechStackShowcase() {
               >
                 {techStack.heading}
               </h2>
-              <p
-                className={cn(
-                  "mt-3 max-w-xl text-sm leading-relaxed",
-                  isDarkTheme ? "text-white/60" : "text-slate-600",
-                )}
-              >
-                {techStack.selectionHint}
-              </p>
+              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
+                {LEVEL_LEGEND.map((level) => (
+                  <span
+                    key={level}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em]",
+                      isDarkTheme ? "text-white/55" : "text-slate-600",
+                    )}
+                  >
+                    <span
+                      className={cn("h-2 w-2 rounded-sm", LEVEL_LEGEND_SWATCH_STYLES[level])}
+                      aria-hidden={true}
+                    />
+                    {techStack.levelLabels[level]}
+                  </span>
+                ))}
+              </div>
             </div>
             <p
               className={cn(
@@ -238,46 +318,58 @@ export function TechStackShowcase() {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    {section.items.map((label) => {
-                      const item: TechStackItem = TECH_STACK_ITEMS[label];
+                    {[...section.items]
+                      .sort((first, second) => getItemPriority(first) - getItemPriority(second))
+                      .map((label) => {
+                        const item: TechStackItem = TECH_STACK_ITEMS[label];
 
-                      const isSelected = selectedItemSet.has(item.label);
+                        const isSelected = selectedItemSet.has(item.label);
 
-                      return (
-                        <button
-                          key={item.label}
-                          type="button"
-                          aria-pressed={isSelected}
-                          onClick={() => toggleSelectedItem(item.label)}
-                          className={cn(
-                            "group inline-flex max-w-full items-center gap-2 rounded-xl border px-3 py-2 text-[13px] font-mono transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
-                            isDarkTheme
-                              ? "border-white/10 bg-black/20 text-white/75 hover:border-white/20 hover:bg-white/8 hover:text-white"
-                              : "border-slate-200 bg-white text-slate-700 hover:border-primary/30 hover:text-slate-950",
-                            isSelected &&
-                              (isDarkTheme
-                                ? "border-primary/55 bg-primary/20 text-white"
-                                : "border-primary/50 bg-primary/10 text-slate-950"),
-                          )}
-                        >
-                          <span className="flex h-5 w-5 items-center justify-center">
-                            {isSelected ? (
-                              <Check size={15} className="text-primary" aria-hidden={true} />
-                            ) : (
-                              <item.icon
-                                size={item.iconSize ?? 18}
-                                className={cn(
-                                  "shrink-0 opacity-70 saturate-[0.65] transition-[filter,opacity] group-hover:opacity-90 group-hover:saturate-100",
-                                  item.iconClassName,
-                                )}
-                                aria-hidden={true}
-                              />
+                        return (
+                          <button
+                            key={item.label}
+                            type="button"
+                            aria-pressed={isSelected}
+                            onClick={() => toggleSelectedItem(item.label)}
+                            className={cn(
+                              "group inline-flex max-w-full items-center gap-2 rounded-xl border px-3 py-2 text-[13px] font-mono transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+                              isDarkTheme
+                                ? "border-white/10 bg-black/20 text-white/75 hover:border-white/20 hover:bg-white/8 hover:text-white"
+                                : "border-slate-200 bg-white text-slate-700 hover:border-primary/30 hover:text-slate-950",
+                              item.level !== undefined &&
+                                !isSelected &&
+                                LEVEL_USAGE_STYLES[item.level][item.usage ?? "unspecified"],
+                              item.level === undefined &&
+                                item.usage !== undefined &&
+                                !isSelected &&
+                                USAGE_FALLBACK_STYLES[item.usage],
+                              isSelected &&
+                                (isDarkTheme
+                                  ? "border-primary/55 bg-primary/20 text-white"
+                                  : "border-primary/50 bg-primary/10 text-slate-950"),
                             )}
-                          </span>
-                          <span>{item.label}</span>
-                        </button>
-                      );
-                    })}
+                          >
+                            <span className="flex h-5 w-5 items-center justify-center">
+                              {isSelected ? (
+                                <Check size={15} className="text-primary" aria-hidden={true} />
+                              ) : (
+                                <item.icon
+                                  size={item.iconSize ?? 18}
+                                  className={cn(
+                                    "shrink-0 transition-[filter,opacity] group-hover:opacity-100 group-hover:saturate-100",
+                                    item.usage
+                                      ? USAGE_ICON_STYLES[item.usage]
+                                      : "opacity-70 saturate-[0.65]",
+                                    item.iconClassName,
+                                  )}
+                                  aria-hidden={true}
+                                />
+                              )}
+                            </span>
+                            <span>{item.label}</span>
+                          </button>
+                        );
+                      })}
                   </div>
                 </article>
               );

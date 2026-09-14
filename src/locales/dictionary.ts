@@ -26,7 +26,12 @@ export interface TranslationDict {
   techStack: {
     eyebrow: string;
     heading: string;
-    selectionHint: string;
+    levelLabels: {
+      learning: string;
+      comfortable: string;
+      advanced: string;
+      expert: string;
+    };
     toolCount: string;
     tabListLabel: string;
     exploreLabel: string;
@@ -162,7 +167,12 @@ export const dictionaries: Record<Language, TranslationDict> = {
     techStack: {
       eyebrow: "tech stack",
       heading: "Tools I actually use",
-      selectionHint: "Shiny items are the ones I use on daily basis",
+      levelLabels: {
+        learning: "Learning",
+        comfortable: "Comfortable",
+        advanced: "Advanced",
+        expert: "Expert",
+      },
       toolCount: "tools",
       tabListLabel: "Technology areas",
       exploreLabel: "Explore",
@@ -339,7 +349,12 @@ export const dictionaries: Record<Language, TranslationDict> = {
     techStack: {
       eyebrow: "Wybrany stack",
       heading: "Narzędzia, których używam",
-      selectionHint: "Błyszczące pozycje to te, których używam na co dzień.",
+      levelLabels: {
+        learning: "Uczę się",
+        comfortable: "Swobodnie",
+        advanced: "Zaawansowany",
+        expert: "Ekspert",
+      },
       toolCount: "narzędzi",
       tabListLabel: "Obszary technologiczne",
       exploreLabel: "Odkrywaj",

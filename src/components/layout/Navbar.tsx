@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@context/LanguageContext";
 import { useRouter, usePathname } from "next/navigation";
@@ -8,6 +8,7 @@ import { Sun, Moon, Menu, X, Terminal, Languages } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useThemeMode } from "@hooks/useThemeMode";
 import { cn } from "@lib/cn";
+import { TerminalLaunchOverlay } from "./TerminalLaunchOverlay";
 import {
   getRouteDirection,
   PAGE_FADE_DURATION_MS,
@@ -23,6 +24,16 @@ export function Navbar() {
   const router = useRouter();
   const pathname = usePathname() ?? "/";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [terminalLaunching, setTerminalLaunching] = useState(false);
+  const terminalLaunchTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (terminalLaunchTimerRef.current !== null) {
+        window.clearTimeout(terminalLaunchTimerRef.current);
+      }
+    };
+  }, []);
 
   let activeSection = "home";
   if (pathname.startsWith("/contributions") || pathname.startsWith("/github")) {
@@ -100,6 +111,18 @@ export function Navbar() {
     router.push(target);
   };
 
+  const handleTerminalLaunch = () => {
+    if (pathname === "/terminal" || terminalLaunching) return;
+
+    setMobileMenuOpen(false);
+    setTerminalLaunching(true);
+    setNavTransitionKind("fade");
+    terminalLaunchTimerRef.current = window.setTimeout(() => {
+      setTerminalLaunching(false);
+      router.push("/terminal");
+    }, 900);
+  };
+
   return (
     <header
       className={cn(
@@ -117,30 +140,36 @@ export function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
         {/* Logo / Brand */}
-        <button
-          onClick={() => handleScrollTo("home")}
-          aria-label="Go to home page"
-          className="flex items-center gap-2 group focus:outline-none"
-        >
-          <div
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleTerminalLaunch}
+            aria-label="Open interactive terminal"
+            aria-current={pathname === "/terminal" ? "page" : undefined}
             className={cn(
-              "p-2 rounded-lg transition-all",
-              isDarkTheme
-                ? "bg-primary/10 border border-primary/20 text-primary group-hover:bg-primary/25 group-hover:border-primary/40"
-                : "bg-slate-100 border border-slate-200 text-slate-700 group-hover:bg-slate-200 group-hover:border-slate-300",
+              "group rounded-lg border p-2 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
+              pathname === "/terminal"
+                ? "border-primary/60 bg-primary/20 text-primary shadow-[0_0_18px_rgba(139,92,246,0.25)]"
+                : isDarkTheme
+                  ? "border-primary/20 bg-primary/10 text-primary hover:border-primary/50 hover:bg-primary/25"
+                  : "border-slate-200 bg-slate-100 text-slate-700 hover:border-primary/40 hover:bg-primary/10 hover:text-primary",
             )}
+            title="Open terminal"
           >
-            <Terminal size={18} />
-          </div>
-          <span
+            <Terminal size={18} className="transition-transform group-hover:scale-110" />
+          </button>
+          <button
+            type="button"
+            onClick={() => handleScrollTo("home")}
+            aria-label="Go to home page"
             className={cn(
-              "font-mono text-sm tracking-widest font-bold",
+              "font-mono text-sm tracking-widest font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
               isDarkTheme ? "text-white" : "text-slate-900",
             )}
           >
             OSKAR.<span className="text-primary">WICHTOWSKI</span>
-          </span>
-        </button>
+          </button>
+        </div>
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-6">
@@ -308,6 +337,7 @@ export function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
+      <TerminalLaunchOverlay open={terminalLaunching} />
     </header>
   );
 }
