@@ -22,6 +22,8 @@ import {
   createLastFmNowPlayingResponse,
   getLastFmNowPlaying,
 } from "../src/lib/lastfm";
+import { getArticles } from "../src/lib/mdx";
+import { createRssResponse } from "../src/lib/rss";
 
 const imageConfig: ImageConfig = {
   deviceSizes: JSON.parse(
@@ -68,6 +70,11 @@ export default {
     if (url.hostname === "www.oskarwichtowski.com") {
       url.hostname = "oskarwichtowski.com";
       return Response.redirect(url.toString(), 301);
+    }
+
+    // RSS route handler fallback until vinext supports App Router route handlers
+    if (url.pathname === "/rss.xml" && request.method === "GET") {
+      return createRssResponse(getArticles().slice(0, 20));
     }
 
     // Image optimization via Cloudflare Images binding
