@@ -3,11 +3,12 @@
 import React, { useState } from "react";
 import { useLanguage } from "@context/LanguageContext";
 import { ProjectMetadata } from "@lib/mdx";
-import { Folder, ArrowUpRight, Cpu, Code2, ShieldAlert } from "lucide-react";
+import { Folder, ArrowUpRight, Cpu, Code2, ShieldAlert, Star } from "lucide-react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import Link from "next/link";
 import { getStatusConfig } from "@lib/status";
 import { Footer } from "@components/layout/Footer";
+import { cn } from "@lib/cn";
 
 interface PortfolioSectionProps {
   projects: ProjectMetadata[];
@@ -122,10 +123,15 @@ export function PortfolioSection({ projects }: PortfolioSectionProps) {
                   initial="hidden"
                   animate="show"
                   exit="exit"
+                  className={project.featured ? "md:col-span-2 lg:col-span-3" : undefined}
                 >
                   <Link
                     href={`/portfolio/${project.slug}`}
-                    className="group p-6 rounded-2xl border border-border/40 bg-muted/10 hover:bg-muted/15 transition-all duration-300 flex flex-col justify-between h-[280px] relative overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                    className={cn(
+                      "group p-6 rounded-2xl border border-border/40 bg-muted/10 hover:bg-muted/15 transition-all duration-300 flex flex-col justify-between h-[280px] relative overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+                      project.featured &&
+                        "h-auto min-h-[320px] gap-8 p-8 md:p-10 border-primary/40 bg-primary/5 hover:bg-primary/10 shadow-lg shadow-primary/5",
+                    )}
                     aria-label={project.title}
                   >
                     {/* Background soft gradient */}
@@ -135,6 +141,12 @@ export function PortfolioSection({ projects }: PortfolioSectionProps) {
                       {/* Card Header: Category & Icons */}
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex gap-2 items-center flex-wrap">
+                          {project.featured && (
+                            <span className="text-[10px] font-mono font-bold uppercase tracking-widest px-2 py-0.5 rounded-md bg-primary text-primary-foreground flex items-center gap-1.5">
+                              <Star size={12} aria-hidden="true" />
+                              {t.portfolio.featured}
+                            </span>
+                          )}
                           <span className="text-[10px] font-mono font-bold uppercase tracking-widest px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/15">
                             {project.category}
                           </span>
@@ -159,10 +171,20 @@ export function PortfolioSection({ projects }: PortfolioSectionProps) {
                       </div>
 
                       {/* Title & Description */}
-                      <h3 className="text-lg font-bold font-mono text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
+                      <h3
+                        className={cn(
+                          "text-lg font-bold font-mono text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1",
+                          project.featured && "text-3xl md:text-5xl mb-4",
+                        )}
+                      >
                         {project.title}
                       </h3>
-                      <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed">
+                      <p
+                        className={cn(
+                          "text-xs text-muted-foreground line-clamp-3 leading-relaxed",
+                          project.featured && "text-sm md:text-base max-w-3xl line-clamp-none",
+                        )}
+                      >
                         {project.description}
                       </p>
                     </div>
@@ -170,7 +192,7 @@ export function PortfolioSection({ projects }: PortfolioSectionProps) {
                     <div>
                       {/* Tags */}
                       <div className="flex flex-wrap gap-1.5 mb-4">
-                        {project.tags.slice(0, 3).map((tag) => (
+                        {project.tags.slice(0, project.featured ? 5 : 3).map((tag) => (
                           <span
                             key={tag}
                             className="text-[9px] font-mono px-2 py-0.5 rounded bg-background border border-border/40 text-muted-foreground"

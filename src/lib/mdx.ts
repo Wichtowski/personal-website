@@ -13,6 +13,7 @@ export interface ProjectMetadata {
   slug: string;
   language: "en" | "pl";
   status?: string;
+  featured?: boolean;
 }
 
 export interface ArticleMetadata {
@@ -35,7 +36,11 @@ interface MdxModule {
 // remark-mdx-frontmatter exports YAML frontmatter as a named `frontmatter` export.
 // Works in Cloudflare Workers — no fs, no HTTP, all bundled at build time.
 const blogModules = import.meta.glob<MdxModule>("../content/blog/*.mdx", { eager: true });
-const projectModules = import.meta.glob<MdxModule>("../content/projects/*.mdx", { eager: true });
+const projectModules = Object.fromEntries(
+  Object.entries(import.meta.glob<MdxModule>("../content/projects/*.mdx", { eager: true })).filter(
+    ([, module]) => module.frontmatter.hidden !== true,
+  ),
+);
 
 const pathToSlug = (filePath: string): string => {
   return (
@@ -75,6 +80,7 @@ const toProjectMetadata = (fm: Record<string, unknown>, slug: string): ProjectMe
     slug,
     language: fm.language === "pl" ? "pl" : "en",
     status: typeof fm.status === "string" ? fm.status : undefined,
+    featured: fm.featured === true,
   };
 };
 
@@ -114,7 +120,11 @@ export function getProjects(locale?: "en" | "pl"): ProjectMetadata[] {
   const projects = Object.entries(projectModules)
     .map(([path, mod]) => toProjectMetadata(mod.frontmatter, pathToSlug(path)))
     .filter((p) => new Date(p.date).getTime() <= now)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    .sort(
+      (a, b) =>
+        Number(b.featured) - Number(a.featured) ||
+        new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
   return locale ? projects.filter((p) => p.language === locale) : projects;
 }
 

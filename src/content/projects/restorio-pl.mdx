@@ -1,0 +1,79 @@
+---
+title: "Restorio"
+description: "Platforma do zarządzania restauracją, która łączy gości, kelnerów, kuchnię i właścicieli przez zamówienia QR, ekrany kuchenne na żywo, plany sali i obsługę wielu organizacji."
+date: "2026-09-30"
+category: "dev"
+tags:
+  [
+    "Obsługa restauracji",
+    "Multi-tenant SaaS",
+    "React",
+    "Rust",
+    "Kubernetes",
+    "FastAPI",
+    "TypeScript",
+    "PostgreSQL",
+    "MongoDB",
+    "WebSockets",
+    "Helm",
+    "Cloudflare",
+    "CI/CD",
+  ]
+liveUrl: "https://restorio.org"
+status: "W trakcie"
+language: "pl"
+featured: true
+---
+
+## Opis projektu
+
+**Restorio** to platforma do zarządzania restauracją, która łączy doświadczenie gościa z pracą na sali i w kuchni.
+Buduję ją wokół wspólnego przepływu: gość składa zamówienie, obsługa prowadzi serwis, kuchnia śledzi przygotowanie dań, a właściciel konfiguruje restaurację w dedykowanym panelu.
+
+Projekt obejmuje projektowanie produktu, aplikacje frontendowe, usługi backendowe, modelowanie danych i infrastrukturę wdrożeniową.
+Najważniejszym wyzwaniem jest zachowanie spójności tych elementów, kiedy różne osoby pracują na tych samych danych restauracji i zamówień.
+
+## Jedna platforma, różne zadania
+
+**Aplikacja dla gości** udostępnia cyfrowe menu i zamawianie przy stoliku przez kod QR.
+**Panel kelnera** wspiera obsługę stolików i zamówień, a **ekran kuchenny** pokazuje napływające zamówienia oraz postęp ich realizacji na żywo.
+
+**Panel administratora** służy do zarządzania menu, uprawnieniami pracowników, konfiguracją restauracji i planem sali.
+**Publiczna strona** przedstawia platformę i pozwala przejść do konta użytkownika.
+Aplikacje korzystają ze wspólnych kontraktów domenowych i pakietów pomocniczych, zamiast traktować każdy ekran jako osobny produkt.
+
+## Izolacja organizacji i stan na żywo
+
+Restorio jest projektowane do obsługi wielu organizacji i restauracji.
+Konta, członkostwa, grupy uprawnień i konfiguracja restauracji określają dostępne operacje oraz widoczne dane.
+Izolacja danych organizacji i kontrola dostępu oparta na rolach są częścią kontraktu backendu.
+
+Zamówienia przechodzą między interfejsami gościa, kelnera i kuchni.
+Uwierzytelnione połączenia WebSocket informują klientów o zmianach, a backend odpowiada za walidację i przejścia między stanami zamówienia.
+Integracja płatności z **Przelewy24** obejmuje weryfikację transakcji i obsługę powiadomień w ramach tego samego procesu.
+
+## Architektura, którą można rozwijać
+
+Aplikacje frontendowe korzystają z **Reacta** i **TypeScriptu**, ze wspólnymi pakietami w workspace zarządzanym przez Bun.
+Istniejący backend **FastAPI** pozostaje dostępny, a obok niego stopniowo powstają usługi domenowe w **Ruście**.
+Jawne granice wersji API pozwalają przenosić klientów domena po domenie.
+
+Warstwa danych łączy **PostgreSQL**, **MongoDB** i **MinIO** do przechowywania rekordów relacyjnych, dokumentów i przesłanych plików.
+Osobne repozytoria odpowiadają za aplikacje produktu, usługi Rust, infrastrukturę, narzędzia deweloperskie i dokumentację architektury.
+Ten podział jasno określa odpowiedzialność za wydania i utrzymanie wraz z rozwojem platformy.
+
+## Wdrożenia i utrzymanie
+
+Wdrożenie korzysta z **k3s**, **Helma** i wspólnego ingressu **Caddy** za Cloudflare.
+Produkcja i środowisko preview mają osobne wymagania dotyczące routingu i dostępu.
+Automatyzacja wydań łączy wersjonowane artefakty aplikacji z przypiętą rewizją infrastruktury, dzięki czemu wdrożenie wynika z konkretnego kontraktu wydania.
+
+Rozwijam również narzędzia pracy z platformą: konfigurację workspace, wspólne CLI, automatyzację wdrożeń i praktyczną dokumentację odzyskiwania środowiska.
+Chcę, żeby zmianę dało się prześledzić od kodu aplikacji aż do działającego środowiska.
+
+## Co pokazuje ten projekt
+
+Restorio łączy obszary inżynierii oprogramowania, które chcę dalej rozwijać: użyteczne interfejsy, jawne granice domen, procesy czasu rzeczywistego i niezawodne wdrożenia.
+To rozwijany produkt, w którym stopniowa migracja backendu i praca nad utrzymaniem idą równolegle z funkcjami restauracyjnymi.
+
+[Odwiedź Restorio](https://restorio.org) lub sprawdź [organizację Restorio Labs](https://github.com/restorio-labs).

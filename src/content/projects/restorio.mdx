@@ -1,0 +1,79 @@
+---
+title: "Restorio"
+description: "A restaurant management platform connecting guests, waiters, kitchens, and owners through QR ordering, live kitchen displays, floor plans, and tenant-aware operations."
+date: "2026-09-30"
+category: "dev"
+tags:
+  [
+    "Restaurant Operations",
+    "Multi-tenant SaaS",
+    "React",
+    "Rust",
+    "Kubernetes",
+    "FastAPI",
+    "TypeScript",
+    "PostgreSQL",
+    "MongoDB",
+    "WebSockets",
+    "Helm",
+    "Cloudflare",
+    "CI/CD",
+  ]
+liveUrl: "https://restorio.org"
+status: "In Progress"
+language: "en"
+featured: true
+---
+
+## Overview
+
+**Restorio** is a restaurant management platform that connects the guest experience with the work happening on the floor and in the kitchen.
+I am building it around a shared flow: a guest places an order, staff manage service, the kitchen tracks preparation, and owners configure the restaurant through dedicated interfaces.
+
+The project spans product design, frontend applications, backend services, data modelling, and deployment infrastructure.
+Its central challenge is keeping those parts consistent while different people work with the same restaurant and order state.
+
+## One Platform, Different Workflows
+
+The **guest application** provides digital menus and QR ordering from a table.
+The **waiter panel** supports table service and order handling, while the **kitchen display** gives the kitchen a live view of incoming orders and their progress.
+
+The **admin panel** manages menus, staff access, restaurant configuration, and floor layouts.
+The **public website** introduces the platform and provides the account entry point.
+These applications share domain contracts and supporting packages rather than treating each screen as a separate product.
+
+## Tenant Boundaries and Live State
+
+Restorio is designed for multiple tenants and restaurants.
+Accounts, memberships, access groups, and restaurant configuration determine which operations a user can perform and which data they can see.
+Tenant isolation and role-aware access are part of the backend contract.
+
+Orders move between customer, waiter, and kitchen interfaces.
+Authenticated WebSocket delivery keeps connected clients informed about changes, while the backend owns validation and order transitions.
+Payment integration with **Przelewy24** includes transaction verification and callback handling alongside the order workflow.
+
+## Architecture That Can Evolve
+
+The frontend applications use **React** and **TypeScript**, with shared packages in a Bun-managed workspace.
+The existing **FastAPI** backend remains available while domain services are introduced in **Rust**.
+The migration uses explicit API version boundaries so the clients can move one domain at a time.
+
+Persistence combines **PostgreSQL**, **MongoDB**, and **MinIO** for relational records, document-shaped data, and uploaded assets.
+Separate repositories own the product applications, Rust services, infrastructure, developer tooling, and architecture documentation.
+That separation makes release and operational responsibilities explicit as the platform grows.
+
+## Delivery and Operations
+
+The deployment uses **k3s**, **Helm**, and a shared **Caddy** ingress behind Cloudflare.
+Production and preview environments have separate routing and access requirements.
+Release automation connects versioned application artifacts with a pinned infrastructure revision, keeping deployments tied to a reviewable release contract.
+
+I am also building the developer and operator workflows around the platform: workspace setup, a unified CLI, deployment automation, and practical recovery documentation.
+The goal is to make a change understandable from the application code through to the running environment.
+
+## What This Project Represents
+
+Restorio brings together the parts of software engineering I want to keep developing: useful interfaces, explicit domain boundaries, real-time workflows, and reliable delivery.
+It is an ongoing product, with an incremental backend migration and operational work developing alongside the restaurant features.
+
+[Visit Restorio](https://restorio.org) or explore the [Restorio Labs organization](https://github.com/restorio-labs).
