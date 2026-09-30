@@ -1,0 +1,78 @@
+---
+title: "FitTune"
+description: "Aplikacja fitness projektowana przede wszystkim na telefon, do treningów siłowych, biegania i jazdy na rowerze, z edytowalnymi planami, historią ćwiczeń, analizą postępów i zapisem treningu offline."
+date: "2026-09-30"
+category: "dev"
+tags:
+  [
+    "Fitness",
+    "React",
+    "Rust",
+    "TypeScript",
+    "Axum",
+    "PostgreSQL",
+    "PWA",
+    "TanStack Query",
+    "Zustand",
+    "Offline-first",
+  ]
+githubUrl: "https://github.com/Wichtowski/fittune-app"
+liveUrl: "https://fittune.oskarwichtowski.com"
+status: "W trakcie"
+language: "pl"
+---
+
+## Opis projektu
+
+**FitTune** to aplikacja fitness projektowana przede wszystkim na telefon, do treningów siłowych i aktywności wytrzymałościowych.
+Buduję ją wokół samego treningu: wyboru planu, zapisu serii, sprawdzenia historii ćwiczenia i późniejszej oceny postępów.
+Bieganie, jazda na rowerze i inne aktywności są dostępne obok treningów siłowych, bez potrzeby korzystania z osobnego narzędzia.
+
+## Plany, które można edytować
+
+Trening zapisuje ćwiczenia, serie, powtórzenia, ciężary oraz pola potrzebne do aktywności opartych na czasie lub dystansie.
+Własne plany i biblioteka gotowych szablonów dają punkt wyjścia, który można zmienić.
+Jeśli dostępna jest odpowiednia historia ćwiczenia, ciężary w szablonie mogą zostać uzupełnione na podstawie poprzednich treningów.
+
+Miejsca treningowe opisują sprzęt dostępny w domu, na siłowni lub w innym miejscu.
+Wybór ćwiczeń uwzględnia to wyposażenie, pomagając znaleźć ćwiczenia możliwe do wykonania na miejscu.
+Zmiana miejsca nie usuwa po cichu ćwiczeń z treningu.
+
+## Zapis treningu offline
+
+Aktywny trening jest zapisywany lokalnie podczas uzupełniania serii.
+Interfejs aktualizuje się od razu, a synchronizacja w tle wysyła wersjonowane dane do API po uzyskaniu połączenia.
+Treningi ukończone offline czekają w kolejce, dzięki czemu słabe połączenie nie musi przerywać sesji.
+
+Aplikację **React** można zainstalować jako **PWA**.
+Service worker przechowuje powłokę aplikacji, a trwały cache **TanStack Query** udostępnia wcześniej pobraną historię i dane ćwiczeń offline.
+Powiadomienie o aktualizacji pozwala wybrać moment przejścia na nową wersję bez wymuszonego przeładowania w trakcie treningu.
+
+## Historia i postępy
+
+FitTune łączy historię treningów, rekordy ćwiczeń, dziennik aktywności i wykresy postępów.
+Interfejs dostosowuje się do urządzenia: telefon ma duże kontrolki i dolną nawigację, a desktop bardziej zwarte widoki historii i analiz.
+Wykresy mają również widoki tabelaryczne.
+
+Zdjęcia postępów są opcjonalne i niezależne od zapisu treningu.
+API przetwarza przesłane obrazy, usuwa ich metadane i przechowuje je prywatnie.
+
+## Aplikacja i API
+
+Frontend korzysta z **TypeScriptu**, **Reacta**, **TanStack Router**, **TanStack Query** i **Zustand**.
+**Zod** waliduje odpowiedzi API po stronie klienta.
+Backend to osobna usługa w **Ruście**, oparta na **Axum**, **Tokio**, **SQLx** i **PostgreSQL**.
+
+API odpowiada za konta, sesje, katalog ćwiczeń, plany, dokumenty treningów i analizy.
+Zapis treningu korzysta z identyfikatorów tworzonych przez klienta i kontroli rewizji, dzięki czemu ponowienie żądania nie tworzy duplikatu sesji.
+Klient i backend komunikują się przez jawny kontrakt HTTP i mają osobne procesy wydawania.
+
+## Wdrożenie
+
+Frontend jest budowany jako pliki statyczne i udostępniany przez Caddy na współdzielonym VPS.
+Wersjonowane wydania są przełączane atomowo, a ostatnie buildy pozostają dostępne do rollbacku.
+API działa osobno, z migracjami bazy i uwierzytelnionym dostępem do danych użytkownika.
+
+FitTune jest nadal rozwijane, z naciskiem na szybki zapis treningu i użyteczną historię.
+
+[Otwórz FitTune](https://fittune.oskarwichtowski.com).

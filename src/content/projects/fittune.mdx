@@ -1,0 +1,78 @@
+---
+title: "FitTune"
+description: "A mobile-first fitness tracker for strength workouts, runs, and rides, with editable training plans, exercise history, progress analytics, and offline workout logging."
+date: "2026-09-30"
+category: "dev"
+tags:
+  [
+    "Fitness",
+    "React",
+    "Rust",
+    "TypeScript",
+    "Axum",
+    "PostgreSQL",
+    "PWA",
+    "TanStack Query",
+    "Zustand",
+    "Offline-first",
+  ]
+githubUrl: "https://github.com/Wichtowski/fittune-app"
+liveUrl: "https://fittune.oskarwichtowski.com"
+status: "In Progress"
+language: "en"
+---
+
+## Overview
+
+**FitTune** is a mobile-first fitness tracker for strength training and endurance activities.
+I am building it around the work of actually completing a session: choosing a routine, logging sets, checking exercise history, and reviewing progress afterwards.
+Runs, rides, and other activities sit alongside strength workouts rather than requiring a separate tracking tool.
+
+## Training That Stays Editable
+
+Workouts record exercises, sets, repetitions, weights, and the tracking fields needed for timed or distance-based activities.
+Reusable routines and a library of training templates provide starting points that remain editable.
+Where usable exercise history exists, template weights can be filled from previous sessions instead of making the user start from scratch.
+
+Workout places record the equipment available at home, at the gym, or at a custom location.
+The exercise picker uses that equipment to help users find exercises they can perform there.
+Changing the place does not silently remove exercises from a workout.
+
+## Offline Workout Logging
+
+An active workout is saved locally as the user logs it.
+The interface updates immediately, and background synchronization sends versioned snapshots to the API when a connection is available.
+Completed offline workouts wait in an outbox, so a poor connection does not have to interrupt the session.
+
+The **React** application is installable as a **PWA**.
+Its service worker caches the application shell, while a persisted **TanStack Query** cache keeps previously downloaded history and exercise data readable offline.
+An update prompt lets users choose when to load a new version rather than forcing a reload in the middle of a workout.
+
+## History and Progress
+
+FitTune brings together workout history, exercise records, activity logs, and progress charts.
+The interface adapts to the device: large controls and a bottom navigation on phones, with denser history and analytics layouts on desktop.
+Charts also provide table views.
+
+Progress photos are optional and separate from saving a workout.
+Uploads are handled by the API and stored privately, with image metadata removed during processing.
+
+## Application and API
+
+The frontend uses **TypeScript**, **React**, **TanStack Router**, **TanStack Query**, and **Zustand**.
+**Zod** validates API responses at the client boundary.
+The backend is a separate **Rust** service built with **Axum**, **Tokio**, **SQLx**, and **PostgreSQL**.
+
+The API owns accounts, sessions, the exercise catalog, routines, workout documents, and analytics.
+Workout writes use client-generated identifiers and revision checks, making retries safe without creating duplicate sessions.
+The client and backend communicate through an explicit HTTP contract and have separate release workflows.
+
+## Deployment
+
+The frontend is built as static assets and served through Caddy on a shared VPS.
+Versioned releases switch atomically and keep recent builds available for rollback.
+The API runs separately, with database migrations and authenticated access to user data.
+
+FitTune is still in development, with the focus on making training quick to record and useful to revisit.
+
+[Open FitTune](https://fittune.oskarwichtowski.com).

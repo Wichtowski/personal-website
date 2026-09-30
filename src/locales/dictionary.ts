@@ -81,6 +81,7 @@ export interface TranslationDict {
     dev: string;
     qa: string;
     viewProject: string;
+    featured: string;
     backToProjects: string;
     onThisPage: string;
   };
@@ -261,6 +262,7 @@ export const dictionaries: Record<Language, TranslationDict> = {
       dev: "Software Eng",
       qa: "QA & Testing",
       viewProject: "View Project",
+      featured: "Featured project",
       backToProjects: "Back to Projects",
       onThisPage: "On this page",
     },
@@ -443,6 +445,7 @@ export const dictionaries: Record<Language, TranslationDict> = {
       dev: "Oprogramowanie",
       qa: "QA i Testy",
       viewProject: "Zobacz projekt",
+      featured: "Wyróżniony projekt",
       backToProjects: "Powrót do projektów",
       onThisPage: "Na tej stronie",
     },
