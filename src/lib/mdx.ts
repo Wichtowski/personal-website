@@ -35,7 +35,11 @@ interface MdxModule {
 // remark-mdx-frontmatter exports YAML frontmatter as a named `frontmatter` export.
 // Works in Cloudflare Workers — no fs, no HTTP, all bundled at build time.
 const blogModules = import.meta.glob<MdxModule>("../content/blog/*.mdx", { eager: true });
-const projectModules = import.meta.glob<MdxModule>("../content/projects/*.mdx", { eager: true });
+const projectModules = Object.fromEntries(
+  Object.entries(import.meta.glob<MdxModule>("../content/projects/*.mdx", { eager: true })).filter(
+    ([, module]) => module.frontmatter.hidden !== true,
+  ),
+);
 
 const pathToSlug = (filePath: string): string => {
   return (
