@@ -5,7 +5,7 @@
   "scripts": {
     "prepare:config:local": "bun run scripts/prepare-cloudflare-config.ts --mode=local",
     "prepare:config:deploy": "bun run scripts/prepare-cloudflare-config.ts --mode=deploy",
-    "dev": "bun run prepare:config:local && WRANGLER_CONFIG_PATH=wrangler.local.json vinext dev --port 3001",
+    "dev": "vinext dev --port 3001",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier . --write",

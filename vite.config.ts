@@ -7,6 +7,8 @@ import remarkFrontmatter from "remark-frontmatter";
 import remarkMdxFrontmatter from "remark-mdx-frontmatter";
 import { fileURLToPath } from "node:url";
 
+const cloudflareConfigPath = process.env.WRANGLER_CONFIG_PATH;
+
 export default defineConfig({
   optimizeDeps: {
     exclude: ["lucide-react"],
@@ -46,17 +48,18 @@ export default defineConfig({
   },
   plugins: [
     { enforce: "pre", ...mdx({ remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter] }) },
-    vinext({
-      cache: {
-        data: kvDataAdapter({ appPrefix: "personal-website" }),
-      },
-    }),
-    cloudflare({
-      configPath: process.env.WRANGLER_CONFIG_PATH || undefined,
-      viteEnvironment: {
-        name: "rsc",
-        childEnvironments: ["ssr"],
-      },
-    }),
+    vinext(
+      cloudflareConfigPath
+        ? { cache: { data: kvDataAdapter({ appPrefix: "personal-website" }) } }
+        : {},
+    ),
+    cloudflareConfigPath &&
+      cloudflare({
+        configPath: cloudflareConfigPath,
+        viteEnvironment: {
+          name: "rsc",
+          childEnvironments: ["ssr"],
+        },
+      }),
   ],
 });
