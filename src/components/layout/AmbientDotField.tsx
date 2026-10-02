@@ -2,6 +2,12 @@
 
 import { useEffect, useRef } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import {
+  getDotDisplacement,
+  MAX_RIPPLES,
+  RIPPLE_LIFETIME,
+  type DotRipple,
+} from "./ambientDotInteraction";
 
 const TAU = Math.PI * 2;
 const MAX_DEVICE_PIXEL_RATIO = 1.5;
@@ -41,11 +47,21 @@ export function AmbientDotField() {
     let width = 0;
     let height = 0;
     let reducedMotion = reducedMotionQuery.matches;
+    const pointer = { x: 0, y: 0, targetX: 0, targetY: 0, strength: 0, targetStrength: 0 };
+    let ripples: DotRipple[] = [];
+    let lastFrame = performance.now();
     let primaryColor = parseHexColor(
       getComputedStyle(document.documentElement).getPropertyValue("--primary"),
     );
 
     const draw = (elapsed = 0) => {
+      const delta = Math.min(Math.max((elapsed - lastFrame) / 1000, 0), 0.1);
+      lastFrame = elapsed;
+      const follow = 1 - Math.exp(-delta * 12);
+      pointer.x += (pointer.targetX - pointer.x) * follow;
+      pointer.y += (pointer.targetY - pointer.y) * follow;
+      pointer.strength += (pointer.targetStrength - pointer.strength) * (1 - Math.exp(-delta * 6));
+      ripples = ripples.filter((ripple) => elapsed - ripple.born < RIPPLE_LIFETIME);
       const time = reducedMotion ? 2.4 : elapsed / 1000;
       const isDark = document.documentElement.classList.contains("dark");
       const spacing = width < 640 ? 13 : 16;
@@ -84,9 +100,12 @@ export function AmbientDotField() {
           if (opacity < 0.018) continue;
 
           const radius = 0.7 + energy * (isDark ? 1.15 : 0.9);
+          const displacement = reducedMotion
+            ? { x: 0, y: 0 }
+            : getDotDisplacement(x, y, pointer, ripples, elapsed, Math.min(height, 900));
           context.globalAlpha = opacity;
           context.beginPath();
-          context.arc(x, y, radius, 0, TAU);
+          context.arc(x + displacement.x, y + displacement.y, radius, 0, TAU);
           context.fill();
         }
       }
@@ -103,10 +122,58 @@ export function AmbientDotField() {
 
     const start = () => {
       cancelAnimationFrame(animationFrame);
-      animationFrame = requestAnimationFrame(render);
+      if (!document.hidden) animationFrame = requestAnimationFrame(render);
+    };
+
+    const resetInteraction = () => {
+      pointer.strength = 0;
+      pointer.targetStrength = 0;
+      ripples = [];
+    };
+
+    const localPointer = (event: PointerEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: ((event.clientX - rect.left) / Math.max(rect.width, 1)) * width,
+        y: ((event.clientY - rect.top) / Math.max(rect.height, 1)) * height,
+        inside:
+          event.clientX >= rect.left &&
+          event.clientX <= rect.right &&
+          event.clientY >= rect.top &&
+          event.clientY <= rect.bottom,
+      };
+    };
+
+    const handlePointerMove = (event: PointerEvent) => {
+      if (reducedMotion || document.hidden || !event.isPrimary) return;
+      const { x, y, inside } = localPointer(event);
+      if (inside && pointer.targetStrength === 0) {
+        pointer.x = x;
+        pointer.y = y;
+      }
+      pointer.targetX = x;
+      pointer.targetY = y;
+      pointer.targetStrength = inside ? 1 : 0;
+    };
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (reducedMotion || document.hidden || !event.isPrimary || event.button !== 0) return;
+      const { x, y, inside } = localPointer(event);
+      if (!inside) return;
+      ripples = [...ripples.slice(-(MAX_RIPPLES - 1)), { x, y, born: performance.now() }];
+      handlePointerMove(event);
+    };
+
+    const handlePointerEnd = (event: PointerEvent) => {
+      if (event.isPrimary && event.pointerType !== "mouse") pointer.targetStrength = 0;
+    };
+
+    const handlePointerLeave = () => {
+      pointer.targetStrength = 0;
     };
 
     const resize = () => {
+      resetInteraction();
       const pixelRatio = Math.min(window.devicePixelRatio, MAX_DEVICE_PIXEL_RATIO);
       width = canvas.clientWidth;
       height = canvas.clientHeight;
@@ -118,11 +185,13 @@ export function AmbientDotField() {
 
     const handleMotionPreference = () => {
       reducedMotion = reducedMotionQuery.matches;
+      resetInteraction();
       start();
     };
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
+        resetInteraction();
         cancelAnimationFrame(animationFrame);
       } else {
         start();
@@ -144,6 +213,12 @@ export function AmbientDotField() {
     });
     reducedMotionQuery.addEventListener("change", handleMotionPreference);
     document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    window.addEventListener("pointerdown", handlePointerDown, { passive: true });
+    window.addEventListener("pointerup", handlePointerEnd, { passive: true });
+    window.addEventListener("pointercancel", handlePointerLeave, { passive: true });
+    window.addEventListener("blur", handlePointerLeave);
+    document.documentElement.addEventListener("pointerleave", handlePointerLeave);
     resize();
 
     return () => {
@@ -152,6 +227,12 @@ export function AmbientDotField() {
       themeObserver.disconnect();
       reducedMotionQuery.removeEventListener("change", handleMotionPreference);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("pointerup", handlePointerEnd);
+      window.removeEventListener("pointercancel", handlePointerLeave);
+      window.removeEventListener("blur", handlePointerLeave);
+      document.documentElement.removeEventListener("pointerleave", handlePointerLeave);
     };
   }, []);
 

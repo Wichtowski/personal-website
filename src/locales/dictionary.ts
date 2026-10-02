@@ -94,28 +94,6 @@ export interface TranslationDict {
     noArticles: string;
     onThisPage: string;
   };
-  engagement: {
-    endorseSectionTitle: string;
-    endorseBtn: string;
-    endorsedBtn: string;
-    endorseCount: string;
-    endorseEmailPlaceholder: string;
-    endorseEmailLabel: string;
-    endorseEmailHint: string;
-    endorseEmailError: string;
-    endorseEmailAlreadyUsed: string;
-    commentsSectionTitle: string;
-    commentBtn: string;
-    commenting: string;
-    commentInputName: string;
-    commentInputEmail: string;
-    commentInputEmailHint: string;
-    commentInputBody: string;
-    commentValidationEmail: string;
-    commentValidationBody: string;
-    commentSuccess: string;
-    noComments: string;
-  };
   contact: {
     title: string;
     subtitle: string;
@@ -276,29 +254,6 @@ export const dictionaries: Record<Language, TranslationDict> = {
       noArticles: "No articles published yet. Check back soon!",
       onThisPage: "On this page",
     },
-    engagement: {
-      endorseSectionTitle: "Endorse this",
-      endorseBtn: "Endorse",
-      endorsedBtn: "Endorsed",
-      endorseCount: "endorsements",
-      endorseEmailPlaceholder: "your@email.com",
-      endorseEmailLabel: "Enter your email to endorse",
-      endorseEmailHint: "Email is required to prevent spam and is never displayed",
-      endorseEmailError: "Please enter a valid email",
-      endorseEmailAlreadyUsed: "This email has already endorsed this content",
-      commentsSectionTitle: "Comments",
-      commentBtn: "Post Comment",
-      commenting: "Posting...",
-      commentInputName: "Name or Username (optional, to hide your email)",
-      commentInputEmail: "Email (required, never shown to public)",
-      commentInputEmailHint:
-        "Email is required to prevent spam. It is never displayed if a username is provided.",
-      commentInputBody: "Your comment",
-      commentValidationEmail: "Please provide a valid email.",
-      commentValidationBody: "Comment cannot be empty.",
-      commentSuccess: "Comment posted successfully!",
-      noComments: "No comments yet. Be the first to share your thoughts!",
-    },
     contact: {
       title: "Let's Build Something Great",
       subtitle:
@@ -458,30 +413,6 @@ export const dictionaries: Record<Language, TranslationDict> = {
       backToArticles: "Powrót do artykułów",
       noArticles: "Brak opublikowanych artykułów. Zajrzyj tu wkrótce!",
       onThisPage: "Na tej stronie",
-    },
-    engagement: {
-      endorseSectionTitle: "Rekomendacja",
-      endorseBtn: "Rekomenduj",
-      endorsedBtn: "Rekomendowano",
-      endorseCount: "rekomendacji",
-      endorseEmailPlaceholder: "twoj@email.com",
-      endorseEmailLabel: "Wpisz email, aby polecić",
-      endorseEmailHint:
-        "Email jest wymagany do ochrony przed spamem i nigdy nie jest pokazywany publicznie",
-      endorseEmailError: "Podaj prawidłowy email",
-      endorseEmailAlreadyUsed: "Ten email został już użyty do polecenia tego wpisu",
-      commentsSectionTitle: "Komentarze",
-      commentBtn: "Dodaj komentarz",
-      commenting: "Wysyłanie...",
-      commentInputName: "Nazwa lub pseudonim (opcjonalne, aby ukryć email)",
-      commentInputEmail: "Email (wymagany, nigdy nie jest upubliczniany)",
-      commentInputEmailHint:
-        "Adres email jest wymagany do ochrony przed spamem. Nigdy nie będzie wyświetlany, jeśli podasz pseudonim.",
-      commentInputBody: "Twój komentarz",
-      commentValidationEmail: "Podaj prawidłowy adres email.",
-      commentValidationBody: "Komentarz nie może być pusty.",
-      commentSuccess: "Pomyślnie dodano komentarz!",
-      noComments: "Brak komentarzy. Bądź pierwszą osobą, która skomentuje!",
     },
     contact: {
       title: "Zbudujmy coś niezwykłego",

@@ -5,7 +5,6 @@ import { Calendar, Clock, Tag } from "lucide-react";
 import { dictionaries, Language } from "@locales/dictionary";
 import { TableOfContents } from "@components/layout/TableOfContents";
 import { StickyBackButton } from "@components/layout/StickyBackButton";
-import { EndorsementButton, CommentsSection } from "@components/engagement";
 import { SITE_URL, AUTHOR_NAME, SITE_OG_IMAGE } from "@lib/site";
 
 interface PageProps {
@@ -154,10 +153,6 @@ export default async function ArticlePage({ params, searchParams }: PageProps) {
               ))}
             </div>
           </div>
-
-          {/* Endorsement & Comment system */}
-          <EndorsementButton targetId={`blog:${resolvedParams.slug}`} />
-          <CommentsSection targetId={`blog:${resolvedParams.slug}`} />
         </div>
 
         {/* Sidebar: Sticky Table of Contents */}

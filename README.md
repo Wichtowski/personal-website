@@ -42,19 +42,14 @@ Install dependencies:
 bun install
 ```
 
-Run the default Next.js dev server:
+Run the local Vinext/Vite dev server:
 
 ```bash
 bun run dev
 ```
 
-Run the `vinext` dev server:
-
-```bash
-bun run dev:vinext
-```
-
-Open the site at `http://localhost:3000` for `next dev`, or `http://localhost:3001` for `vinext dev`.
+Open the site at `http://localhost:3001`.
+Local development runs in Node without generating Wrangler config, starting the Workers emulator, or accessing Cloudflare KV.
 
 Optional environment variable:
 
@@ -62,16 +57,17 @@ Optional environment variable:
 
 ## Scripts
 
-- `bun run dev` - start the Next.js dev server
-- `bun run build` - build the app
-- `bun run start` - start the production Next.js server
+- `bun run dev` - start the local Vinext dev server on port 3001
 - `bun run lint` - run ESLint
 - `bun run lint:fix` - run ESLint with autofix
 - `bun run format` - format the codebase with Prettier
 - `bun run format:check` - check formatting without writing
-- `bun run dev:vinext` - start the Vinext dev server on port 3001
-- `bun run build:vinext` - build with Vinext
+- `bun run typecheck` - run TypeScript checks
+- `bun test` - run tests
+- `bun run build:vinext` - build with Vinext for Node
 - `bun run start:vinext` - start the Vinext production server
+- `bun run deploy` - build and deploy to Cloudflare Workers
+- `bun run deploy:preview` - build and deploy a Cloudflare preview
 
 ## Content Structure
 
@@ -83,7 +79,9 @@ Optional environment variable:
 
 ## Deployment
 
-The site is set up to work well with Cloudflare Pages-style static hosting. The `public/_headers` file defines long-lived caching rules for static assets, and the app is organized so the build output can be deployed without extra runtime infrastructure.
+Production runs on Cloudflare Workers.
+The deploy scripts generate Wrangler config and enable the Cloudflare plugin and KV cache adapter through `WRANGLER_CONFIG_PATH`.
+GitHub Actions deploys pushes to `main`.
 
 ## Notes
 
